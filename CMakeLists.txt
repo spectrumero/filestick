@@ -7,4 +7,6 @@ set(CMAKE_C_COMPILER "riscv-none-elf-gcc")
 project(filestick)
 
 add_subdirectory(boot)
+add_subdirectory(system)
+add_subdirectory(init_test)
 
