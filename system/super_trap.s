@@ -50,7 +50,7 @@ syscall_handler:
    # TODO: syscalls should be table based, but there aren't many yet
    li       t0, SYSCALL_write 
    bne      t0, a7, .L0
-   call     SYS_write
+   j        SYS_write
 .L0:
 .bad_syscall:
    li       a0, -2000         # TODO: error number
