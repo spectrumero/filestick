@@ -14,6 +14,14 @@
 //  address bus (and address computation logic).
 //
 // Bruno Levy, Matthias Koch, 2020-2021
+//
+//-----------------------------------------------------------------------------
+//
+// * Added ecall, sret, mscratch and sscratch CSRs
+// * Added define ENABLE_MULDIV to enable the multiply/divide instructions,
+// (with ENABLE_MULDIV not set, instruction set is RV32IC)
+//
+// Dylan Smith, 2023
 /******************************************************************************/
 
 // Firmware generation flags for this processor
@@ -314,10 +322,12 @@ module FemtoRV32(
    reg  [ADDR_WIDTH-1:0] mtvec;   // The address of the interrupt handler.
    reg                   mstatus; // Interrupt enable
    reg                   mcause;  // Interrupt cause (and lock)
+   reg  [31:0]           mscratch;// Machine scratch reg
    reg  [63:0]           cycles;  // Cycle counter
    //------------------------
    // ecall/sret CSRs:
    reg  [ADDR_WIDTH-1:0] sepc;    // Saved program counter.
+   reg  [31:0]           sscratch; // Supervisor scratch reg
    reg  [ADDR_WIDTH-1:0] stvec;   // The address of the ecall handler.
    //-----------------------
 
@@ -325,6 +335,7 @@ module FemtoRV32(
 
    wire sel_mstatus = (instr[31:20] == 12'h300);
    wire sel_mtvec   = (instr[31:20] == 12'h305);
+   wire sel_mscratch= (instr[31:20] == 12'h340);
    wire sel_mepc    = (instr[31:20] == 12'h341);
    wire sel_mcause  = (instr[31:20] == 12'h342);
    wire sel_cycles  = (instr[31:20] == 12'hC00);
@@ -334,18 +345,21 @@ module FemtoRV32(
    // ecall
    wire sel_stvec  =  (instr[31:20] == 12'h105);
    wire sel_sepc   =  (instr[31:20] == 12'h141);
+   wire sel_sscratch =(instr[31:20] == 12'h140);
    //---------------------
 
    // Read CSRs
    /* verilator lint_off WIDTH */
    wire [31:0] CSR_read =
      (sel_mstatus ? {28'b0, mstatus, 3'b0} : 32'b0) |
+     (sel_mscratch? mscratch               : 32'b0) |
      (sel_mtvec   ? mtvec                  : 32'b0) |
      (sel_mepc    ? mepc                   : 32'b0) |
      (sel_mcause  ? {mcause, 31'b0}        : 32'b0) |
      (sel_cycles  ? cycles[31:0]           : 32'b0) |
      (sel_cyclesh ? cycles[63:32]          : 32'b0) |
      (sel_stvec   ? stvec                  : 32'b0) |
+     (sel_sscratch? sscratch               : 32'b0) |
      (sel_sepc    ? sepc                   : 32'b0);
    /* verilator lint_on WIDTH */
 
@@ -362,11 +376,13 @@ module FemtoRV32(
       end else begin
 	 // Execute a CSR opcode
 	 if (isSYSTEM & (instr[14:12] != 0) & state[EXECUTE_bit]) begin
-	    if (sel_mstatus) mstatus <= CSR_write[3];
-	    if (sel_mtvec  ) mtvec   <= CSR_write[ADDR_WIDTH-1:0];
+            if (sel_mscratch) mscratch <= CSR_write[31:0];
+	    if (sel_mstatus)  mstatus  <= CSR_write[3];
+	    if (sel_mtvec  )  mtvec    <= CSR_write[ADDR_WIDTH-1:0];
 
             //---- ecall/sret
-            if (sel_stvec  ) stvec   <= CSR_write[ADDR_WIDTH-1:0];
+            if (sel_stvec  )  stvec    <= CSR_write[ADDR_WIDTH-1:0];
+            if (sel_sscratch) sscratch <= CSR_write[31:0];
             //----            
 	 end
       end
