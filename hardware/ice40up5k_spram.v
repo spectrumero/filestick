@@ -16,6 +16,7 @@
  *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
+ *  DS: Added select line.
  */
 
 module ice40up5k_spram #(
@@ -23,6 +24,7 @@ module ice40up5k_spram #(
 	parameter integer WORDS = 32768
 ) (
 	input clk,
+        input select,
 	input [3:0] wen,
 	input [14:0] addr,
 	input [31:0] wdata,
@@ -36,14 +38,17 @@ module ice40up5k_spram #(
 	assign rdata = rdata_reg;
 	always @(posedge clk) begin
 	   /* verilator lint_off WIDTH */
-	   if(wen[0]) RAM[addr][ 7:0 ] <= wdata[ 7:0 ];
-	   if(wen[1]) RAM[addr][15:8 ] <= wdata[15:8 ];
-	   if(wen[2]) RAM[addr][23:16] <= wdata[23:16];
-	   if(wen[3]) RAM[addr][31:24] <= wdata[31:24];	 
-	   rdata_reg <= RAM[addr];
+           if(select) begin
+              if(wen[0]) RAM[addr][ 7:0 ] <= wdata[ 7:0 ];
+	      if(wen[1]) RAM[addr][15:8 ] <= wdata[15:8 ];
+	      if(wen[2]) RAM[addr][23:16] <= wdata[23:16];
+	      if(wen[3]) RAM[addr][31:24] <= wdata[31:24];	 
+	      rdata_reg <= RAM[addr];
+           end
 	   /* verilator lint_on WIDTH */	   
 	end
 `else
+        wire sel_wen[3:0];
 	wire cs_0, cs_1;
 	wire [31:0] rdata_0, rdata_1;
 
@@ -51,11 +56,16 @@ module ice40up5k_spram #(
 	assign cs_1 = addr[14];
 	assign rdata = addr[14] ? rdata_1 : rdata_0;
 
+        assign sel_wen[0] = select & wen[0];
+        assign sel_wen[1] = select & wen[1];
+        assign sel_wen[2] = select & wen[2];
+        assign sel_wen[3] = select & wen[3];
+
 	SB_SPRAM256KA ram00 (
 		.ADDRESS(addr[13:0]),
 		.DATAIN(wdata[15:0]),
-		.MASKWREN({wen[1], wen[1], wen[0], wen[0]}),
-		.WREN(wen[1]|wen[0]),
+		.MASKWREN({sel_wen[1], sel_wen[1], sel_wen[0], sel_wen[0]}),
+		.WREN(sel_wen[1]|sel_wen[0]),
 		.CHIPSELECT(cs_0),
 		.CLOCK(clk),
 		.STANDBY(1'b0),
@@ -67,8 +77,8 @@ module ice40up5k_spram #(
 	SB_SPRAM256KA ram01 (
 		.ADDRESS(addr[13:0]),
 		.DATAIN(wdata[31:16]),
-		.MASKWREN({wen[3], wen[3], wen[2], wen[2]}),
-		.WREN(wen[3]|wen[2]),
+		.MASKWREN({sel_wen[3], sel_wen[3], sel_wen[2], sel_wen[2]}),
+		.WREN(sel_wen[3]|sel_wen[2]),
 		.CHIPSELECT(cs_0),
 		.CLOCK(clk),
 		.STANDBY(1'b0),
@@ -80,8 +90,8 @@ module ice40up5k_spram #(
 	SB_SPRAM256KA ram10 (
 		.ADDRESS(addr[13:0]),
 		.DATAIN(wdata[15:0]),
-		.MASKWREN({wen[1], wen[1], wen[0], wen[0]}),
-		.WREN(wen[1]|wen[0]),
+		.MASKWREN({sel_wen[1], sel_wen[1], sel_wen[0], sel_wen[0]}),
+		.WREN(sel_wen[1]|sel_wen[0]),
 		.CHIPSELECT(cs_1),
 		.CLOCK(clk),
 		.STANDBY(1'b0),
@@ -93,8 +103,8 @@ module ice40up5k_spram #(
 	SB_SPRAM256KA ram11 (
 		.ADDRESS(addr[13:0]),
 		.DATAIN(wdata[31:16]),
-		.MASKWREN({wen[3], wen[3], wen[2], wen[2]}),
-		.WREN(wen[3]|wen[2]),
+		.MASKWREN({sel_wen[3], sel_wen[3], sel_wen[2], sel_wen[2]}),
+		.WREN(sel_wen[3]|sel_wen[2]),
 		.CHIPSELECT(cs_1),
 		.CLOCK(clk),
 		.STANDBY(1'b0),

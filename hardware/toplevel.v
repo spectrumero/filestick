@@ -93,6 +93,7 @@ blkram dpram (
 wire [31:0] spram_rdata;
 ice40up5k_spram spram (
    .clk(clk),
+   .select(spram_sel),
    .wen(cpu_we),
    .addr(mem_addr[16:2]),
    .wdata(mem_wdata),
