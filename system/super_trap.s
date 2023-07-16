@@ -44,17 +44,40 @@ super_trap:
 syscall_handler:
    addi     sp, sp, -16
    sw       ra, 12(sp)
+   sw       a7, 8(sp)
 
-   la       ra, .syscall_done # always return here
-   
-   # TODO: syscalls should be table based, but there aren't many yet
-   li       t0, SYSCALL_write 
-   bne      t0, a7, .L0
-   j        SYS_write
-.L0:
-.bad_syscall:
-   li       a0, -2000         # TODO: error number
+   addi     a7, a7, -SYSCALL_lowest
+   bltz     a7, .invalid_syscall
+   li       t0, syscall_table_sz
+   bge      a7, t0, .syscall_high
+
+   la       t0, syscall_table
+.find_syscall:
+   add      t0, t0, a7           # get table entry
+   lb       t1, 0(t0)
+   beqz     t1, .invalid_syscall # must be nonzero
+   slli     t1, t1, 2            # multiply by 4 to get call offset
+   la       t2, syscall_address
+   add      t2, t2, t1           # add offset
+   lw       t3, 0(t2)            # get table entry
+   jalr     ra, 0(t3)            # Make syscall
+   j        .syscall_done
+
+.syscall_high:
+   lw       a7, 8(sp)
+   addi     a7, a7, -SYSCALL_hi_lowest
+   bltz     a7, .invalid_syscall
+   li       t0, syscall_high_table_sz
+   bge      a7, t0, .invalid_syscall
+   la       t0, syscall_high_table
+   j        .find_syscall
+
+.invalid_syscall:
+   mv       a0, a7
+   li       a0, -2000
+
 .syscall_done:
+   lw       a7, 8(sp)
    lw       ra, 12(sp)
    addi     sp, sp, 16
    ret
