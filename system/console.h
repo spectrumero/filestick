@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include "fd.h"
+
 ssize_t console_write(int fd, void *buf, size_t count);
 void serial_putc(uint8_t ch);
 
@@ -34,5 +36,9 @@ void serial_putc(uint8_t ch);
 void console_hexdump(void *buf, size_t count);
 void console_hexword(uint32_t word);
 void console_hexbyte(uint8_t byte);
+
+// Syscall support
+int open_console(const char *devname, int flags, mode_t mode, FD *fd);
+
 #endif
 

@@ -1,6 +1,5 @@
-#ifndef _FD_H
-#define _FD_H
-
+#ifndef DEV_OPEN
+#define DEV_OPEN
 /*
 ;The MIT License
 ;
@@ -25,38 +24,19 @@
 ;THE SOFTWARE.
 */
 
+// Open devices
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#include <unistd.h>
-#include <stdint.h>
+#include "fd.h"
 
-#define MAX_FILE_DESCRIPTORS  16
+typedef struct _devopen {
+   char *devname;
+   int (* open_device_impl)(const char *devname, int flags, mode_t mode, FD *fd);
+} DevOpen;
 
-// Temporary flag to reserve a file descriptor
-#define FLAG_TEMP_ALLOCATED  0x80000000
-
-typedef struct _FDfunction {
-   ssize_t (*fd_read)(int fd, void *ptr, size_t count);
-   ssize_t (*fd_write)(int fd, void *ptr, size_t count);
-   int (*fd_close)(int fd);
-} FDfunction;
-
-typedef struct _FD {
-   uint32_t       flags;
-   FDfunction     *fdfunc;
-   void           *data;
-} FD;
-
-// File descriptor table management
-void fd_init();
-FD *fd_alloc(int *fdnum);
-FD *get_fdentry(int fd);
-void fd_dealloc(FD *fd);
-
-// System calls
-ssize_t SYS_write(int fd, void *buf, size_t count);
-ssize_t SYS_read (int fd, void *buf, size_t count);
-int     SYS_close(int fd);
-int     SYS_open(const char *pathname, int flags, mode_t mode);
+int open_device(const char *devname, int flags, mode_t mode);
 
 
 #endif

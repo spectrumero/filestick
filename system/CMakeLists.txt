@@ -9,7 +9,7 @@ project(filestick-system)
 set(EXECUTABLE_NAME "${PROJECT_NAME}.elf")
 
 enable_language(C ASM)
-add_executable(${EXECUTABLE_NAME} init.s super_trap.s serial_putc.s spi_flash.s fd.c memset.c console.c)
+add_executable(${EXECUTABLE_NAME} init.s super_trap.s serial_putc.s spi_flash.s fd.c dev_open.c memset.c console.c strncmp.c strcmp.c)
 target_include_directories(${EXECUTABLE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_custom_target(system_bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_command(

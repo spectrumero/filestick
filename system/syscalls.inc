@@ -45,13 +45,13 @@ syscall_table:
 .byte 0           # 54
 .byte 0           # 55
 .byte 0           # 56 SYS_openat
-.byte 0           # 57 SYS_close
+.byte 4           # 57 SYS_close
 .byte 0           # 58 
 .byte 0           # 59
 .byte 0           # 60
 .byte 0           # 61 SYS_getdents
 .byte 0           # 62 SYS_lseek
-.byte 0           # 63 SYS_read
+.byte 2           # 63 SYS_read
 .byte 1           # 64 SYS_write
 .byte 0           # 65 
 .byte 0           # 66 SYS_writev
@@ -86,7 +86,7 @@ syscall_table:
 .set syscall_table_sz, .-syscall_table
 
 syscall_high_table:
-.byte 0           # 1024 SYS_open
+.byte 3           # 1024 SYS_open
 .byte 0           # 1025 SYS_link
 .byte 0           # 1026 SYS_unlink
 .byte 0           # 1027
@@ -108,4 +108,8 @@ syscall_high_table:
 .align 4
 syscall_address:
 .word 0x00000000  # dummy entry
-.word SYS_write
+.word SYS_write   # 1
+.word SYS_read    # 2
+.word SYS_open    # 3
+.word SYS_close   # 4
+

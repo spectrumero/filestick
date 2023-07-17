@@ -26,9 +26,23 @@
 #include <unistd.h>
 
 #include "console.h"
+#include "fd.h"
 
 static size_t console_hexline(void *buf, size_t count);
 static void console_nibble(uint8_t nibble);
+
+static FDfunction cons_func = {
+   .fd_read  = NULL,
+   .fd_write = console_write,
+   .fd_close = NULL,
+};
+
+//------------------------------------------------------------------
+// Open the console
+int open_console(const char *devname, int flags, mode_t mode, FD *fd) {
+   fd->fdfunc = &cons_func;
+   return 0;
+}
 
 //------------------------------------------------------------------
 // Write to the system console.

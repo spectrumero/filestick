@@ -1,6 +1,3 @@
-#ifndef _FD_H
-#define _FD_H
-
 /*
 ;The MIT License
 ;
@@ -25,38 +22,46 @@
 ;THE SOFTWARE.
 */
 
+// Open devices
+#include <string.h>
 
-#include <unistd.h>
-#include <stdint.h>
+#include "dev_open.h"
+#include "fd.h"
+#include "console.h"
+#include "errno.h"
 
-#define MAX_FILE_DESCRIPTORS  16
+extern FD fdtable[MAX_FILE_DESCRIPTORS];
 
-// Temporary flag to reserve a file descriptor
-#define FLAG_TEMP_ALLOCATED  0x80000000
+DevOpen open_table[] = {
+   { .devname = "console", .open_device_impl = open_console },
+   { .devname = NULL,      .open_device_impl = NULL }
+};
 
-typedef struct _FDfunction {
-   ssize_t (*fd_read)(int fd, void *ptr, size_t count);
-   ssize_t (*fd_write)(int fd, void *ptr, size_t count);
-   int (*fd_close)(int fd);
-} FDfunction;
+//------------------------------------------------------------
+// Open a device
+//
+int open_device(const char *devname, int flags, mode_t mode) {
+   int fdnum;
+   FD *fd = fd_alloc(&fdnum);
+   if(!fd)
+      return -EMFILE;
 
-typedef struct _FD {
-   uint32_t       flags;
-   FDfunction     *fdfunc;
-   void           *data;
-} FD;
+   DevOpen *table_ent = open_table;
+   while(table_ent->devname != NULL) {
+      if(!strcmp(table_ent->devname, devname)) {
+         int rc = table_ent->open_device_impl(devname, flags, mode, fd);
+         if(!rc) {
+            fd->flags = flags;
+            return fdnum;
+         }
+         else
+            return rc;
+      } 
+      table_ent++;
+   }
 
-// File descriptor table management
-void fd_init();
-FD *fd_alloc(int *fdnum);
-FD *get_fdentry(int fd);
-void fd_dealloc(FD *fd);
+   // Device not found
+   fd_dealloc(fd);
+   return -ENOENT;
+}
 
-// System calls
-ssize_t SYS_write(int fd, void *buf, size_t count);
-ssize_t SYS_read (int fd, void *buf, size_t count);
-int     SYS_close(int fd);
-int     SYS_open(const char *pathname, int flags, mode_t mode);
-
-
-#endif
