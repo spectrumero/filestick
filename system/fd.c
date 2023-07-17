@@ -130,7 +130,7 @@ void fd_dealloc(FD *fd) {
 FD *fd_alloc(int *fdnum) {
    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
       if(!fdtable[i].flags) {
-         fdtable[i].flags = FLAG_TEMP_ALLOCATED;
+         fdtable[i].flags = FLAG_ALLOCATED;
          *fdnum = i;
          return &fdtable[i];
       }

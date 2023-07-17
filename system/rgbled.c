@@ -1,6 +1,3 @@
-#ifndef _FD_H
-#define _FD_H
-
 /*
 ;The MIT License
 ;
@@ -25,38 +22,49 @@
 ;THE SOFTWARE.
 */
 
-
 #include <unistd.h>
 #include <stdint.h>
 
-#define MAX_FILE_DESCRIPTORS  16
+#include "rgbled.h"
+#include "fd.h"
 
-// Temporary flag to reserve a file descriptor
-#define FLAG_ALLOCATED  0x80000000
+static FDfunction led_func = {
+   .fd_read  = rgbled_read,
+   .fd_write = rgbled_write,
+   .fd_close = rgbled_close,
+};
 
-typedef struct _FDfunction {
-   ssize_t (*fd_read)(int fd, void *ptr, size_t count);
-   ssize_t (*fd_write)(int fd, void *ptr, size_t count);
-   int (*fd_close)(int fd);
-} FDfunction;
+static uint32_t ledval;
+static uint32_t *led_dev = (uint32_t *)0x800000;
 
-typedef struct _FD {
-   uint32_t       flags;
-   FDfunction     *fdfunc;
-   void           *data;
-} FD;
+int rgbled_open(const char *devname, int flags, mode_t mode, FD *fd) {
+   fd->fdfunc = &led_func;
+   return 0;   
+}
 
-// File descriptor table management
-void fd_init();
-FD *fd_alloc(int *fdnum);
-FD *get_fdentry(int fd);
-void fd_dealloc(FD *fd);
+ssize_t rgbled_write(int fd, void *buf, size_t count) {
+   uint8_t *bufptr = (uint8_t *)buf;
+   size_t rc = count;
 
-// System calls
-ssize_t SYS_write(int fd, void *buf, size_t count);
-ssize_t SYS_read (int fd, void *buf, size_t count);
-int     SYS_close(int fd);
-int     SYS_open(const char *pathname, int flags, mode_t mode);
+   while(count--) {
+      uint8_t byte = *bufptr++;
+      ledval = byte;
+      *led_dev = ledval;
+   }
+   return rc;
+}
 
+ssize_t rgbled_read(int fd, void *buf, size_t count) {
+   uint8_t *bufptr = (uint8_t *)buf;
+   size_t rc = count;
 
-#endif
+   while(count--) {
+      *bufptr++ = (uint8_t)ledval;
+   }
+   return rc;
+}
+
+int rgbled_close(int fd) {
+   return 0;
+}
+

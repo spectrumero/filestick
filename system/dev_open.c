@@ -28,12 +28,14 @@
 #include "dev_open.h"
 #include "fd.h"
 #include "console.h"
+#include "rgbled.h"
 #include "errno.h"
 
 extern FD fdtable[MAX_FILE_DESCRIPTORS];
 
 DevOpen open_table[] = {
    { .devname = "console", .open_device_impl = open_console },
+   { .devname = "rgbled",  .open_device_impl = rgbled_open },
    { .devname = NULL,      .open_device_impl = NULL }
 };
 
@@ -51,11 +53,13 @@ int open_device(const char *devname, int flags, mode_t mode) {
       if(!strcmp(table_ent->devname, devname)) {
          int rc = table_ent->open_device_impl(devname, flags, mode, fd);
          if(!rc) {
-            fd->flags = flags;
+            fd->flags |= flags;
             return fdnum;
          }
-         else
+         else {
+            fd_dealloc(fd);
             return rc;
+         }
       } 
       table_ent++;
    }
