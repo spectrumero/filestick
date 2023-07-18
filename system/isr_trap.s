@@ -22,43 +22,30 @@
 #THE SOFTWARE.
 #
 
-.option arch, +zicsr
-
-.data
-initstr:
-.ascii "Loading initial program\r\n"
-.set initstr_sz, .-initstr
+# Interrupt service routine
+.include "devices.inc"
 
 .text
-.globl init
-init:
-   la    sp, __stack_top         # initialize system stack
+.globl isr_trap
+isr_trap:
+   addi     sp, sp, -16
+   sw       ra, 12(sp)
+   sw       a1, 8(sp)
+   sw       a0, 4(sp)
 
-   call  fd_init                 # initialize file descriptors
+   la       ra, .isr_exit     # return here
+   la       a0, device_base
+   lw       a1, 16(a0)        # console uart state
+   andi     a1, a1, 1         # uart_valid bit
+   bnez     a0, console_rx 
 
-   la    a0, __cons_buff         # clear down the console buffer
-   mv    a1, zero
-   li    a2, 256
-   call  memset
+   lw       a0, 8(a1)         # timer state
+   bnez     a0, timer_done 
    
-   la    t0, super_trap          # initialize the supervisor (ecall) trap
-   csrw  stvec, t0
+.isr_exit:   
+   lw       a0, 4(sp)
+   lw       a1, 8(sp)
+   lw       ra, 12(sp)
+   addi     sp, sp, 16
+   mret
 
-   li    a0, 1
-   la    a1, initstr
-   li    a2, initstr_sz
-   li    a7, 64
-   call  syscall_handler
-
-   call  flash_reset
-   li    a0, 0x30000             # flash address for initial program to run
-   li    a1, 0x0000              # destination address in RAM
-   li    a2, 65536               # number of bytes to copy
-   call  flash_memcpy            # copy into RAM
-
-   la    t0, isr_trap            # Interrupt routine address
-   csrw  mtvec, t0
-   csrwi mstatus, 8              # enable interrupts
-
-   li    t0, 0                   # jump address
-   jr    t0                      # start initial program

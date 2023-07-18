@@ -30,6 +30,7 @@
 #include "fd.h"
 
 ssize_t console_write(int fd, void *buf, size_t count);
+ssize_t console_read(int fd, void *buf, size_t count);
 void serial_putc(uint8_t ch);
 
 // Debugging routings

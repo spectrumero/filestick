@@ -23,6 +23,7 @@
 */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #include "console.h"
@@ -32,16 +33,48 @@ static size_t console_hexline(void *buf, size_t count);
 static void console_nibble(uint8_t nibble);
 
 static FDfunction cons_func = {
-   .fd_read  = NULL,
+   .fd_read  = console_read,
    .fd_write = console_write,
    .fd_close = NULL,
 };
+
+extern uint32_t bufindex;
+extern uint32_t curidx;
+uint8_t *cons_buf = (uint8_t *)0x20700; // FIXME FIXME FIXME!
 
 //------------------------------------------------------------------
 // Open the console
 int open_console(const char *devname, int flags, mode_t mode, FD *fd) {
    fd->fdfunc = &cons_func;
    return 0;
+}
+
+//-----------------------------------------------------------------
+// Read the console
+ssize_t console_read(int fd, void *buf, size_t count) {
+   size_t bytes_read = 0;
+   uint8_t *bufptr = (uint8_t *)buf;
+
+   if(!count) return 0;
+
+   while(1) {
+      while(bufindex != curidx) {
+         uint8_t byte = *(cons_buf + curidx);
+
+         count--;
+         bytes_read++;
+         *bufptr++ = byte;
+
+         if(byte == 0x0d) serial_putc(0x0a);
+         serial_putc(byte);      // echo it
+
+         curidx++;
+         curidx &= 0xFF;         // index wraps
+
+         if(!count || byte == 0x0d)
+            return bytes_read;
+      }
+   }
 }
 
 //------------------------------------------------------------------

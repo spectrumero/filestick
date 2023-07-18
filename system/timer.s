@@ -22,43 +22,21 @@
 #THE SOFTWARE.
 #
 
-.option arch, +zicsr
+.text
+
+# On entry a0 = device_base, a1 = timer_ctl, ra = isr_exit
+.globl timer_done
+timer_done:
+   li    a1, 6          # reset timer interrupt and enable
+   sw    a1, 8(a1)      # timer control reg
+   la    a0, timer_count
+   lw    a1, 0(a0)      # get timer count and increment
+   addi  a1, a1, 1
+   sw    a1, 0(a0)
+   ret                  # isr_exit
 
 .data
-initstr:
-.ascii "Loading initial program\r\n"
-.set initstr_sz, .-initstr
+.align 4
+.globl timer_count
+timer_count:   .word 0
 
-.text
-.globl init
-init:
-   la    sp, __stack_top         # initialize system stack
-
-   call  fd_init                 # initialize file descriptors
-
-   la    a0, __cons_buff         # clear down the console buffer
-   mv    a1, zero
-   li    a2, 256
-   call  memset
-   
-   la    t0, super_trap          # initialize the supervisor (ecall) trap
-   csrw  stvec, t0
-
-   li    a0, 1
-   la    a1, initstr
-   li    a2, initstr_sz
-   li    a7, 64
-   call  syscall_handler
-
-   call  flash_reset
-   li    a0, 0x30000             # flash address for initial program to run
-   li    a1, 0x0000              # destination address in RAM
-   li    a2, 65536               # number of bytes to copy
-   call  flash_memcpy            # copy into RAM
-
-   la    t0, isr_trap            # Interrupt routine address
-   csrw  mtvec, t0
-   csrwi mstatus, 8              # enable interrupts
-
-   li    t0, 0                   # jump address
-   jr    t0                      # start initial program

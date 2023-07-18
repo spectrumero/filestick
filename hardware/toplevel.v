@@ -62,6 +62,7 @@ assign mem_rdata =
    `endif
    uart_sel          ? uart_rdata   :
    uart_state_sel    ? uart_rstate  :
+   timer_ctl_sel     ? { 31'b0, timer_intr } :
    32'hAAAAAAAA;
 
 FemtoRV32 #(
@@ -277,7 +278,7 @@ always @(posedge clk)
    end
 
 // ------- Interrupts ------------
-assign int = timer_intr;
+assign int = timer_intr | uart_valid;
 
 endmodule
 
