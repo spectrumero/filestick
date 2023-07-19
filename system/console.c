@@ -38,8 +38,11 @@ static FDfunction cons_func = {
    .fd_close = NULL,
 };
 
-extern uint32_t bufindex;
-extern uint32_t curidx;
+extern volatile uint32_t bufindex;
+extern volatile uint32_t bufstart;
+extern volatile uint32_t cr_index;
+extern volatile uint32_t cons_rx_flags;
+
 uint8_t *cons_buf = (uint8_t *)0x20700; // FIXME FIXME FIXME!
 
 //------------------------------------------------------------------
@@ -57,24 +60,28 @@ ssize_t console_read(int fd, void *buf, size_t count) {
 
    if(!count) return 0;
 
-   while(1) {
-      while(bufindex != curidx) {
-         uint8_t byte = *(cons_buf + curidx);
+   // FIXME
+   while(!(cons_rx_flags & 1));
+   cons_rx_flags = 0;
+   //
 
-         count--;
-         bytes_read++;
-         *bufptr++ = byte;
+   while(count && bufstart != bufindex) {
+      uint8_t byte = *(cons_buf + bufstart);
+      *bufptr++ = byte;
+      bufstart++;
+      bufstart &= 0xFF;
+      count--;
+      bytes_read++;
 
-         if(byte == 0x0d) serial_putc(0x0a);
-         serial_putc(byte);      // echo it
-
-         curidx++;
-         curidx &= 0xFF;         // index wraps
-
-         if(!count || byte == 0x0d)
-            return bytes_read;
+      // FIXME console driver should do this echo back
+      if(byte == 0x0d) {
+         serial_putc(0x0d);
+         serial_putc(0x0a);
+         break;
       }
    }
+
+   return bytes_read;
 }
 
 //------------------------------------------------------------------

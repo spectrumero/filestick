@@ -26,32 +26,74 @@
 .text
 .globl console_rx
 console_rx:
-   addi  sp, sp, -16
-   sw    ra, 12(sp)
+   addi  sp, sp, -32
+   sw    ra, 28(sp)
+   sw    s1, 12(sp)
    sw    a2, 8(sp)
+   sw    a3, 4(sp)
+   sw    a1, 0(sp)
 
-   lb    a1, 12(a0)     # get uart byte - resets data received flag
-   sw    a1, 4(sp)      # store it
+   lb    s1, 12(a0)     # get uart byte - resets data received flag
 
    la    a0, 0x20700    # FIXME
    la    a1, bufindex
    lw    a2, 0(a1)      # get current buffer index
-   add   a0, a0, a2     # set buffer pointer
+
+   li    a3, 127        # backspace?
+   beq   a3, s1, .bkspc
+
+   li    a3, 0x0d       # carriage return?
+   beq   a3, s1, .cr
+
+   add   a0, a0, a2     # set memory address for byte store
    addi  a2, a2, 1      # increment buffer index
    andi  a2, a2, 0xFF   # make sure it wraps around
-   sw    a2, 0(a1)      # store it
-   lw    a1, 4(sp)      # get the uart byte back
-   sb    a1, 0(a0)      # store it in the console buffer
+   lw    a3, 4(a1)      # get starting index
+   beq   a3, a2, .cons_rx_done # buffer is full
 
+   sw    a2, 0(a1)      # store new buffer index
+   sb    s1, 0(a0)      # store byte in the console buffer
+
+   la    a0, 0x80000C   # FIXME
+   sw    s1, 0(a0)      # echo character
+
+.cons_rx_done:
+   lw    a1, 0(sp)
+   lw    a3, 4(sp)
    lw    a2, 8(sp)
-   lw    ra, 12(sp)   
-   addi  sp, sp, 16
+   lw    s1, 12(sp)
+   lw    ra, 28(sp)   
+   addi  sp, sp, 32
    ret
+
+.bkspc:
+   lw    a3, 4(a1)      # bufstart
+   beq   a2, a3, .cons_rx_done # nothing to do, at buffer start
+   addi  a2, a2, -1     # go back a space
+   andi  a2, a2, 0xFF   # wrap
+   sw    a2, 0(a1)      # store it in bufindex
+
+   la    a0, 0x80000C   # FIXME
+   li    a3, 127
+   sw    a3, 0(a0)
+   j     .cons_rx_done
+
+.cr:
+   addi  a2, a2, -1     # index of the CR is one byte before the bufindex
+   andi  a2, a2, 0xFF
+   sw    a2, 8(a1)      # cr_index
+   li    a0, 1          # flag done
+   sw    a0, 12(a1)     # cons_rx_flags
+   j     .cons_rx_done
 
 .data
 .align 4
-.globl bufindex
+.globl bufindex         # where next byte should be written
 bufindex: .word 0
-.globl curidx
-curidx:  .word 0
+.globl bufstart         # where the ring buffer starts
+bufstart:  .word 0
+.globl cr_index         # where the carriage return is
+cr_index:   .word 0
+.globl cons_rx_flags    # console receive flags
+cons_rx_flags: .word 0
 
