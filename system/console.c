@@ -28,6 +28,7 @@
 
 #include "console.h"
 #include "fd.h"
+#include "sysdefs.h"
 
 static size_t console_hexline(void *buf, size_t count);
 static void console_nibble(uint8_t nibble);
@@ -41,7 +42,7 @@ static FDfunction cons_func = {
 extern volatile uint32_t bufindex;
 extern volatile uint32_t bufstart;
 extern volatile uint32_t cr_index;
-extern volatile uint32_t cons_rx_flags;
+extern volatile uint32_t cons_rx_count;
 
 uint8_t *cons_buf = (uint8_t *)0x20700; // FIXME FIXME FIXME!
 
@@ -60,10 +61,12 @@ ssize_t console_read(int fd, void *buf, size_t count) {
 
    if(!count) return 0;
 
-   // FIXME
-   while(!(cons_rx_flags & 1));
-   cons_rx_flags = 0;
-   //
+   // FIXME will need a way to break out (eg Ctrl-C)
+   while(cons_rx_count == 0);
+
+   DISABLE_INTERRUPTS
+   cons_rx_count--;
+   ENABLE_INTERRUPTS
 
    while(count && bufstart != bufindex) {
       uint8_t byte = *(cons_buf + bufstart);

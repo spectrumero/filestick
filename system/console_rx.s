@@ -82,8 +82,9 @@ console_rx:
    addi  a2, a2, -1     # index of the CR is one byte before the bufindex
    andi  a2, a2, 0xFF
    sw    a2, 8(a1)      # cr_index
-   li    a0, 1          # flag done
-   sw    a0, 12(a1)     # cons_rx_flags
+   lw    a0, 12(a1)     # get current cons_rx_count
+   addi  a0, a0, 1      # increment received count
+   sw    a0, 12(a1)     # cons_rx_count
    j     .cons_rx_done
 
 .data
@@ -94,6 +95,6 @@ bufindex: .word 0
 bufstart:  .word 0
 .globl cr_index         # where the carriage return is
 cr_index:   .word 0
-.globl cons_rx_flags    # console receive flags
-cons_rx_flags: .word 0
+.globl cons_rx_count    # console receive count
+cons_rx_count: .word 0
 
