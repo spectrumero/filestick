@@ -81,6 +81,36 @@ ssize_t SYS_read(int fd, void *buf, size_t count) {
 }
 
 //------------------------------------------------------------------------
+// Stat an fd
+//
+int SYS_fstat(int fd, struct stat *statbuf) {
+   if(fd > MAX_FILE_DESCRIPTORS || fd < 0)
+      return -EBADF;
+
+   FD fd_ent = fdtable[fd];
+   if(fd_ent.flags && fd_ent.fdfunc->fd_fstat != NULL) {
+      return fd_ent.fdfunc->fd_fstat(fd, statbuf);
+   }
+
+   return -EBADF;
+}
+
+//------------------------------------------------------------------------
+// seek on an fd
+//
+off_t SYS_lseek(int fd, off_t offset, int whence) {
+   if(fd > MAX_FILE_DESCRIPTORS || fd < 0)
+      return -EBADF;
+
+   FD fd_ent = fdtable[fd];
+   if(fd_ent.flags && fd_ent.fdfunc->fd_lseek != NULL) {
+      return fd_ent.fdfunc->fd_lseek(fd, offset, whence);
+   }
+
+   return -ESPIPE;
+}
+
+//------------------------------------------------------------------------
 // Close an fd
 //
 int SYS_close(int fd) {

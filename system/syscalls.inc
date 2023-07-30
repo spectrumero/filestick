@@ -50,7 +50,7 @@ syscall_table:
 .byte 0           # 59
 .byte 0           # 60
 .byte 0           # 61 SYS_getdents
-.byte 0           # 62 SYS_lseek
+.byte 6           # 62 SYS_lseek
 .byte 2           # 63 SYS_read
 .byte 1           # 64 SYS_write
 .byte 0           # 65 
@@ -68,7 +68,7 @@ syscall_table:
 .byte 0           # 77
 .byte 0           # 78
 .byte 0           # 79 SYS_fstatat
-.byte 0           # 80 SYS_fstat
+.byte 5           # 80 SYS_fstat
 .byte 0           # 81
 .byte 0           # 82
 .byte 0           # 83
@@ -81,7 +81,7 @@ syscall_table:
 .byte 0           # 90
 .byte 0           # 91
 .byte 0           # 92
-.byte 0           # 93 SYS_exit
+.byte 7           # 93 SYS_exit
 .byte 0           # 94
 .set syscall_table_sz, .-syscall_table
 
@@ -112,4 +112,7 @@ syscall_address:
 .word SYS_read    # 2
 .word SYS_open    # 3
 .word SYS_close   # 4
+.word SYS_fstat   # 5
+.word SYS_lseek   # 6
+.word SYS_exit    # 7
 

@@ -1,5 +1,3 @@
-#ifndef _CONSOLE_H
-#define _CONSOLE_H
 /*
 ;The MIT License
 ;
@@ -24,24 +22,15 @@
 ;THE SOFTWARE.
 */
 
-#include <stdint.h>
 #include <unistd.h>
-#include <sys/stat.h>
 
-#include "fd.h"
+#include "brk.h"
 
-ssize_t console_write(int fd, void *buf, size_t count);
-ssize_t console_read(int fd, void *buf, size_t count);
-int console_fstat(int fd, struct stat *statbuf);
-void serial_putc(uint8_t ch);
-
-// Debugging routings
-void console_hexdump(void *buf, size_t count);
-void console_hexword(uint32_t word);
-void console_hexbyte(uint8_t byte);
-
-// Syscall support
-int open_console(const char *devname, int flags, mode_t mode, FD *fd);
-
-#endif
+//--------------------------------------------------------------------------
+// Set the program break
+// TODO: effectively is a no-op at the moment
+int SYS_brk(void *addr) {
+   if(addr > (void *)MAX_ADDR) return -1;
+   return 0;
+}
 

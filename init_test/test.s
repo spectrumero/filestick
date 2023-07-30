@@ -15,12 +15,16 @@ filedes:    .ascii "File descriptor: "
 .set filedes_sz, .-filedes
 read:       .ascii "Read: "
 .set read_sz, .-read
+brk:        .ascii "brk returned: "
+.set brk_sz, .-brk
 buffer:
 
 .set SYSCALL_write, 64
 .set SYSCALL_read,  63
 .set SYSCALL_open,  1024
 .set SYSCALL_close, 57
+.set SYSCALL_brk,   214
+.set SYSCALL_exit,  93
 
 .text
 .global start
@@ -34,6 +38,21 @@ start:
 
    la    a0, startup
    la    a1, startup_sz
+   call  serial_write
+
+   # Test brk
+   li    a7, SYSCALL_brk
+   li    a0, 0x8000
+   ecall
+
+   sw    a0, 12(sp)
+   la    a0, brk
+   la    a1, brk_sz
+   call  serial_write
+   lw    a0, 12(sp)
+   call  serial_hexprint
+   la    a0, crlf
+   la    a1, 2
    call  serial_write
    
    li    a7, SYSCALL_write
@@ -109,6 +128,20 @@ start:
    la    a1, 2
    call  serial_write
 
+   # Test exit
+   #li    a7, 123
+   #li    a0, 0
+   #ecall
+
+   sw    a0, 12(sp)
+   la    a0, returncode
+   la    a1, returncode_sz
+   call  serial_write
+   lw    a0, 12(sp)
+   call  serial_hexprint
+   la    a0, crlf
+   la    a1, 2
+   call  serial_write
 .halt_loop:
    j .halt_loop
 

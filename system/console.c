@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
 
 #include "console.h"
 #include "fd.h"
@@ -36,6 +38,8 @@ static void console_nibble(uint8_t nibble);
 static FDfunction cons_func = {
    .fd_read  = console_read,
    .fd_write = console_write,
+   .fd_lseek = NULL,
+   .fd_fstat = console_fstat,
    .fd_close = NULL,
 };
 
@@ -98,6 +102,15 @@ ssize_t console_write(int fd, void *buf, size_t count) {
    }
 
    return rc;
+}
+
+//------------------------------------------------------------------
+// stat the console
+int console_fstat(int fd, struct stat *statbuf) {
+   memset(statbuf, 0, sizeof(struct stat));
+   statbuf->st_mode = S_IFCHR | 0777;
+   statbuf->st_nlink = 1;
+   return 0;
 }
 
 //------------------------------------------------------------------

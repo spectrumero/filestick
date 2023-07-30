@@ -66,14 +66,21 @@ syscall_handler:
 .syscall_high:
    lw       a7, 8(sp)
    addi     a7, a7, -SYSCALL_hi_lowest
-   bltz     a7, .invalid_syscall
+   bltz     a7, .nontable_syscall   # between the tables
    li       t0, syscall_high_table_sz
    bge      a7, t0, .invalid_syscall
    la       t0, syscall_high_table
    j        .find_syscall
 
+.nontable_syscall:
+   lw       a7, 8(sp)
+   li       t0, 214              # brk
+   bne      a7, t0, .next_nontable_1
+   call     SYS_brk
+   j        .syscall_done
+.next_nontable_1:
+
 .invalid_syscall:
-   mv       a0, a7
    li       a0, -2000
 
 .syscall_done:

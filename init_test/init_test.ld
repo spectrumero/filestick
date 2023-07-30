@@ -6,7 +6,9 @@ MEMORY
 SECTIONS
 {
    . = ORIGIN(RAM);
-   .text : { *(.text) }
+   .text : { *(.text)
+      __start = .;
+   }
    .data : { *(.data) }
    .bss  : { *(.bss)  }
 
