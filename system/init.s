@@ -28,6 +28,7 @@
 initstr:
 .ascii "Loading initial program\r\n"
 .set initstr_sz, .-initstr
+.set user_sp, 65536
 
 .text
 .globl init
@@ -60,5 +61,6 @@ init:
    csrw  mtvec, t0
    csrwi mstatus, 8              # enable interrupts
 
+   la    sp, user_sp             # set user stack pointer
    li    t0, 0                   # jump address
    jr    t0                      # start initial program

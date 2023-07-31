@@ -29,14 +29,16 @@
 #include "fd.h"
 #include "console.h"
 #include "rgbled.h"
+#include "spi_flashdev.h"
 #include "errno.h"
 
 extern FD fdtable[MAX_FILE_DESCRIPTORS];
 
 DevOpen open_table[] = {
-   { .devname = "console", .open_device_impl = open_console },
-   { .devname = "rgbled",  .open_device_impl = rgbled_open },
-   { .devname = NULL,      .open_device_impl = NULL }
+   { .devname = "console",    .open_device_impl = open_console },
+   { .devname = "rgbled",     .open_device_impl = rgbled_open },
+   { .devname = "spiflash",   .open_device_impl = spiflash_open },
+   { .devname = NULL,         .open_device_impl = NULL }
 };
 
 //------------------------------------------------------------

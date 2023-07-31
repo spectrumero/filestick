@@ -20,8 +20,8 @@ syscall_table:
 .byte 0           # 29
 .byte 0           # 30
 .byte 0           # 31
-.byte 0           # 32
-.byte 0           # 33
+.byte 8           # 32 console_hexdump  -- (nonstd)
+.byte 9           # 33 console_hexword  -- (nonstd)
 .byte 0           # 34
 .byte 0           # 35
 .byte 0           # 36
@@ -115,4 +115,7 @@ syscall_address:
 .word SYS_fstat   # 5
 .word SYS_lseek   # 6
 .word SYS_exit    # 7
+.word console_hexdump # 8
+.word console_hexword # 9
+
 

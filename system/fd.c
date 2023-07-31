@@ -136,10 +136,6 @@ int SYS_close(int fd) {
 // Open an fd
 //
 int SYS_open(const char *pathname, int flags, mode_t mode) {
-   // Make sure that at least some flags are set
-   if(!flags)
-      return -EINVAL;
-
    // Device or file?
    if(!strncmp(pathname, "/dev/", 5)) {
       return open_device(pathname + 5, flags, mode);
