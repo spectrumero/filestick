@@ -37,7 +37,7 @@
 
 typedef struct _FDfunction {
    ssize_t (*fd_read)(int fd, void *ptr, size_t count);
-   ssize_t (*fd_write)(int fd, void *ptr, size_t count);
+   ssize_t (*fd_write)(int fd, const void *ptr, size_t count);
    off_t   (*fd_lseek)(int fd, off_t offset, int whence);
    int     (*fd_fstat)(int fd, struct stat *statbuf);
    int (*fd_close)(int fd);
@@ -56,7 +56,7 @@ FD *get_fdentry(int fd);
 void fd_dealloc(FD *fd);
 
 // System calls
-ssize_t SYS_write(int fd, void *buf, size_t count);
+ssize_t SYS_write(int fd, const void *buf, size_t count);
 ssize_t SYS_read (int fd, void *buf, size_t count);
 int     SYS_fstat(int fd, struct stat *statbuf);
 off_t   SYS_lseek(int fd, off_t offset, int whence);

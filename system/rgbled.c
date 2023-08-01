@@ -42,7 +42,7 @@ int rgbled_open(const char *devname, int flags, mode_t mode, FD *fd) {
    return 0;   
 }
 
-ssize_t rgbled_write(int fd, void *buf, size_t count) {
+ssize_t rgbled_write(int fd, const void *buf, size_t count) {
    uint8_t *bufptr = (uint8_t *)buf;
    size_t rc = count;
 

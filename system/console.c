@@ -93,7 +93,7 @@ ssize_t console_read(int fd, void *buf, size_t count) {
 
 //------------------------------------------------------------------
 // Write to the system console.
-ssize_t console_write(int fd, void *buf, size_t count) {
+ssize_t console_write(int fd, const void *buf, size_t count) {
    ssize_t rc = count;
    char *bufptr = (char *)buf;
 
@@ -143,7 +143,7 @@ static size_t console_hexline(void *buf, size_t count) {
    serial_putc('|');
    ptr -= bytes;
    for(int i=0; i < bytes; i++) {
-      if(*ptr > 31 && *ptr < 128)
+      if(*ptr > 31 && *ptr < 127)
          serial_putc(*ptr);
       else
          serial_putc('.');
@@ -180,5 +180,18 @@ static void console_nibble(uint8_t val) {
       val='0' + val;
 
    serial_putc(val);
+}
+
+//------------------------------------------------------------
+// Convenience functions
+void kputs(const char *string) {
+   SYS_write(1, string, strlen(string));
+   SYS_write(1, "\r\n", 2);
+}
+
+void kerr_puts(const char *string) {
+   SYS_write(2, "[ERROR] ", 8);
+   SYS_write(2, string, strlen(string));
+   SYS_write(2, "\r\n", 2);
 }
 

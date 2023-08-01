@@ -28,7 +28,7 @@
 #include "fd.h"
 
 int rgbled_open(const char *devname, int flags, mode_t mode, FD *fd);
-ssize_t rgbled_write(int fd, void *buf, size_t count);
+ssize_t rgbled_write(int fd, const void *buf, size_t count);
 ssize_t rgbled_read(int fd, void *buf, size_t count);
 int rgbled_close(int fd);
 

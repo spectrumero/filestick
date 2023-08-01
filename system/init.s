@@ -52,15 +52,16 @@ init:
    call  syscall_handler
 
    call  flash_reset
-   li    a0, 0x30000             # flash address for initial program to run
-   li    a1, 0x10000             # destination address in RAM
-   li    a2, 65536               # number of bytes to copy
-   call  flash_memcpy            # copy into RAM
+
+   call  elf_boot                # load boot code from flash
+   beqz  a0, .badboot            # boot file not OK?
 
    la    t0, isr_trap            # Interrupt routine address
    csrw  mtvec, t0
    csrwi mstatus, 8              # enable interrupts
 
    la    sp, user_sp             # set user stack pointer
-   li    t0, 10000               # jump address
-   jr    t0                      # start initial program
+   jr    a0                      # start initial program
+
+.badboot:
+   j     .badboot                # halt

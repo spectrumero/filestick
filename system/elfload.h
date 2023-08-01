@@ -1,5 +1,5 @@
-#ifndef _CONSOLE_H
-#define _CONSOLE_H
+#ifndef ELFLOAD_H
+#define ELFLOAD_H
 /*
 ;The MIT License
 ;
@@ -23,29 +23,20 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
-
 #include <stdint.h>
-#include <unistd.h>
-#include <sys/stat.h>
 
-#include "fd.h"
+#define ELF_MAGIC       0x464c457f     // 0x7f,E,L,F
+#define FLASH_OFFSET    0x30000        // Where in flash the startup is
+#define USRMEM_START    0x10000
+#define USRMEM_SIZE     0x10800
 
-ssize_t console_write(int fd, const void *buf, size_t count);
-ssize_t console_read(int fd, void *buf, size_t count);
-int console_fstat(int fd, struct stat *statbuf);
-void serial_putc(uint8_t ch);
+// Loads boot file from flash. Returns entry address or 0 on failure.
+uint32_t elf_boot();
 
-// Debugging routings
-void console_hexdump(void *buf, size_t count);
-void console_hexword(uint32_t word);
-void console_hexbyte(uint8_t byte);
-
-// Syscall support
-int open_console(const char *devname, int flags, mode_t mode, FD *fd);
-
-// Convenience
-void kputs(const char *string);
-void kerr_puts(const char *string);
+// Loads from a file descriptor. The offset is how many bytes into the
+// open file the ELF data starts (normally 0). Returns the entry address
+// or 0 on failure.
+uint32_t elf_load(int fd, uint32_t offset);
 
 #endif
 

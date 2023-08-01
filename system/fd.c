@@ -53,7 +53,7 @@ void fd_init() {
 //------------------------------------------------------------------------
 // Write to an fd
 //
-ssize_t SYS_write(int fd, void *buf, size_t count) {
+ssize_t SYS_write(int fd, const void *buf, size_t count) {
    if(fd > MAX_FILE_DESCRIPTORS || fd < 0)
       return -EBADF;
 
