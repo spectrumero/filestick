@@ -45,7 +45,7 @@ booting:
    call  serial_write 
 
 .flash_copy:
-   li    s1, 0x10000       # destination address
+   li    s1, 0x00000       # destination address
    li    s2, 0x10000       # bytes to copy
 
    li    a0, 0x03          # cmd = 3
@@ -68,7 +68,7 @@ booting:
    li    a1, ok_sz
    call  serial_write
 
-   j     0x10000           # run
+   j     0x00000           # run
 
 .badflash:
    la    a0, bad

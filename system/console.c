@@ -48,7 +48,7 @@ extern volatile uint32_t bufstart;
 extern volatile uint32_t cr_index;
 extern volatile uint32_t cons_rx_count;
 
-uint8_t *cons_buf = (uint8_t *)0x20700; // FIXME FIXME FIXME!
+uint8_t *cons_buf = (uint8_t *)0x0FF00; // FIXME FIXME FIXME!
 
 //------------------------------------------------------------------
 // Open the console

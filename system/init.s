@@ -28,7 +28,7 @@
 initstr:
 .ascii "Loading initial program\r\n"
 .set initstr_sz, .-initstr
-.set user_sp, 65536
+.set user_sp, 0x20800            # end of RAM
 
 .text
 .globl init
@@ -53,7 +53,7 @@ init:
 
    call  flash_reset
    li    a0, 0x30000             # flash address for initial program to run
-   li    a1, 0x0000              # destination address in RAM
+   li    a1, 0x10000             # destination address in RAM
    li    a2, 65536               # number of bytes to copy
    call  flash_memcpy            # copy into RAM
 
@@ -62,5 +62,5 @@ init:
    csrwi mstatus, 8              # enable interrupts
 
    la    sp, user_sp             # set user stack pointer
-   li    t0, 0                   # jump address
+   li    t0, 10000               # jump address
    jr    t0                      # start initial program
