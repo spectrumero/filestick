@@ -22,6 +22,8 @@ void run_tests() {
 
    flashtest();
 
+   asm("ebreak");
+
    exit(0);
 }
 

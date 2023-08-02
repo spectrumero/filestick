@@ -26,16 +26,83 @@
 # implemented, so arriving here will always be from an ecall instruction
 .include "syscalls.inc"
 
+.set SCAUSE_ECALL, 0x8
+.set SCAUSE_EBREAK, 0x3
+.set SCAUSE_ILLEGAL, 0x2
+
 .option arch, +zicsr
 .text
+
+##---------------------------------------------------------------------------
+## supervisor trap entry point: don't use the temp registers because we could
+## have got here via an illegal instruction
 .globl super_trap
 super_trap:
    csrw     sscratch, sp      # store userland stack pointer
-   la       sp, __stack_top   # set up supervisor stack
+   la       sp, __stack_top - 16   # set up supervisor stack
+   sw       s1, 0(sp)         # save s1
+   sw       s2, 4(sp)         # save s2
+   sw       ra, 8(sp)
+   csrr     s1, sscratch      # retrieve user stack ptr
+   sw       s1, 12(sp)        # save it on the stack
 
-   call     syscall_handler
+   la       ra, .trap_done
+   csrr     s1, scause
+   li       s2, SCAUSE_ECALL
+   beq      s1, s2, syscall_handler
 
-   csrr     sp, sscratch      # restore userland stack pointer
+   # save all the registers
+   addi     sp, sp, -124
+   sw       a0, 0(sp)
+   sw       a1, 4(sp)
+   sw       a2, 8(sp)
+   sw       a3, 12(sp)
+   sw       a4, 16(sp)
+   sw       a5, 20(sp)
+   sw       a6, 24(sp)
+   sw       a7, 28(sp)
+   sw       s0, 32(sp)
+   lw       a0, 124(sp)       # original s1 
+   sw       a0, 36(sp)
+   lw       a0, 128(sp)       # original s2
+   sw       a0, 40(sp)
+   sw       s3, 44(sp)
+   sw       s4, 48(sp)
+   sw       s5, 52(sp)
+   sw       s6, 56(sp)
+   sw       s7, 60(sp)
+   sw       s8, 64(sp)
+   sw       s9, 68(sp)
+   sw       s10, 72(sp)
+   sw       s11, 76(sp)
+   sw       t0, 80(sp)
+   sw       t1, 84(sp)
+   sw       t2, 88(sp)
+   sw       t3, 92(sp)
+   sw       t4, 96(sp)
+   sw       t5, 100(sp)
+   sw       t6, 104(sp)
+   sw       gp, 108(sp)
+   sw       tp, 112(sp)
+   lw       a0, 132(sp)       # original ra
+   sw       a0, 116(sp)
+   lw       a0, 136(sp)       # user sp
+   sw       a0, 120(sp)
+
+   mv       a0, sp            # pass pointer to saved registers
+   la       ra, .restore_stack
+
+   li       s2, SCAUSE_EBREAK
+   beq      s1, s2, ebreak_handler
+   call     illegal_handler
+.restore_stack:
+   addi     sp, sp, 124
+
+.trap_done:
+   lw       s1, 0(sp)
+   lw       s2, 4(sp)
+   lw       ra, 8(sp)
+   lw       sp, 12(sp)
    sret
 
 ##-------------------------------------------------------------------------
