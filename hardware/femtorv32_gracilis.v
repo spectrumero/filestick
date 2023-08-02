@@ -18,6 +18,8 @@
 //-----------------------------------------------------------------------------
 //
 // * Added ecall, sret, mscratch and sscratch CSRs
+// * Added ebreak and scause CSR
+// * Added some illegal instruction support
 // * Added define ENABLE_MULDIV to enable the multiply/divide instructions,
 // (with ENABLE_MULDIV not set, instruction set is RV32IC)
 //
@@ -87,6 +89,9 @@ module FemtoRV32(
    wire isSYSTEM  =  (instr[6:2] == 5'b11100); // rd <- CSR <- rs1/uimm5
 
    wire isALU = isALUimm | isALUreg;
+
+   wire isILLEGAL = !(isLoad | isALUimm | isAUIPC | isStore | isALUreg |
+                      isLUI | isBranch | isJALR | isJAL | isSYSTEM);
 
    /***************************************************************************/
    // The register file.
@@ -312,6 +317,7 @@ module FemtoRV32(
    // ----- add ecall/sret
    // Decoder for ecall
    wire ecall            = isSYSTEM & funct3Is[0] & (instr[31:20]==12'h000);
+   wire ebreak           = isSYSTEM & funct3Is[0] & (instr[31:20]==12'h001);
 
    // Decoder for sret opcode
    wire supervisor_return = isSYSTEM & funct3Is[0] & (instr[31:20]==12'h102);
@@ -329,6 +335,7 @@ module FemtoRV32(
    reg  [ADDR_WIDTH-1:0] sepc;    // Saved program counter.
    reg  [31:0]           sscratch; // Supervisor scratch reg
    reg  [ADDR_WIDTH-1:0] stvec;   // The address of the ecall handler.
+   reg  [3:0]            scause;  // supervisor trap cause
    //-----------------------
 
    always @(posedge clk) cycles <= cycles + 1;
@@ -346,6 +353,7 @@ module FemtoRV32(
    wire sel_stvec  =  (instr[31:20] == 12'h105);
    wire sel_sepc   =  (instr[31:20] == 12'h141);
    wire sel_sscratch =(instr[31:20] == 12'h140);
+   wire sel_scause =  (instr[31:20] == 12'h142);
    //---------------------
 
    // Read CSRs
@@ -360,7 +368,8 @@ module FemtoRV32(
      (sel_cyclesh ? cycles[63:32]          : 32'b0) |
      (sel_stvec   ? stvec                  : 32'b0) |
      (sel_sscratch? sscratch               : 32'b0) |
-     (sel_sepc    ? sepc                   : 32'b0);
+     (sel_sepc    ? sepc                   : 32'b0) |
+     (sel_scause  ? {28'b0, scause}        : 32'b0);
    /* verilator lint_on WIDTH */
 
    // Write CSRs: 5 bit unsigned immediate or content of RS1
@@ -580,13 +589,17 @@ module FemtoRV32(
 		 mcause <= 1;
 		 state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
               end 
-              else if(ecall) begin
+              else if(ecall | ebreak | isILLEGAL) begin
                  PC     <= stvec;
                  sepc   <= PC_new;
+                 scause <= ecall    ? 4'h8 :
+                           ebreak   ? 4'h3 :
+                           4'h2;
                  state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
               end else begin
 		 PC <= PC_new;
 		 if (interrupt_return) mcause <= 0;
+                 if (supervisor_return) scause <= 0;
 
 		 state <= next_cache_hit & ~next_unaligned_long
   		        ? (needToWait ? WAIT_ALU_OR_MEM_SKIP : WAIT_INSTR)
@@ -706,7 +719,7 @@ module decompressor(
       16'b010__?_?????_?????_10 : d = {           lwspImm,            x2, 3'b010,                 rwh, 7'b00000_11} ; // c.lwsp      -->  lw   rd, offset[7:2](x2)
       16'b100__0_?????_00000_10 : d = {  12'b000000000000,           rwh, 3'b000,                  x0, 7'b11001_11} ; // c.jr        -->  jalr x0, rs1, 0
       16'b100__0_?????_?????_10 : d = {        7'b0000000,      rwl,  x0, 3'b000,                 rwh, 7'b01100_11} ; // c.mv        -->  add  rd, x0, rs2
-   // 16'b100__1_00000_00000_10 : d = {                              25'b00000000_00010000_00000000_0, 7'b11100_11} ; // c.ebreak    -->  ebreak
+      16'b100__1_00000_00000_10 : d = {                              25'b00000000_00010000_00000000_0, 7'b11100_11} ; // c.ebreak    -->  ebreak
       16'b100__1_?????_00000_10 : d = {  12'b000000000000,           rwh, 3'b000,                  x1, 7'b11001_11} ; // c.jalr      -->  jalr x1, rs1, 0
       16'b100__1_?????_?????_10 : d = {        7'b0000000,      rwl, rwh, 3'b000,                 rwh, 7'b01100_11} ; // c.add       -->  add  rd, rd, rs2
       16'b110__?_?????_?????_10 : d = {     swspImm[11:5],      rwl,  x2, 3'b010,        swspImm[4:0], 7'b01000_11} ; // c.swsp      -->  sw   rs2, offset[7:2](x2)
