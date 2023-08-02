@@ -1,5 +1,3 @@
-#ifndef REGDUMP_H
-#define REGDUMP_H
 /*
 ;The MIT License
 ;
@@ -24,41 +22,23 @@
 ;THE SOFTWARE.
 */
 
-enum Registerfile {
-   REG_A0 = 0,
-   REG_A1,
-   REG_A2,
-   REG_A3,
-   REG_A4,
-   REG_A5,
-   REG_A6,
-   REG_A7,
-   REG_S0,
-   REG_S1,
-   REG_S2,
-   REG_S3,
-   REG_S4,
-   REG_S5,
-   REG_S6,
-   REG_S7,
-   REG_S8,
-   REG_S9,
-   REG_S10,
-   REG_S11,
-   REG_T0,
-   REG_T1,
-   REG_T2,
-   REG_T3,
-   REG_T4,
-   REG_T5,
-   REG_T6,
-   REG_GP,
-   REG_TP,
-   REG_RA,
-   REG_SP
-};
+#include <stdint.h>
 
-void dump_registers(uint32_t *registers);
-void dump_reg(char *regname, uint32_t regval);
+#include "console.h"
+#include "fd.h"
+#include "regdump.h"
 
-#endif
+void syscall_reglist(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
+                     uint32_t a5, uint32_t a6, uint32_t a7) {
+   uint32_t *stk = (uint32_t *)0xFEF0;
+   dump_reg("\r\nSYS", a7);
+   dump_reg("ra", *(stk+2));
+   dump_reg("a0", a0);
+   dump_reg("a1", a1);
+   dump_reg("a2", a2);
+   dump_reg("a3", a3);
+   dump_reg("a4", a4);
+   dump_reg("a5", a5);
+   dump_reg("a6", a6);
+   SYS_write(1, "\r\n", 2);
+}

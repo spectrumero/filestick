@@ -29,8 +29,6 @@
 #include "fd.h"
 #include "regdump.h"
 
-static void dump_reg(char *regname, uint32_t regval);
-
 void dump_registers(uint32_t *registers) {
    dump_reg("sp", registers[REG_SP]);
    dump_reg("ra", registers[REG_RA]);
@@ -39,7 +37,7 @@ void dump_registers(uint32_t *registers) {
    SYS_write(1, "\r\n", 2);
 }
 
-static void dump_reg(char *regname, uint32_t regval) {
+void dump_reg(char *regname, uint32_t regval) {
    SYS_write(1, regname, strlen(regname));
    SYS_write(1, ": ", 2);
 

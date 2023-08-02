@@ -26,9 +26,10 @@
 
 #include <unistd.h>
 
-#define MAX_ADDR     0x0FFFF
+#define MAX_ADDR     0x207FF
 
-int SYS_brk(void *addr);
+void set_min_brk(void *addr);
+void *SYS_brk(void *addr);
 
 #endif
 

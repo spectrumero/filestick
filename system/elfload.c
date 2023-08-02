@@ -31,6 +31,7 @@
 #include "console.h"
 #include "fd.h"
 #include "elfload.h"
+#include "brk.h"
 
 //-------------------------------------------------------------------
 // Loads the boot file from SPI flash. Returns the start address.
@@ -108,6 +109,9 @@ uint32_t elf_load(int fd, uint32_t offset) {
          SYS_lseek(fd, offset + phdr.p_offset, SEEK_SET);
          SYS_read(fd, (uint8_t *)phdr.p_paddr, phdr.p_filesz);
          SYS_lseek(fd, curpos, SEEK_SET);
+
+         // set the program break
+         set_min_brk((void *)(phdr.p_paddr + phdr.p_memsz));
       } 
    }
 

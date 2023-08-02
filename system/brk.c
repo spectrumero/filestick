@@ -26,11 +26,20 @@
 
 #include "brk.h"
 
+static void *program_brk = (void *)0x10000;
+static void *min_brk = (void *)0x10000;
+
+void set_min_brk(void *addr) {
+   min_brk = addr;
+}
+
 //--------------------------------------------------------------------------
 // Set the program break
 // TODO: effectively is a no-op at the moment
-int SYS_brk(void *addr) {
-   if(addr > (void *)MAX_ADDR) return -1;
-   return 0;
+void *SYS_brk(void *addr) {
+   if(addr > (void *)MAX_ADDR || addr < min_brk) return program_brk;
+
+   program_brk = addr;
+   return addr;   
 }
 
