@@ -44,7 +44,8 @@ super_trap:
    sw       s2, 4(sp)         # save s2
    sw       ra, 8(sp)
    csrr     s1, sscratch      # retrieve user stack ptr
-   sw       s1, 12(sp)        # save it on the stack
+   sw       s1, 12(sp)        # save it on the stack IMPORTANT: always store at 12(sp)
+                              # some syscalls check the user sp!
 
    la       ra, .trap_done
    csrr     s1, scause
@@ -52,7 +53,7 @@ super_trap:
    beq      s1, s2, syscall_handler
 
    # save all the registers
-   addi     sp, sp, -124
+   addi     sp, sp, -128
    sw       a0, 0(sp)
    sw       a1, 4(sp)
    sw       a2, 8(sp)
@@ -88,6 +89,8 @@ super_trap:
    sw       a0, 116(sp)
    lw       a0, 136(sp)       # user sp
    sw       a0, 120(sp)
+   csrr     a0, sepc
+   sw       a0, 124(sp)       # supervisor trap return address
 
    mv       a0, sp            # pass pointer to saved registers
    la       ra, .restore_stack
@@ -96,7 +99,7 @@ super_trap:
    beq      s1, s2, ebreak_handler
    call     illegal_handler
 .restore_stack:
-   addi     sp, sp, 124
+   addi     sp, sp, 128
 
 .trap_done:
    lw       s1, 0(sp)
@@ -114,25 +117,25 @@ syscall_handler:
    sw       a7, 8(sp)
 
    # debug
-   #addi     sp, sp, -48
-   #sw       a0, 0(sp)
-   #sw       a1, 4(sp)
-   #sw       a2, 8(sp)
-   #sw       a3, 12(sp)
-   #sw       a4, 16(sp)
-   #sw       a5, 20(sp)
-   #sw       a6, 24(sp)
-   #sw       a7, 28(sp)
-   #call     syscall_reglist
-   #lw       a0, 0(sp)
-   #lw       a1, 4(sp)
-   #lw       a2, 8(sp)
-   #lw       a3, 12(sp)
-   #lw       a4, 16(sp)
-   #lw       a5, 20(sp)
-   #lw       a6, 24(sp)
-   #lw       a7, 28(sp)
-   #addi     sp, sp, 48
+#   addi     sp, sp, -48
+#   sw       a0, 0(sp)
+#   sw       a1, 4(sp)
+#   sw       a2, 8(sp)
+#   sw       a3, 12(sp)
+#   sw       a4, 16(sp)
+#   sw       a5, 20(sp)
+#   sw       a6, 24(sp)
+#   sw       a7, 28(sp)
+#   call     syscall_reglist
+#   lw       a0, 0(sp)
+#   lw       a1, 4(sp)
+#   lw       a2, 8(sp)
+#   lw       a3, 12(sp)
+#   lw       a4, 16(sp)
+#   lw       a5, 20(sp)
+#   lw       a6, 24(sp)
+#   lw       a7, 28(sp)
+#   addi     sp, sp, 48
 
    addi     a7, a7, -SYSCALL_lowest
    bltz     a7, .invalid_syscall

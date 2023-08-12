@@ -55,7 +55,8 @@ enum Registerfile {
    REG_GP,
    REG_TP,
    REG_RA,
-   REG_SP
+   REG_SP,
+   REG_SEPC
 };
 
 void dump_registers(uint32_t *registers);

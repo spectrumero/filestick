@@ -34,6 +34,7 @@ void dump_registers(uint32_t *registers) {
    dump_reg("ra", registers[REG_RA]);
    dump_reg("gp", registers[REG_GP]);
    dump_reg("tp", registers[REG_TP]);
+   dump_reg("sepc", registers[REG_SEPC]);
    SYS_write(1, "\r\n", 2);
 }
 

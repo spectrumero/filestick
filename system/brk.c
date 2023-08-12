@@ -23,11 +23,15 @@
 */
 
 #include <unistd.h>
+#include <console.h>
 
 #include "brk.h"
 
+#define GP_SPACE     0x800
+
 static void *program_brk = (void *)0x10000;
 static void *min_brk = (void *)0x10000;
+static uint8_t **user_sp = (uint8_t **)0xFEFC;  // FIXME export linker symbol
 
 void set_min_brk(void *addr) {
    min_brk = addr;
@@ -35,9 +39,20 @@ void set_min_brk(void *addr) {
 
 //--------------------------------------------------------------------------
 // Set the program break
-// TODO: effectively is a no-op at the moment
 void *SYS_brk(void *addr) {
-   if(addr > (void *)MAX_ADDR || addr < min_brk) return program_brk;
+
+   // Space must be left for the global pointer, if used.
+   register void *gp asm("gp");
+   void *min_gp = gp + GP_SPACE;
+   if(min_brk < min_gp) min_brk = min_gp;
+   if(program_brk < min_brk) program_brk = min_brk;
+
+   // Maximum program break should always leave some space for the stack
+   void *max_brk = (*user_sp) - 256;
+
+   // Break request must be within a valid range: above the minimum,
+   // below the top of RAM and not within 256 bytes of user program SP.
+   if(addr > max_brk || addr < min_brk) return program_brk;
 
    program_brk = addr;
    return addr;   
