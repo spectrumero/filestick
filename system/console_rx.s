@@ -74,7 +74,7 @@ console_rx:
    sw    a2, 0(a1)      # store it in bufindex
 
    la    a0, 0x80000C   # FIXME
-   li    a3, 127
+   li    a3, 8          # backspace
    sw    a3, 0(a0)
    j     .cons_rx_done
 
@@ -85,6 +85,8 @@ console_rx:
    lw    a0, 12(a1)     # get current cons_rx_count
    addi  a0, a0, 1      # increment received count
    sw    a0, 12(a1)     # cons_rx_count
+   li    a0, '\n'       # echo CR
+   call  serial_putc
    j     .cons_rx_done
 
 .data
