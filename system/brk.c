@@ -33,6 +33,8 @@ static void *program_brk = (void *)0x10000;
 static void *min_brk = (void *)0x10000;
 static uint8_t **user_sp = (uint8_t **)0xFEFC;  // FIXME export linker symbol
 
+//--------------------------------------------------------------------------
+// Set when loading an ELF file from memory size information
 void set_min_brk(void *addr) {
    min_brk = addr;
 }
@@ -48,10 +50,10 @@ void *SYS_brk(void *addr) {
    if(program_brk < min_brk) program_brk = min_brk;
 
    // Maximum program break should always leave some space for the stack
-   void *max_brk = (*user_sp) - 256;
+   void *max_brk = (*user_sp) - 1024;
 
-   // Break request must be within a valid range: above the minimum,
-   // below the top of RAM and not within 256 bytes of user program SP.
+   // Break request must be within a valid range which is: above the GP
+   // or min brk, and sufficiently below the current user stack pointer.
    if(addr > max_brk || addr < min_brk) return program_brk;
 
    program_brk = addr;
