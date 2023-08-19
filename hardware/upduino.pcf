@@ -23,8 +23,8 @@ set_io flash_miso 17
 # Normal GPIO pins, left side
 set_io -nowarn uart_tx 23
 set_io -nowarn uart_rx 25
-set_io -nowarn gpio_26 26
-set_io -nowarn gpio_27 27
+set_io -nowarn econet_clk 26
+set_io -nowarn econet_rx 27
 set_io -nowarn gpio_32 32
 set_io -nowarn gpio_35 35
 set_io -nowarn gpio_31 31

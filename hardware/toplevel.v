@@ -1,5 +1,8 @@
 module toplevel (
    input wire     input_clk,
+
+   input wire     econet_clk,
+   input wire     econet_rx,
    
    output wire    led_red,
    output wire    led_green,
@@ -50,6 +53,9 @@ wire  uart_state_sel =  mem_addr == 24'h800010;
 wire  flashrom_spi_sel = mem_addr == 24'h800014;
 wire  flashrom_spi_ss_rst = mem_addr == 24'h800018;
 `endif
+wire  econet_rx_buf_sel = mem_addr[23:16] == 8'h81;
+wire  econet_rx_fs_sel  = mem_addr == 24'h800030;
+wire  econet_rx_fe_sel  = mem_addr == 24'h800034;
 
 // CPU memory read mux
 assign mem_rdata =
@@ -63,6 +69,9 @@ assign mem_rdata =
    uart_sel          ? uart_rdata   :
    uart_state_sel    ? uart_rstate  :
    timer_ctl_sel     ? { 31'b0, timer_intr } :
+   econet_rx_buf_sel ? econet_rx_data        :
+   econet_rx_fs_sel  ? econet_rx_frame_start :
+   econet_rx_fe_sel  ? econet_rx_frame_end   :
    32'hAAAAAAAA;
 
 FemtoRV32 #(
@@ -100,6 +109,23 @@ ice40up5k_spram spram (
    .wdata(mem_wdata),
    .rdata(spram_rdata)
 );
+
+wire [31:0] econet_rx_data;
+wire [31:0] econet_rx_frame_start;
+wire [31:0] econet_rx_frame_end;
+wire econet_rx_valid;
+buffered_econet econet_receiver(
+   .reset(reset),
+   .econet_clk(econet_clk),
+   .econet_rx(econet_rx),
+   .sys_clk(clk),
+   .sys_rd(cpu_rd),
+   .sys_select(econet_rx_buf_sel),
+   .sys_addr(mem_addr[9:0]),
+   .sys_data(econet_rx_data),
+   .sys_frame_start(econet_rx_frame_start),
+   .sys_frame_end(econet_rx_frame_end),
+   .sys_frame_valid(econet_rx_valid));
 
 `ifdef USE_SLOWROM
 wire [31:0] slowrom_rdata;
@@ -278,7 +304,7 @@ always @(posedge clk)
    end
 
 // ------- Interrupts ------------
-assign int = timer_intr | uart_valid;
+assign int = timer_intr | uart_valid | econet_rx_valid;
 
 endmodule
 
