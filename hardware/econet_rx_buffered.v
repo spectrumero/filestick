@@ -23,9 +23,9 @@ module buffered_econet
    reg [31:0]           sys_data;
    reg                  sys_frame_valid;
 
-   reg [ECO_CNTWIDTH:0] econet_ctr;
-   reg [ECO_CNTWIDTH:0] frame_start;
-   reg [ECO_CNTWIDTH:0] frame_end;
+   reg [ECO_CNTWIDTH-1:0] econet_ctr;
+   reg [ECO_CNTWIDTH-1:0] frame_start;
+   reg [ECO_CNTWIDTH-1:0] frame_end;
 
    assign sys_frame_start  = 32'b0 | frame_start;
    assign sys_frame_end    = 32'b0 | frame_end;
@@ -64,10 +64,10 @@ module buffered_econet
    always @(posedge econet_clk) begin
       if(rx_byte_ready) begin
          case(econet_ctr & 2'b11) 
-            0:       econet_buf[econet_ctr[ECO_CNTWIDTH:2]][7:0] <= rx_byte;
-            1:       econet_buf[econet_ctr[ECO_CNTWIDTH:2]][15:8] <= rx_byte;
-            2:       econet_buf[econet_ctr[ECO_CNTWIDTH:2]][23:16] <= rx_byte;
-            3:       econet_buf[econet_ctr[ECO_CNTWIDTH:2]][31:24] <= rx_byte;
+            0:       econet_buf[econet_ctr[ECO_CNTWIDTH-1:2]][7:0] <= rx_byte;
+            1:       econet_buf[econet_ctr[ECO_CNTWIDTH-1:2]][15:8] <= rx_byte;
+            2:       econet_buf[econet_ctr[ECO_CNTWIDTH-1:2]][23:16] <= rx_byte;
+            3:       econet_buf[econet_ctr[ECO_CNTWIDTH-1:2]][31:24] <= rx_byte;
          endcase
 
          econet_ctr <= econet_ctr + 1;

@@ -121,7 +121,7 @@ buffered_econet econet_receiver(
    .sys_clk(clk),
    .sys_rd(cpu_rd),
    .sys_select(econet_rx_buf_sel),
-   .sys_addr(mem_addr[9:0]),
+   .sys_addr(mem_addr[9:2]),
    .sys_data(econet_rx_data),
    .sys_frame_start(econet_rx_frame_start),
    .sys_frame_end(econet_rx_frame_end),
@@ -304,7 +304,7 @@ always @(posedge clk)
    end
 
 // ------- Interrupts ------------
-assign int = timer_intr | uart_valid | econet_rx_valid;
+assign int = timer_intr | uart_valid; // | econet_rx_valid;
 
 endmodule
 
