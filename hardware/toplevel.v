@@ -3,6 +3,9 @@ module toplevel (
 
    input wire     econet_clk,
    input wire     econet_rx,
+   output wire    econet_tx_p,
+   output wire    econet_tx_n,
+   output wire    econet_tx_enable,
    
    output wire    led_red,
    output wire    led_green,
@@ -56,6 +59,10 @@ wire  flashrom_spi_ss_rst = mem_addr == 24'h800018;
 wire  econet_rx_buf_sel = mem_addr[23:16] == 8'h81;
 wire  econet_rx_fs_sel  = mem_addr == 24'h800030;
 wire  econet_rx_fe_sel  = mem_addr == 24'h800034;
+wire  econet_tx_buf_sel = mem_addr[23:16] == 8'h82;
+wire  econet_tx_sel_frame_start = mem_addr == 24'h800040;
+wire  econet_tx_sel_frame_end   = mem_addr == 24'h800044;
+wire  econet_tx_state_sel = mem_addr == 24'h800048;
 
 // CPU memory read mux
 assign mem_rdata =
@@ -72,6 +79,7 @@ assign mem_rdata =
    econet_rx_buf_sel ? econet_rx_data        :
    econet_rx_fs_sel  ? econet_rx_frame_start :
    econet_rx_fe_sel  ? econet_rx_frame_end   :
+   econet_tx_state_sel ? {30'b0, econet_tx_enable, econet_tx_busy } :
    32'hAAAAAAAA;
 
 FemtoRV32 #(
@@ -126,6 +134,28 @@ buffered_econet econet_receiver(
    .sys_frame_start(econet_rx_frame_start),
    .sys_frame_end(econet_rx_frame_end),
    .sys_frame_valid(econet_rx_valid));
+
+wire econet_tx_data;
+wire econet_tx_busy;
+assign econet_tx_p = econet_tx_data;
+assign econet_tx_n = ~econet_tx_data;
+
+econet_tx_buffered econet_transmitter(
+   .reset(reset),
+   .econet_clk(econet_clk),
+   .econet_data(econet_tx_data),
+   .transmitting(econet_tx_enable),
+   .busy(econet_tx_busy),
+   .receiving(1'b0),
+   
+   .sys_clk(clk),
+   .sys_we(cpu_we),
+   .sys_select(econet_tx_buf_sel),
+   .sys_addr(mem_addr[9:2]),
+   .sys_data(mem_wdata),
+   .sys_select_frame_start(econet_tx_sel_frame_start),
+   .sys_select_buffer_end(econet_tx_sel_frame_end));
+
 
 `ifdef USE_SLOWROM
 wire [31:0] slowrom_rdata;

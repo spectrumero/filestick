@@ -25,9 +25,9 @@ set_io -nowarn uart_tx 23
 set_io -nowarn uart_rx 25
 set_io -nowarn econet_clk 26
 set_io -nowarn econet_rx 27
-set_io -nowarn gpio_32 32
-set_io -nowarn gpio_35 35
-set_io -nowarn gpio_31 31
+set_io -nowarn econet_tx_p 32
+set_io -nowarn econet_tx_n 35
+set_io -nowarn econet_tx_enable 31
 set_io -nowarn gpio_37 37
 set_io -nowarn gpio_34 34
 set_io -nowarn gpio_43 43
