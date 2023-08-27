@@ -25,6 +25,7 @@ module econet_tx_buffered
    parameter STATE_TX         = 3'b011;
    parameter STATE_FCS_1      = 3'b100;
    parameter STATE_FCS_2      = 3'b101;
+   parameter STATE_TX_END     = 3'b111;
 
 `ifdef BENCH
    initial begin
@@ -114,6 +115,10 @@ module econet_tx_buffered
                if(increment_ctr) state <= STATE_FCS_2;
 
             STATE_FCS_2: begin
+               if(increment_ctr) state <= STATE_TX_END;
+            end
+
+            STATE_TX_END: begin
                end_frame <= 1;
                if(increment_ctr) state <= STATE_IDLE;
             end
