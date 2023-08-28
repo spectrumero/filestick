@@ -128,6 +128,7 @@ buffered_econet econet_receiver(
    .reset(reset),
    .econet_clk(econet_clk),
    .econet_rx(econet_rx),
+   .inhibit(econet_transmitting),
    .sys_clk(clk),
    .sys_rd(cpu_rd),
    .sys_select(econet_rx_buf_sel),

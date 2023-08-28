@@ -4,6 +4,7 @@ module buffered_econet
 
    input          econet_clk,
    input          econet_rx,
+   input          inhibit,
 
    input          sys_clk,
    input          sys_rd,
@@ -83,6 +84,7 @@ module buffered_econet
       .reset(reset),
       .econet_clk(econet_clk),
       .rx(econet_rx),
+      .inhibit(inhibit),
 
       .rx_byte(rx_byte),
       .rx_fcs(rx_fcs),

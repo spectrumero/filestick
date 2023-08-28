@@ -4,6 +4,7 @@ module econet
    input reset,
    input econet_clk,
    input rx,
+   input inhibit,
 
    output [7:0]   rx_byte,
    output [15:0]  rx_fcs,
@@ -32,6 +33,7 @@ module econet
       .reset(reset),
       .econet_clk(econet_clk),
       .econet_data(rx),
+      .inhibit(inhibit),
       .data_out(rx_byte),
       .data_strobe(rx_byte_ready),
       .frame_start(rx_frame_start),

@@ -4,6 +4,7 @@ module econet_rx
    input reset,
    input econet_clk,
    input econet_data,
+   input inhibit,
 
    output [1:0] phy_state,
    output [7:0] data_out,
@@ -33,7 +34,7 @@ reg      end_sync;
 reg      frame_start;         // tell stuff outside a sync has been received
 reg      frame_end;           // and ended
 
-assign   receiving = !econet_data || (phy_state != STATE_PHY_IDLE);
+assign   receiving = (!inhibit & !econet_data) || (phy_state != STATE_PHY_IDLE);
 
 // Econet clock: transitions are on the negedge,
 // sampling is done on the posedge.
@@ -61,7 +62,7 @@ always @(posedge econet_clk, posedge reset) begin
 
             // econet idles at 1, so the moment we detect a zero we know
             // someone is transmitting.
-            if(econet_data == 1'b0) begin
+            if(econet_data == 1'b0 && !inhibit) begin
                phy_state <= STATE_PHY_RX_SYNC;
             end
          end
