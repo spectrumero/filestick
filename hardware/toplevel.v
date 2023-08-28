@@ -79,7 +79,7 @@ assign mem_rdata =
    econet_rx_buf_sel ? econet_rx_data        :
    econet_rx_fs_sel  ? econet_rx_frame_start :
    econet_rx_fe_sel  ? econet_rx_frame_end   :
-   econet_tx_state_sel ? {30'b0, econet_tx_enable, econet_tx_busy } :
+   econet_tx_state_sel ? {30'b0, econet_transmitting, econet_tx_busy } :
    32'hAAAAAAAA;
 
 FemtoRV32 #(
@@ -139,12 +139,14 @@ wire econet_tx_data;
 wire econet_tx_busy;
 assign econet_tx_p = econet_tx_data;
 assign econet_tx_n = ~econet_tx_data;
+wire econet_transmitting;
+assign econet_tx_enable = ~econet_transmitting;
 
 econet_tx_buffered econet_transmitter(
    .reset(reset),
    .econet_clk(econet_clk),
    .econet_data(econet_tx_data),
-   .transmitting(econet_tx_enable),
+   .transmitting(econet_transmitting),
    .busy(econet_tx_busy),
    .receiving(1'b0),
    

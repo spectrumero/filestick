@@ -35,7 +35,7 @@ assign         econet_data = ~data_out;
    end
 `endif
 
-always @(posedge econet_clk, posedge reset) begin
+always @(negedge econet_clk, posedge reset) begin
    if(reset)
       txbuf <= 0;
    else if(request_byte)
@@ -45,7 +45,7 @@ end
 wire request_byte = (bitcount == 7 && state != STATE_END_SYNC);
 wire output_bit   = (txbuf >> bitcount) & 1;
 
-always @(posedge econet_clk, posedge reset) begin
+always @(negedge econet_clk, posedge reset) begin
    if(reset) begin
       state <= STATE_IDLE;
       data_out <= 1;
@@ -100,7 +100,7 @@ always @(posedge econet_clk, posedge reset) begin
    end
 
    reg transmitting;
-   always @(posedge econet_clk)
+   always @(negedge econet_clk)
       transmitting <= state != STATE_IDLE;
 
 endmodule

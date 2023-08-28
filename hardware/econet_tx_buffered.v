@@ -69,7 +69,7 @@ module econet_tx_buffered
    end
 
    // done this way to make sure nextpnr infers block ram
-   always @(posedge econet_clk) begin
+   always @(negedge econet_clk) begin
       buf_reg <= econet_buf[econet_ctr[ECO_CNTWIDTH-1:2]];
    end
    wire [7:0]  econet_byte = econet_ctr[1:0] == 2'b00 ? buf_reg[7:0]    :
@@ -77,7 +77,7 @@ module econet_tx_buffered
                              econet_ctr[1:0] == 2'b10 ? buf_reg[23:16]  :
                                                         buf_reg[31:24];
 
-   always @(posedge econet_clk, posedge reset) begin
+   always @(negedge econet_clk, posedge reset) begin
       if(reset) begin
          state <= STATE_IDLE;
          start_frame <= 0;
