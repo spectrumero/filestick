@@ -9,7 +9,8 @@ module econet
    output [15:0]  rx_fcs,
    output         rx_byte_ready,
    output         rx_frame_start,
-   output         rx_frame_end
+   output         rx_frame_end,
+   output         receiving
 );
 
    wire rx_byte_ready;
@@ -34,7 +35,8 @@ module econet
       .data_out(rx_byte),
       .data_strobe(rx_byte_ready),
       .frame_start(rx_frame_start),
-      .frame_end(rx_frame_end)
+      .frame_end(rx_frame_end),
+      .receiving(receiving)
    );
 
    fcs econet_fcs(

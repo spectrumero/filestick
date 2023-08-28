@@ -6,6 +6,7 @@ module toplevel (
    output wire    econet_tx_p,
    output wire    econet_tx_n,
    output wire    econet_tx_enable,
+   output wire    econet_receiving, // debug
    
    output wire    led_red,
    output wire    led_green,
@@ -122,6 +123,7 @@ wire [31:0] econet_rx_data;
 wire [31:0] econet_rx_frame_start;
 wire [31:0] econet_rx_frame_end;
 wire econet_rx_valid;
+wire econet_receiving;
 buffered_econet econet_receiver(
    .reset(reset),
    .econet_clk(econet_clk),
@@ -133,7 +135,8 @@ buffered_econet econet_receiver(
    .sys_data(econet_rx_data),
    .sys_frame_start(econet_rx_frame_start),
    .sys_frame_end(econet_rx_frame_end),
-   .sys_frame_valid(econet_rx_valid));
+   .sys_frame_valid(econet_rx_valid),
+   .receiving(econet_receiving));
 
 wire econet_tx_data;
 wire econet_tx_busy;
@@ -148,7 +151,7 @@ econet_tx_buffered econet_transmitter(
    .econet_data(econet_tx_data),
    .transmitting(econet_transmitting),
    .busy(econet_tx_busy),
-   .receiving(1'b0),
+   .receiving(econet_receiving),
    
    .sys_clk(clk),
    .sys_we(cpu_we),

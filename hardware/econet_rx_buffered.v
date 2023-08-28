@@ -12,7 +12,8 @@ module buffered_econet
    output [31:0]  sys_data,
    output [31:0]  sys_frame_start,
    output [31:0]  sys_frame_end,
-   output         sys_frame_valid
+   output         sys_frame_valid,
+   output         receiving
 );
 
    parameter      ECO_BUFSZ = 512;
@@ -87,6 +88,8 @@ module buffered_econet
       .rx_fcs(rx_fcs),
       .rx_byte_ready(rx_byte_ready),
       .rx_frame_start(rx_frame_start),
-      .rx_frame_end(rx_frame_end));
+      .rx_frame_end(rx_frame_end),
+   
+      .receiving(receiving));
 
 endmodule

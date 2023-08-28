@@ -28,7 +28,7 @@ set_io -nowarn econet_rx 27
 set_io -nowarn econet_tx_p 32
 set_io -nowarn econet_tx_n 35
 set_io -nowarn econet_tx_enable 31
-set_io -nowarn gpio_37 37
+set_io -nowarn econet_receiving 37
 set_io -nowarn gpio_34 34
 set_io -nowarn gpio_43 43
 set_io -nowarn gpio_36 36

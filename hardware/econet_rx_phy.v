@@ -9,7 +9,8 @@ module econet_rx
    output [7:0] data_out,
    output       data_strobe,
    output       frame_start,
-   output       frame_end
+   output       frame_end,
+   output       receiving
 );
 
 // ADLC start/end sync pattern
@@ -31,6 +32,8 @@ reg      data_strobe;
 reg      end_sync;
 reg      frame_start;         // tell stuff outside a sync has been received
 reg      frame_end;           // and ended
+
+assign   receiving = !econet_data || (phy_state != STATE_PHY_IDLE);
 
 // Econet clock: transitions are on the negedge,
 // sampling is done on the posedge.
