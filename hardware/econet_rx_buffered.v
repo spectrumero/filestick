@@ -30,9 +30,9 @@ module buffered_econet
    parameter      REG_BYTE_COUNT       = 2;     // 0x08
    parameter      REG_ADDRESS          = 3;     // 0x0C
    parameter      REG_REPLY_ADDRESS    = 4;     // 0x10
-   parameter      REG_OUR_ADDRESS      = 5;     // 0x14
-   parameter      REG_STATUS           = 6;     // 0x18
-
+   parameter      REG_SCOUT_DATA       = 5;     // 0x14
+   parameter      REG_OUR_ADDRESS      = 6;     // 0x18
+   parameter      REG_STATUS           = 7;     // 0x1C
 
    parameter      ECO_BUFSZ = 512;
    parameter      ECO_CNTWIDTH = 9;
@@ -46,7 +46,7 @@ module buffered_econet
    reg [ECO_CNTWIDTH-1:0] econet_ptr;
    reg [ECO_CNTWIDTH-1:0] econet_ctr;
    reg [ECO_CNTWIDTH-1:0] frame_start;
-   reg [7:0]            frame_address[4];
+   reg [7:0]            frame_address[6];
    reg                  frame_state;
 
    // These are set when a frame with a valid FCS for our econet address
@@ -57,6 +57,7 @@ module buffered_econet
    reg [ECO_CNTWIDTH-1:0]  valid_end;
    reg [ECO_CNTWIDTH-1:0]  valid_cnt;
    reg [31:0]              valid_address;
+   reg [15:0]              valid_scout;
 
    parameter      FRAME_STATE_IDLE = 0;
    parameter      FRAME_STATE_RX   = 1;
@@ -104,7 +105,7 @@ module buffered_econet
                end
 
                FRAME_STATE_RX: begin
-                  if(econet_ctr < 4) frame_address[econet_ctr] <= rx_byte;
+                  if(econet_ctr < 6) frame_address[econet_ctr] <= rx_byte;
                end
          endcase
       end
@@ -126,6 +127,8 @@ module buffered_econet
             valid_address[15:8]  <= frame_address[1];
             valid_address[23:16] <= frame_address[2];
             valid_address[31:24] <= frame_address[3];
+            valid_scout[15:8]    <= frame_address[4]; // scout flags
+            valid_scout[7:0]     <= frame_address[5]; // scout port
             sys_frame_valid <= 1;
          end
    end
@@ -163,6 +166,7 @@ module buffered_econet
       sys_reg_addr == REG_STATUS          ? { 30'b0, receiving, sys_frame_valid } :
       sys_reg_addr == REG_OUR_ADDRESS     ? { 16'b0, econet_address } :
       sys_reg_addr == REG_REPLY_ADDRESS   ? { valid_address[15:8], valid_address[7:0], valid_address[31:24], valid_address[23:16] } :
+      sys_reg_addr == REG_SCOUT_DATA      ? { 16'b0, valid_scout } :
       32'h55555555;
 
    always @(posedge sys_clk) begin
