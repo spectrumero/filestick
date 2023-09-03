@@ -57,13 +57,14 @@ wire  uart_state_sel =  mem_addr == 24'h800010;
 wire  flashrom_spi_sel = mem_addr == 24'h800014;
 wire  flashrom_spi_ss_rst = mem_addr == 24'h800018;
 `endif
-wire  econet_rx_buf_sel = mem_addr[23:16] == 8'h81;
-wire  econet_rx_fs_sel  = mem_addr == 24'h800030;
-wire  econet_rx_fe_sel  = mem_addr == 24'h800034;
-wire  econet_tx_buf_sel = mem_addr[23:16] == 8'h82;
-wire  econet_tx_sel_frame_start = mem_addr == 24'h800040;
-wire  econet_tx_sel_frame_end   = mem_addr == 24'h800044;
-wire  econet_tx_state_sel = mem_addr == 24'h800048;
+
+// Econet selectors
+wire  econet_rx_buf_sel          = mem_addr[23:16] == 8'h81;
+wire  econet_rx_reg_sel          = mem_addr[23:8]  == 16'h8001;
+wire  econet_tx_buf_sel          = mem_addr[23:16] == 8'h82;
+wire  econet_tx_sel_frame_start  = mem_addr == 24'h800200;
+wire  econet_tx_sel_frame_end    = mem_addr == 24'h800204;
+wire  econet_tx_state_sel        = mem_addr == 24'h800208;
 
 // CPU memory read mux
 assign mem_rdata =
@@ -78,8 +79,7 @@ assign mem_rdata =
    uart_state_sel    ? uart_rstate  :
    timer_ctl_sel     ? { 31'b0, timer_intr } :
    econet_rx_buf_sel ? econet_rx_data        :
-   econet_rx_fs_sel  ? econet_rx_frame_start :
-   econet_rx_fe_sel  ? econet_rx_frame_end   :
+   econet_rx_reg_sel ? econet_rx_data        :
    econet_tx_state_sel ? {30'b0, econet_transmitting, econet_tx_busy } :
    32'hAAAAAAAA;
 
@@ -120,8 +120,6 @@ ice40up5k_spram spram (
 );
 
 wire [31:0] econet_rx_data;
-wire [31:0] econet_rx_frame_start;
-wire [31:0] econet_rx_frame_end;
 wire econet_rx_valid;
 wire econet_receiving;
 buffered_econet econet_receiver(
@@ -129,13 +127,15 @@ buffered_econet econet_receiver(
    .econet_clk(econet_clk),
    .econet_rx(econet_rx),
    .inhibit(econet_transmitting),
+
    .sys_clk(clk),
    .sys_rd(cpu_rd),
-   .sys_select(econet_rx_buf_sel),
+   .sys_wr(cpu_we),
+   .sys_buf_select(econet_rx_buf_sel),
+   .sys_reg_select(econet_rx_reg_sel),
    .sys_addr(mem_addr[9:2]),
-   .sys_data(econet_rx_data),
-   .sys_frame_start(econet_rx_frame_start),
-   .sys_frame_end(econet_rx_frame_end),
+   .sys_rdata(econet_rx_data),
+   .sys_wdata(mem_wdata),
    .sys_frame_valid(econet_rx_valid),
    .receiving(econet_receiving));
 
