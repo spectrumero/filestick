@@ -35,9 +35,12 @@ isr_trap:
 
    la       ra, .isr_exit     # return here
    la       a0, device_base
+   lw       a1, 0x11c(a0)     # econet receive status offset
+   andi     a1, a1, 1         # frame valid waiting bit
+   bnez     a1, econet_rx
    lw       a1, 16(a0)        # console uart state
    andi     a1, a1, 1         # uart_valid bit
-   bnez     a0, console_rx 
+   bnez     a1, console_rx 
 
    lw       a0, 8(a1)         # timer state
    bnez     a0, timer_done 

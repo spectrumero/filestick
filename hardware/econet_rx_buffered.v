@@ -80,13 +80,18 @@ module buffered_econet
       frame_address[1] = 0;
       frame_address[2] = 0;
       frame_address[3] = 0;
+      frame_address[4] = 0;
+      frame_address[5] = 0;
    end
 
    wire [31:0] fr_address;
+   wire [15:0] sc_data;
    assign fr_address[7:0] = frame_address[0];
    assign fr_address[15:8] = frame_address[1];
    assign fr_address[23:16] = frame_address[2];
    assign fr_address[31:24] = frame_address[3];
+   assign sc_data[15:8] = frame_address[4];
+   assign sc_data[7:0]  = frame_address[5];
 `endif
 
    always @(posedge econet_clk) begin
@@ -113,8 +118,8 @@ module buffered_econet
 
    // register select acts as an async reset for the frame_valid flag (which is intended to be used to trigger
    // an interrupt)
-   always @(posedge econet_clk, posedge sys_reg_select) begin
-      if(sys_reg_select)
+   always @(posedge econet_clk, posedge valid_rst) begin
+      if(valid_rst)
          sys_frame_valid <= 0;
       else
          // Frame for our address received and is valid
@@ -129,7 +134,7 @@ module buffered_econet
             valid_address[31:24] <= frame_address[3];
             valid_scout[15:8]    <= frame_address[4]; // scout flags
             valid_scout[7:0]     <= frame_address[5]; // scout port
-            sys_frame_valid <= 1;
+            sys_frame_valid      <= 1;
          end
    end
          
@@ -163,10 +168,10 @@ module buffered_econet
       sys_reg_addr == REG_END_PTR         ? 32'b0 | valid_end :
       sys_reg_addr == REG_BYTE_COUNT      ? 32'b0 | valid_cnt :
       sys_reg_addr == REG_ADDRESS         ? 32'b0 | valid_address :
-      sys_reg_addr == REG_STATUS          ? { 30'b0, receiving, sys_frame_valid } :
       sys_reg_addr == REG_OUR_ADDRESS     ? { 16'b0, econet_address } :
       sys_reg_addr == REG_REPLY_ADDRESS   ? { valid_address[15:8], valid_address[7:0], valid_address[31:24], valid_address[23:16] } :
       sys_reg_addr == REG_SCOUT_DATA      ? { 16'b0, valid_scout } :
+      sys_reg_addr == REG_STATUS          ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
       32'h55555555;
 
    always @(posedge sys_clk) begin
@@ -177,6 +182,81 @@ module buffered_econet
          end
       end
    end
+
+   // Resets the 'valid' flag, this must be done with a delay so that
+   // the CPU can actually read it, as the action of reading the RX
+   // registers is what causes the 'valid' flag to get reset. This flag
+   // is used to generate the data received interrupt.
+   reg [1:0] valid_rst_state;
+   reg valid_rst;
+   always @(posedge sys_clk, posedge reset) begin
+      if(reset) begin
+         valid_rst <= 0;
+         valid_rst_state <= 0;
+      end
+      else begin
+         case(valid_rst_state)
+            0: 
+               if(sys_reg_select & sys_rd)
+                  valid_rst_state <= 1;
+            1: valid_rst_state <= 2;
+            2: begin
+               valid_rst <= 1;
+               valid_rst_state <= 3;
+            end
+            3: begin
+               valid_rst <= 0;
+               valid_rst_state <= 0;
+            end
+         endcase
+      end
+   end
+
+   // Measure the econet clock period
+   reg [15:0] period_cnt;
+   reg [15:0] period;
+   reg [1:0]  period_cnt_state;
+   always @(posedge sys_clk, posedge reset) begin
+      if(reset) begin
+         period_cnt <= 0;
+         period_cnt_state <= 0;
+         period <= 0;
+      end
+      else begin
+         case(period_cnt_state)
+            0: begin
+               if(econet_clk) period_cnt_state <= 1;
+               period_cnt <= period_cnt + 1;
+            end
+            1: begin
+               if(!econet_clk) period_cnt_state <= 2;
+               period_cnt <= period_cnt + 1;
+            end
+            2: begin
+               if(econet_clk) begin
+                  period_cnt_state <= 3;
+                  period <= period_cnt;
+               end
+               period_cnt <= period_cnt + 1;
+            end
+            3: begin
+               period_cnt_state <= 0;
+               period_cnt <= 0;
+            end
+         endcase
+      end
+   end
+
+   // Set the clock detected flag
+   reg clk_detected;
+   wire clk_det = period_cnt_state == 3;
+   always @(posedge sys_clk, posedge clk_det) begin
+      if(clk_det)
+         clk_detected <= 1;
+      else
+         if(period_cnt == 16'hFFFF) clk_detected <= 0;
+   end
+         
 
    econet   econet_receiver(
       .reset(reset),
