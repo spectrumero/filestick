@@ -40,7 +40,8 @@ typedef struct _FDfunction {
    ssize_t (*fd_write)(int fd, const void *ptr, size_t count);
    off_t   (*fd_lseek)(int fd, off_t offset, int whence);
    int     (*fd_fstat)(int fd, struct stat *statbuf);
-   int (*fd_close)(int fd);
+   int     (*fd_close)(int fd);
+   int     (*fd_ioctl)(int fd, unsigned long request, void *ptr);
 } FDfunction;
 
 typedef struct _FD {
@@ -60,6 +61,7 @@ ssize_t SYS_write(int fd, const void *buf, size_t count);
 ssize_t SYS_read (int fd, void *buf, size_t count);
 int     SYS_fstat(int fd, struct stat *statbuf);
 off_t   SYS_lseek(int fd, off_t offset, int whence);
+int     SYS_ioctl(int fd, unsigned long request, void *ptr);
 int     SYS_close(int fd);
 int     SYS_open(const char *pathname, int flags, mode_t mode);
 

@@ -17,7 +17,7 @@ syscall_table:
 .byte 0           # 26
 .byte 0           # 27
 .byte 0           # 28
-.byte 0           # 29
+.byte 10          # 29 SYS_ioctl
 .byte 0           # 30
 .byte 0           # 31
 .byte 8           # 32 console_hexdump  -- (nonstd)
@@ -117,5 +117,6 @@ syscall_address:
 .word SYS_exit    # 7
 .word console_hexdump # 8
 .word console_hexword # 9
+.word SYS_ioctl   # 10
 
 

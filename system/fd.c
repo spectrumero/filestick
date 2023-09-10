@@ -81,6 +81,20 @@ ssize_t SYS_read(int fd, void *buf, size_t count) {
 }
 
 //------------------------------------------------------------------------
+// ioctl
+int SYS_ioctl(int fd, unsigned long request, void *ptr) {
+   if(fd > MAX_FILE_DESCRIPTORS || fd < 0)
+      return -EBADF;
+
+   FD fd_ent = fdtable[fd];
+   if(fd_ent.flags && fd_ent.fdfunc->fd_ioctl != NULL) {
+      return fd_ent.fdfunc->fd_ioctl(fd, request, ptr);
+   }
+
+   return -EBADF;
+}
+
+//------------------------------------------------------------------------
 // Stat an fd
 //
 int SYS_fstat(int fd, struct stat *statbuf) {

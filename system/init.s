@@ -45,6 +45,8 @@ init:
    la    t0, super_trap          # initialize the supervisor (ecall) trap
    csrw  stvec, t0
 
+   call  econet_init             # initialize econet
+
    li    a0, 1
    la    a1, initstr
    li    a2, initstr_sz
