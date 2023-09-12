@@ -27,7 +27,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define SET_PORT     0x01000000
+// ioctl request values
+#define SET_ADDR           0x01000000
+#define SET_RECV_PORT      0x02000000
+#define SET_SEND_ADDR      0x03000000
+#define SET_SEND_PORT      0x04000000
 
 void econet_init();
 int econet_open(const char *devname, int flags, mode_t mode, FD *fd);

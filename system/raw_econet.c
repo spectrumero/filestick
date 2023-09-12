@@ -38,6 +38,7 @@ extern volatile size_t econet_buf_len;
 extern volatile uint8_t econet_port_list[256];
 
 uint8_t fd_portmap[MAX_FILE_DESCRIPTORS];
+uint16_t econet_address;
 
 static FDfunction econet_func = {
    .fd_read = econet_read,
@@ -48,10 +49,15 @@ static FDfunction econet_func = {
    .fd_close = econet_close
 };
 
+static uint32_t *addr_set = (uint32_t *)0x800114;
+
+// Internal functions
 static int econet_set_port(int fd, uint8_t port);
+static int econet_set_addr(uint16_t netstation);
 
 void econet_init() {
    memset(fd_portmap, 0, sizeof(fd_portmap));
+   econet_address = 0;
 }
 
 int econet_open(const char *devname, int flags, mode_t mode, FD *fd) {
@@ -63,9 +69,10 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
    uint32_t req_id = request & 0xFF000000;
 
    switch(req_id) {
-      case SET_PORT:
+      case SET_ADDR:
+         return econet_set_addr((uint16_t)(request & 0xFFFF));
+      case SET_RECV_PORT:
          return econet_set_port(fd, request & 0xFF);
-         break;
       default:
          kerr_puts("econet_ioctl: bad request");
          return -EINVAL;
@@ -117,4 +124,10 @@ static int econet_set_port(int fd, uint8_t port) {
    return 0;
 }
 
+// netstation is MSB=network LSB=station
+static int econet_set_addr(uint16_t netstation) {
+   econet_address = netstation;
+   *addr_set = netstation;       // sets address in receiver hardware
+   return 0;
+}
 
