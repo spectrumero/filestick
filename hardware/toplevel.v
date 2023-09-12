@@ -340,7 +340,7 @@ always @(posedge clk)
    end
 
 // ------- Interrupts ------------
-assign int = timer_intr | uart_valid; // | econet_rx_valid;
+assign int = timer_intr | uart_valid | econet_rx_valid;
 
 endmodule
 
