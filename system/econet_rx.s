@@ -90,8 +90,10 @@ econet_rx:
    sb       s3, 0(a2)
    sw       s1, 0(a1)            # s1 = state_waitscout
    lw       s1, 0x100(a0)        # get buffer start offset
+   addi     s1, s1, 2            # advance past our address
    sw       s1, 8(a1)            # save in econet_buf_start
    lw       s1, 0x108(a0)        # get bytes received length
+   addi     s1, s1, -4           # remove FCS byte length and our addr byte len
    sw       s1, 12(a1)           # save in econet_buf_len
    j        .econet_ack          # send ack frame
    
