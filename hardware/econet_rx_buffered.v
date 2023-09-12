@@ -33,6 +33,7 @@ module buffered_econet
    parameter      REG_SCOUT_DATA       = 5;     // 0x14
    parameter      REG_OUR_ADDRESS      = 6;     // 0x18
    parameter      REG_STATUS           = 7;     // 0x1C
+   parameter      REG_STATUS_PEEK      = 8;     // 0x20
 
    parameter      ECO_BUFSZ = 512;
    parameter      ECO_CNTWIDTH = 9;
@@ -161,8 +162,8 @@ module buffered_econet
    assign sys_rdata =
       sys_buf_select ? buf_data : reg_data;
 
-   wire [2:0] sys_reg_addr;
-   assign sys_reg_addr = sys_addr[2:0];
+   wire [3:0] sys_reg_addr;
+   assign sys_reg_addr = sys_addr[3:0];
    wire [31:0] reg_data =
       sys_reg_addr == REG_START_PTR       ? 32'b0 | valid_start :
       sys_reg_addr == REG_END_PTR         ? 32'b0 | valid_end :
@@ -172,6 +173,7 @@ module buffered_econet
       sys_reg_addr == REG_REPLY_ADDRESS   ? { valid_address[15:8], valid_address[7:0], valid_address[31:24], valid_address[23:16] } :
       sys_reg_addr == REG_SCOUT_DATA      ? { 16'b0, valid_scout } :
       sys_reg_addr == REG_STATUS          ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
+      sys_reg_addr == REG_STATUS_PEEK     ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
       32'h55555555;
 
    always @(posedge sys_clk) begin
@@ -197,7 +199,7 @@ module buffered_econet
       else begin
          case(valid_rst_state)
             0: 
-               if(sys_reg_select & sys_rd)
+               if((sys_reg_select & sys_rd) && sys_reg_addr == REG_STATUS)
                   valid_rst_state <= 1;
             1: valid_rst_state <= 2;
             2: begin
