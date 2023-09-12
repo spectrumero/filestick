@@ -6,5 +6,6 @@ project(filestick)
 set(LIBRARY_NAME "${PROJECT_NAME}")
 
 enable_language(C ASM)
-add_library(${LIBRARY_NAME} STATIC sbrk.c)
+include_directories(BEFORE ../include)
+add_library(${LIBRARY_NAME} STATIC sbrk.c ioctl.c)
 
