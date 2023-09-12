@@ -49,7 +49,7 @@ static FDfunction econet_func = {
    .fd_close = econet_close
 };
 
-static uint32_t *addr_set = (uint32_t *)0x800114;
+static uint32_t *addr_set = (uint32_t *)0x800118;
 
 // Internal functions
 static int econet_set_port(int fd, uint8_t port);

@@ -42,7 +42,7 @@ econet_rx:
    sw       s2, 20(sp)
    sw       s3, 16(sp)
    sw       a2, 12(sp)
-   
+
    la       a1, econet_handshake_state
    lw       s1, 0(a1)            # s1 = state
    beqz     s1, .scout_ack       # state == state_waitscout
@@ -86,7 +86,7 @@ econet_rx:
    lw       s2, 4(a1)            # get econet_pending_port
    add      a2, a2, s2           # set a2 = econet_port_list entry
    lb       s3, 0(a2)            # get file descriptor
-   andi     s3, s3, 0x80         # set high bit to flag is_ready
+   ori      s3, s3, 0x80         # set high bit to flag is_ready
    sb       s3, 0(a2)
    sw       s1, 0(a1)            # s1 = state_waitscout
    lw       s1, 0x100(a0)        # get buffer start offset
