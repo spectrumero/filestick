@@ -30,14 +30,26 @@
 #include "console.h"
 #include "fd.h"
 #include "raw_econet.h"
+#include "sysdefs.h"
+#include <sys/econet.h>
 
 extern volatile uint32_t econet_handshake_state;
 extern volatile uint32_t econet_pending_port;
 extern volatile uint32_t econet_buf_start;
 extern volatile size_t econet_buf_len;
+extern volatile uint32_t econet_tx_start;
+extern volatile uint32_t econet_tx_end;
+extern volatile uint32_t econet_tx_status;
 extern volatile uint8_t econet_port_list[256];
 
-uint8_t fd_portmap[MAX_FILE_DESCRIPTORS];
+// Hardware registers
+static volatile uint32_t *econet_state    = (uint32_t *)0x800120;  // REG_STATUS_PEEK
+static volatile uint32_t *tx_start_offset = (uint32_t *)0x800200;
+static volatile uint32_t *tx_end_offset   = (uint32_t *)0x800204;
+
+uint8_t fd_rx_portmap[MAX_FILE_DESCRIPTORS];
+struct econet_addr fd_tx_destmap[MAX_FILE_DESCRIPTORS];
+
 uint16_t econet_address;
 
 static FDfunction econet_func = {
@@ -52,11 +64,13 @@ static FDfunction econet_func = {
 static uint32_t *addr_set = (uint32_t *)0x800118;
 
 // Internal functions
-static int econet_set_port(int fd, uint8_t port);
-static int econet_set_addr(uint16_t netstation);
+static int econet_set_rx_port(int fd, uint8_t port);     // sets recvfrom port
+static int econet_set_addr(uint16_t netstation);         // sets our net and station number
+static int econet_set_tx_addr(int fd, struct econet_addr *dest);
 
 void econet_init() {
-   memset(fd_portmap, 0, sizeof(fd_portmap));
+   memset(fd_rx_portmap, 0, sizeof(fd_rx_portmap));
+   memset(fd_tx_destmap, 0, sizeof(fd_tx_destmap));
    econet_address = 0;
 }
 
@@ -69,10 +83,12 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
    uint32_t req_id = request & 0xFF000000;
 
    switch(req_id) {
-      case SET_ADDR:
+      case ECONET_SET_ADDR:
          return econet_set_addr((uint16_t)(request & 0xFFFF));
-      case SET_RECV_PORT:
-         return econet_set_port(fd, request & 0xFF);
+      case ECONET_SET_RECV_PORT:
+         return econet_set_rx_port(fd, request & 0xFF);
+      case ECONET_SET_SEND_ADDR:
+         return econet_set_tx_addr(fd, ptr);
       default:
          kerr_puts("econet_ioctl: bad request");
          return -EINVAL;
@@ -82,7 +98,7 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
 }
 
 int econet_read(int fd, void *ptr, size_t count) {
-   uint8_t port = fd_portmap[fd];
+   uint8_t port = fd_rx_portmap[fd];
    if(!port)
       return -EINVAL;
 
@@ -106,21 +122,76 @@ int econet_read(int fd, void *ptr, size_t count) {
    return copy_sz;
 }
 
+int econet_write(int fd, void *ptr, size_t count) {
+   uint8_t *scout_buf = (uint8_t *)0x820000;
+   uint8_t *data_buf  = (uint8_t *)0x820008;
+
+   // Validate the size
+   if(count > ECONET_TXBUFSZ - 8) return -EMSGSIZE;
+
+   // Validate that there is a valid destination
+   struct econet_addr *dest = &fd_tx_destmap[fd];
+   if(dest->station == 0) return -EDESTADDRREQ;
+
+   // wait until idle:
+   // check receiving and frame_valid flags (the latter is reset only once the ISR
+   // has acknowledged a frame), and that handshake state is idle
+   while(*econet_state & 3 || econet_handshake_state > STATE_WAITSCOUT);
+   DISABLE_INTERRUPTS
+
+   // Create the address word
+   uint32_t addr = dest->net << 24 | dest->station << 16 | econet_address;
+
+   // Set up the scout frame
+   *((uint32_t *)scout_buf) = addr;
+   *(scout_buf + 4) = 0x80;            // scout flag
+   *(scout_buf + 5) = dest->port;
+
+   // Set up the data frame
+   *((uint32_t *)data_buf)  = addr;
+   memcpy(data_buf + 4, ptr, count);
+   econet_tx_start = 8;          // start offset in transmit buffer for data frame
+   econet_tx_end   = 7 + count;  // index of last byte of transmit buffer for data frame
+
+   // Transmit the scout frame. The ISR will handle the handshaking.
+   // Setting the end offset will trigger the transmission of the scout frame.
+   econet_handshake_state = STATE_TXSCOUT;
+   *tx_start_offset = 0;
+   *tx_end_offset   = 5;      // index of last byte of scout frame
+   ENABLE_INTERRUPTS
+
+   // TODO: error handling
+   // TODO: nonblocking writes
+   while(econet_handshake_state >= STATE_TXSCOUT);
+   if(econet_tx_status != STATUS_TXDONE)
+      return -ECONNABORTED;
+
+   return count;
+}
+
 int econet_close(int fd) {
-   uint8_t port = fd_portmap[fd];
+   uint8_t port = fd_rx_portmap[fd];
    if(port) {
       econet_port_list[port] = 0;
-      fd_portmap[fd] = 0;
+      fd_rx_portmap[fd] = 0;
    }
    return 0;
 }
 
-static int econet_set_port(int fd, uint8_t port) {
+static int econet_set_rx_port(int fd, uint8_t port) {
    // TODO: error handling
-   fd_portmap[fd] = port;
+   fd_rx_portmap[fd] = port;
 
    // indicates to the ISR that the port is being listened
    econet_port_list[port] = fd;
+   return 0;
+}
+
+static int econet_set_tx_addr(int fd, struct econet_addr *dest) {
+   fd_tx_destmap[fd].port = dest->port;
+   fd_tx_destmap[fd].net = dest->net;
+   fd_tx_destmap[fd].station = dest->station;
+
    return 0;
 }
 

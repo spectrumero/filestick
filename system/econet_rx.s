@@ -28,6 +28,12 @@
 
 .set     state_waitscout,  0
 .set     state_waitdata,   1
+.set     state_txscout,    2
+.set     state_txdata,     3
+
+# bitfield values
+.set     status_txdone,    1        # transmit completed OK
+.set     status_txneterr,  2        # network error
 
 .text
 
@@ -48,6 +54,10 @@ econet_rx:
    beqz     s1, .scout_ack       # state == state_waitscout
    addi     s1, s1, -1           # next state = state_waitdata
    beqz     s1, .data_ack        # state == state_waitdata, s1 reset to state_waitscout
+   addi     s1, s1, -1           # next state = state_txscout
+   beqz     s1, .rx_scout_ack    # remote station acked our scout
+   addi     s1, s1, -1           # next state = state_txdata
+   beqz     s1, .rx_data_ack
 
 .econet_rx_done:
    lw       a2, 12(sp)
@@ -96,7 +106,37 @@ econet_rx:
    addi     s1, s1, -4           # remove FCS byte length and our addr byte len
    sw       s1, 12(a1)           # save in econet_buf_len
    j        .econet_ack          # send ack frame
-   
+
+# these routines are to handle acknowledgements when we are doing a 4 way handshake
+.rx_scout_ack:
+   lw       s2, 0x108(a0)        # get the frame size
+   addi     s2, s2, -4           # which should be 4 bytes
+   bnez     s2, .tx_error        # if not, bale out now. 
+   # TODO: verify the ack is from the correct station!
+   li       s1, state_txdata     # next state - transmit data packet
+   sw       s1, 0(a1)
+   lw       a2, 16(a1)           # data packet start offset
+   sw       a2, 0x200(a0)
+   lw       a2, 20(a1)           # data packet end offset
+   sw       a2, 0x204(a0)        # kicks off transmission
+   j        .econet_rx_done
+
+.rx_data_ack:
+   lw       s2, 0x108(a0)        # get the frame size
+   addi     s2, s2, -4           # which should be 4 bytes
+   bnez     s2, .tx_error        # if not, bale out now.
+   sw       zero, 0(a1)          # set state back to idle (state_waitscout)
+   la       s1, status_txdone
+   sw       s1, 24(a1)           # set TX done status bit
+   j        .econet_rx_done
+
+# TODO: retry sending the 4 way handshake sequence
+.tx_error:
+   sw       zero, 0(a1)          # reset state
+   la       s1, status_txneterr
+   sw       s1, 24(a1)           # set status bit
+   j        .econet_rx_done
+
 .data
 .align 4
 .globl econet_handshake_state       # offset 0
@@ -107,6 +147,13 @@ econet_pending_port:    .word 0
 econet_buf_start:       .word 0
 .globl econet_buf_len               # offset 12
 econet_buf_len:         .word 0
+.globl econet_tx_start              # offset 16
+econet_tx_start:        .word 0    
+.globl econet_tx_end                # offset 20
+econet_tx_end:          .word 0
+.globl econet_tx_status             # offset 24
+econet_tx_status:       .word 0
+
 .globl econet_port_list
 econet_port_list:
 .fill 256, 1, 0

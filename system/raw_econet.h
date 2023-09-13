@@ -27,14 +27,23 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-// ioctl request values
-#define SET_ADDR           0x01000000
-#define SET_RECV_PORT      0x02000000
-#define SET_SEND_ADDR      0x03000000
-#define SET_SEND_PORT      0x04000000
+#define ECONET_TXBUFSZ     512
+#define ECONET_RXBUFSZ     512
+
+// Hardware driver states
+#define STATE_WAITSCOUT    0           // idle
+#define STATE_WAITDATA     1           // waiting for data frame to us
+#define STATE_TXSCOUT      2           // sending TX scout frame
+#define STATE_TXDATA       3           // sending TX data frame
+
+// TX status from the ISR
+#define STATUS_TXDONE      1           // Successful transmission
+#define STATUS_TXNETERR    2           // Generic failure of transmission
 
 void econet_init();
 int econet_open(const char *devname, int flags, mode_t mode, FD *fd);
+
+// ioctl requests and structs are defined in sys/econet.h
 int econet_ioctl(int fd, unsigned long request, void *ptr);
 int econet_read(int fd, void *ptr, size_t count);
 int econet_close(int fd);

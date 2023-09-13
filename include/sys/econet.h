@@ -23,13 +23,18 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
+#include <stdint.h>
 
-// Econet ioctl constants
 
 #define ECONET_SET_ADDR       0x01000000
 #define ECONET_SET_RECV_PORT  0x02000000
 #define ECONET_SET_SEND_ADDR  0x03000000
-#define ECONET_SET_SEND_PORT  0x04000000
+
+struct econet_addr {
+   uint8_t        port;
+   uint8_t        net;
+   uint8_t        station;
+};
 
 #endif
 
