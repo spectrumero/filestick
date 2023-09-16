@@ -61,6 +61,7 @@ wire  flashrom_spi_ss_rst = mem_addr == 24'h800018;
 // Econet selectors
 wire  econet_rx_buf_sel          = mem_addr[23:16] == 8'h81;
 wire  econet_rx_reg_sel          = mem_addr[23:8]  == 16'h8001;
+wire  econet_timer_a_sel         = mem_addr[23:4]  == 20'h80030;
 wire  econet_tx_buf_sel          = mem_addr[23:16] == 8'h82;
 wire  econet_tx_sel_frame_start  = mem_addr == 24'h800200;
 wire  econet_tx_sel_frame_end    = mem_addr == 24'h800204;
@@ -81,6 +82,7 @@ assign mem_rdata =
    econet_rx_buf_sel ? econet_rx_data        :
    econet_rx_reg_sel ? econet_rx_data        :
    econet_tx_state_sel ? {30'b0, econet_transmitting, econet_tx_busy } :
+   econet_timer_a_sel ? econet_timer_a_data  :
    32'hAAAAAAAA;
 
 FemtoRV32 #(
@@ -161,6 +163,18 @@ econet_tx_buffered econet_transmitter(
    .sys_data(mem_wdata),
    .sys_select_frame_start(econet_tx_sel_frame_start),
    .sys_select_buffer_end(econet_tx_sel_frame_end));
+
+wire econet_timer_a_intr;
+wire [31:0] econet_timer_a_data;
+timer econet_timer_a(
+   .reset(reset),
+   .clk(clk),
+   .wr(cpu_we),
+   .select(econet_timer_a_sel),
+   .addr(mem_addr[3:2]),
+   .data_in(mem_wdata),
+   .data_out(econet_timer_a_data),
+   .interrupt(econet_timer_a_intr));
 
 
 `ifdef USE_SLOWROM
@@ -340,7 +354,7 @@ always @(posedge clk)
    end
 
 // ------- Interrupts ------------
-assign int = timer_intr | uart_valid | econet_rx_valid;
+assign int = timer_intr | uart_valid | econet_rx_valid | econet_timer_a_intr;
 
 endmodule
 
