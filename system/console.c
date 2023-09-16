@@ -48,7 +48,8 @@ extern volatile uint32_t bufstart;
 extern volatile uint32_t cr_index;
 extern volatile uint32_t cons_rx_count;
 
-uint8_t *cons_buf = (uint8_t *)0x0FF00; // FIXME FIXME FIXME!
+// This should be able to pick up the symbol, but it doesn't
+uint8_t *cons_buf = (uint8_t *)0xff00; // FIXME system.ld symbol
 
 //------------------------------------------------------------------
 // Open the console
@@ -75,6 +76,7 @@ ssize_t console_read(int fd, void *buf, size_t count) {
    while(count && bufstart != bufindex) {
       uint8_t byte = *(cons_buf + bufstart);
       *bufptr++ = byte;
+
       bufstart++;
       bufstart &= 0xFF;
       count--;

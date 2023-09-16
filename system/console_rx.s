@@ -35,7 +35,7 @@ console_rx:
 
    lb    s1, 12(a0)     # get uart byte - resets data received flag
 
-   la    a0, 0x20700    # FIXME
+   la    a0, __cons_buff
    la    a1, bufindex
    lw    a2, 0(a1)      # get current buffer index
 
@@ -49,13 +49,13 @@ console_rx:
    addi  a2, a2, 1      # increment buffer index
    andi  a2, a2, 0xFF   # make sure it wraps around
    lw    a3, 4(a1)      # get starting index
-   beq   a3, a2, .cons_rx_done # buffer is full
+   beq   a3, a2, .cons_buffer_full # buffer is full
 
    sw    a2, 0(a1)      # store new buffer index
    sb    s1, 0(a0)      # store byte in the console buffer
 
-   la    a0, 0x80000C   # FIXME
-   sw    s1, 0(a0)      # echo character
+   la    a0, 0x800000   # FIXME
+   sw    s1, 0xC(a0)    # echo character
 
 .cons_rx_done:
    lw    a1, 0(sp)
@@ -65,6 +65,12 @@ console_rx:
    lw    ra, 28(sp)   
    addi  sp, sp, 32
    ret
+
+.cons_buffer_full:
+   la    a0, 0x800000
+   li    s1, 7
+   sw    s1, 0(a0)
+   j .cons_rx_done
 
 .bkspc:
    lw    a3, 4(a1)      # bufstart
