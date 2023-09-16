@@ -261,7 +261,7 @@ always @(posedge clk, posedge timer_intr_reset)
 //---------------- uart -----------------
 wire uart_wr_busy;
 wire uart_valid;
-wire uart_rd = uart_state_sel & cpu_rd;
+wire uart_rd = uart_sel & cpu_rd;
 wire uart_wr = uart_sel & cpu_we[0];
 wire [7:0] uart_rx_data;
 
