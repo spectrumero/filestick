@@ -43,7 +43,7 @@ extern volatile uint32_t econet_tx_status;
 extern volatile uint8_t econet_port_list[256];
 
 // Hardware registers
-static volatile uint32_t *econet_state    = (uint32_t *)0x800120;  // REG_STATUS_PEEK
+static volatile uint32_t *econet_state    = (uint32_t *)0x80011c;  // reg_status
 static volatile uint32_t *tx_start_offset = (uint32_t *)0x800200;
 static volatile uint32_t *tx_end_offset   = (uint32_t *)0x800204;
 

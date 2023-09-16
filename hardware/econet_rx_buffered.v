@@ -33,7 +33,6 @@ module buffered_econet
    parameter      REG_SCOUT_DATA       = 5;     // 0x14
    parameter      REG_OUR_ADDRESS      = 6;     // 0x18
    parameter      REG_STATUS           = 7;     // 0x1C
-   parameter      REG_STATUS_PEEK      = 8;     // 0x20
 
    parameter      ECO_BUFSZ = 512;
    parameter      ECO_CNTWIDTH = 9;
@@ -173,45 +172,26 @@ module buffered_econet
       sys_reg_addr == REG_REPLY_ADDRESS   ? { valid_address[15:8], valid_address[7:0], valid_address[31:24], valid_address[23:16] } :
       sys_reg_addr == REG_SCOUT_DATA      ? { 16'b0, valid_scout } :
       sys_reg_addr == REG_STATUS          ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
-      sys_reg_addr == REG_STATUS_PEEK     ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
       32'h55555555;
 
+   reg valid_rst;
    always @(posedge sys_clk) begin
       if(sys_wr & sys_reg_select) begin
-         if(sys_reg_addr == REG_OUR_ADDRESS) begin
-            if(sys_wr[0]) econet_address[7:0] <= sys_wdata[7:0];
-            if(sys_wr[1]) econet_address[15:8] <= sys_wdata[15:8];
-         end
-      end
-   end
-
-   // Resets the 'valid' flag, this must be done with a delay so that
-   // the CPU can actually read it, as the action of reading the RX
-   // registers is what causes the 'valid' flag to get reset. This flag
-   // is used to generate the data received interrupt.
-   reg [1:0] valid_rst_state;
-   reg valid_rst;
-   always @(posedge sys_clk, posedge reset) begin
-      if(reset) begin
-         valid_rst <= 0;
-         valid_rst_state <= 0;
-      end
-      else begin
-         case(valid_rst_state)
-            0: 
-               if((sys_reg_select & sys_rd) && sys_reg_addr == REG_STATUS)
-                  valid_rst_state <= 1;
-            1: valid_rst_state <= 2;
-            2: begin
-               valid_rst <= 1;
-               valid_rst_state <= 3;
+         case(sys_reg_addr)
+            REG_OUR_ADDRESS: begin
+               if(sys_wr[0]) econet_address[7:0] <= sys_wdata[7:0];
+               if(sys_wr[1]) econet_address[15:8] <= sys_wdata[15:8];
             end
-            3: begin
-               valid_rst <= 0;
-               valid_rst_state <= 0;
+
+            REG_STATUS: begin
+               if(sys_wr[0]) begin
+                  // asynchronously resets valid flag on its posedge
+                  valid_rst <= sys_wdata[0];
+               end
             end
          endcase
       end
+      else valid_rst <= 0;
    end
 
    // Measure the econet clock period

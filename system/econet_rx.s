@@ -49,8 +49,8 @@ econet_rx:
    sw       s3, 16(sp)
    sw       a2, 12(sp)
 
-   li       s1, 1                # LED
-   sw       s1, 0(a0)            # LED
+   li       s1, 1                # reset interrupt status
+   sw       s1, 0x11c(a0)
 
    la       a1, econet_handshake_state
    lw       s1, 0(a1)            # s1 = state
