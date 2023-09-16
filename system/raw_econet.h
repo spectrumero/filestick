@@ -45,7 +45,8 @@ int econet_open(const char *devname, int flags, mode_t mode, FD *fd);
 
 // ioctl requests and structs are defined in sys/econet.h
 int econet_ioctl(int fd, unsigned long request, void *ptr);
-int econet_read(int fd, void *ptr, size_t count);
+ssize_t econet_read(int fd, void *ptr, size_t count);
+ssize_t econet_write(int fd, const void *ptr, size_t count);
 int econet_close(int fd);
 
 #endif

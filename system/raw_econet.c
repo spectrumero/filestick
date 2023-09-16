@@ -54,7 +54,7 @@ uint16_t econet_address;
 
 static FDfunction econet_func = {
    .fd_read = econet_read,
-   .fd_write = NULL,
+   .fd_write = econet_write,
    .fd_lseek = NULL,
    .fd_fstat = NULL,
    .fd_ioctl = econet_ioctl,
@@ -67,6 +67,8 @@ static uint32_t *addr_set = (uint32_t *)0x800118;
 static int econet_set_rx_port(int fd, uint8_t port);     // sets recvfrom port
 static int econet_set_addr(uint16_t netstation);         // sets our net and station number
 static int econet_set_tx_addr(int fd, struct econet_addr *dest);
+
+static uint32_t *led = (uint32_t *)0x800000;
 
 void econet_init() {
    memset(fd_rx_portmap, 0, sizeof(fd_rx_portmap));
@@ -89,6 +91,9 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
          return econet_set_rx_port(fd, request & 0xFF);
       case ECONET_SET_SEND_ADDR:
          return econet_set_tx_addr(fd, ptr);
+      case ECONET_DBG_BUF:
+         memcpy(ptr, (uint8_t *)(&econet_handshake_state), 28);
+         return 0;
       default:
          kerr_puts("econet_ioctl: bad request");
          return -EINVAL;
@@ -97,7 +102,7 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
    return -EINVAL;
 }
 
-int econet_read(int fd, void *ptr, size_t count) {
+ssize_t econet_read(int fd, void *ptr, size_t count) {
    uint8_t port = fd_rx_portmap[fd];
    if(!port)
       return -EINVAL;
@@ -122,7 +127,7 @@ int econet_read(int fd, void *ptr, size_t count) {
    return copy_sz;
 }
 
-int econet_write(int fd, void *ptr, size_t count) {
+ssize_t econet_write(int fd, const void *ptr, size_t count) {
    uint8_t *scout_buf = (uint8_t *)0x820000;
    uint8_t *data_buf  = (uint8_t *)0x820008;
 
@@ -136,11 +141,12 @@ int econet_write(int fd, void *ptr, size_t count) {
    // wait until idle:
    // check receiving and frame_valid flags (the latter is reset only once the ISR
    // has acknowledged a frame), and that handshake state is idle
+   *led = 0;
    while(*econet_state & 3 || econet_handshake_state > STATE_WAITSCOUT);
    DISABLE_INTERRUPTS
 
    // Create the address word
-   uint32_t addr = dest->net << 24 | dest->station << 16 | econet_address;
+   uint32_t addr = dest->station | dest->net << 8 | econet_address << 16;
 
    // Set up the scout frame
    *((uint32_t *)scout_buf) = addr;
@@ -151,7 +157,7 @@ int econet_write(int fd, void *ptr, size_t count) {
    *((uint32_t *)data_buf)  = addr;
    memcpy(data_buf + 4, ptr, count);
    econet_tx_start = 8;          // start offset in transmit buffer for data frame
-   econet_tx_end   = 7 + count;  // index of last byte of transmit buffer for data frame
+   econet_tx_end   = 11 + count; // index of last byte of transmit buffer for data frame
 
    // Transmit the scout frame. The ISR will handle the handshaking.
    // Setting the end offset will trigger the transmission of the scout frame.
@@ -159,10 +165,10 @@ int econet_write(int fd, void *ptr, size_t count) {
    *tx_start_offset = 0;
    *tx_end_offset   = 5;      // index of last byte of scout frame
    ENABLE_INTERRUPTS
-
    // TODO: error handling
    // TODO: nonblocking writes
    while(econet_handshake_state >= STATE_TXSCOUT);
+   *led = 1;
    if(econet_tx_status != STATUS_TXDONE)
       return -ECONNABORTED;
 

@@ -35,6 +35,7 @@ isr_trap:
 
    la       ra, .isr_exit     # return here
    la       a0, device_base
+
    lw       a1, 0x11c(a0)     # econet receive status offset
    andi     a1, a1, 1         # frame valid waiting bit
    bnez     a1, econet_rx
@@ -44,6 +45,11 @@ isr_trap:
 
    lw       a0, 8(a1)         # timer state
    bnez     a0, timer_done 
+
+.isr_fell_through:
+   la       a0, device_base
+   li       a1, 7
+   sw       a1, 0(a0)
    
 .isr_exit:   
    lw       a0, 4(sp)

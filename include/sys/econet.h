@@ -29,11 +29,22 @@
 #define ECONET_SET_ADDR       0x01000000
 #define ECONET_SET_RECV_PORT  0x02000000
 #define ECONET_SET_SEND_ADDR  0x03000000
+#define ECONET_DBG_BUF        0xF0000000
 
 struct econet_addr {
    uint8_t        port;
    uint8_t        net;
    uint8_t        station;
+};
+
+struct econet_dbg_buf {
+   uint32_t       hs_state;
+   uint32_t       pending_port;
+   uint32_t       rx_offset;
+   uint32_t       rx_len;
+   uint32_t       tx_offset;
+   uint32_t       tx_end;
+   uint32_t       tx_status;
 };
 
 #endif

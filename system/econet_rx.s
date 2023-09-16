@@ -49,6 +49,9 @@ econet_rx:
    sw       s3, 16(sp)
    sw       a2, 12(sp)
 
+   li       s1, 1                # LED
+   sw       s1, 0(a0)            # LED
+
    la       a1, econet_handshake_state
    lw       s1, 0(a1)            # s1 = state
    beqz     s1, .scout_ack       # state == state_waitscout
@@ -110,7 +113,7 @@ econet_rx:
 # these routines are to handle acknowledgements when we are doing a 4 way handshake
 .rx_scout_ack:
    lw       s2, 0x108(a0)        # get the frame size
-   addi     s2, s2, -4           # which should be 4 bytes
+   addi     s2, s2, -6           # which should be 6 bytes (addr + FCS)
    bnez     s2, .tx_error        # if not, bale out now. 
    # TODO: verify the ack is from the correct station!
    li       s1, state_txdata     # next state - transmit data packet
@@ -123,7 +126,7 @@ econet_rx:
 
 .rx_data_ack:
    lw       s2, 0x108(a0)        # get the frame size
-   addi     s2, s2, -4           # which should be 4 bytes
+   addi     s2, s2, -6           # which should be 6 bytes
    bnez     s2, .tx_error        # if not, bale out now.
    sw       zero, 0(a1)          # set state back to idle (state_waitscout)
    la       s1, status_txdone
