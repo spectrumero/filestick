@@ -31,7 +31,7 @@ reg               rst_timer;
 `endif
 
 wire rst_counter = reset | rst_timer;
-wire interrupt = count == timerval;
+wire interrupt = (count == timerval) && enable;
 
 wire [31:0] data_out =
    addr == REG_TIMERCNT ?     count :
