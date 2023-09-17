@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/errno.h>
 
 #include "console.h"
 #include "fd.h"
@@ -33,6 +33,7 @@
 #include "sysdefs.h"
 #include <sys/econet.h>
 
+extern volatile struct econet_state econet_state_val;
 extern volatile uint32_t econet_handshake_state;
 extern volatile uint32_t econet_pending_port;
 extern volatile uint32_t econet_buf_start;
@@ -40,12 +41,15 @@ extern volatile size_t econet_buf_len;
 extern volatile uint32_t econet_tx_start;
 extern volatile uint32_t econet_tx_end;
 extern volatile uint32_t econet_tx_status;
+extern volatile uint32_t econet_timeout_state;
 extern volatile uint8_t econet_port_list[256];
 
 // Hardware registers
 static volatile uint32_t *econet_state    = (uint32_t *)0x80011c;  // reg_status
 static volatile uint32_t *tx_start_offset = (uint32_t *)0x800200;
 static volatile uint32_t *tx_end_offset   = (uint32_t *)0x800204;
+static volatile uint32_t *timer_a_val     = (uint32_t *)0x800304;
+static volatile uint32_t *timer_a_stat    = (uint32_t *)0x800308;
 
 uint8_t fd_rx_portmap[MAX_FILE_DESCRIPTORS];
 struct econet_addr fd_tx_destmap[MAX_FILE_DESCRIPTORS];
@@ -92,7 +96,7 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
       case ECONET_SET_SEND_ADDR:
          return econet_set_tx_addr(fd, ptr);
       case ECONET_DBG_BUF:
-         memcpy(ptr, (uint8_t *)(&econet_handshake_state), 28);
+         memcpy(ptr, (uint8_t *)&econet_state_val, sizeof(struct econet_state));
          return 0;
       default:
          kerr_puts("econet_ioctl: bad request");
@@ -134,6 +138,10 @@ ssize_t econet_write(int fd, const void *ptr, size_t count) {
    // Validate the size
    if(count > ECONET_TXBUFSZ - 8) return -EMSGSIZE;
 
+   // Reset transmit flags
+   econet_tx_status = 0;
+   econet_timeout_state = 0;
+
    // Validate that there is a valid destination
    struct econet_addr *dest = &fd_tx_destmap[fd];
    if(dest->station == 0) return -EDESTADDRREQ;
@@ -159,18 +167,28 @@ ssize_t econet_write(int fd, const void *ptr, size_t count) {
    econet_tx_start = 8;          // start offset in transmit buffer for data frame
    econet_tx_end   = 11 + count; // index of last byte of transmit buffer for data frame
 
+   // Set up the timeout for the scout frame
+   *timer_a_val = TIMER_HUNDRED_MS;
+   *timer_a_stat = TIMER_ENABLE|TIMER_RESET;
+
    // Transmit the scout frame. The ISR will handle the handshaking.
    // Setting the end offset will trigger the transmission of the scout frame.
    econet_handshake_state = STATE_TXSCOUT;
    *tx_start_offset = 0;
    *tx_end_offset   = 5;      // index of last byte of scout frame
    ENABLE_INTERRUPTS
-   // TODO: error handling
+
    // TODO: nonblocking writes
    while(econet_handshake_state >= STATE_TXSCOUT);
-   *led = 1;
-   if(econet_tx_status != STATUS_TXDONE)
-      return -ECONNABORTED;
+
+   if(econet_tx_status != STATUS_TXDONE) {
+      // Not listening
+      if(econet_timeout_state == ECONET_STATE_TXSCOUT) 
+         return -EHOSTUNREACH;
+
+      // got scout ack but no data ack
+      return -ETIMEDOUT;
+   }
 
    return count;
 }

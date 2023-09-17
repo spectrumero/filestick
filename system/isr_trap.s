@@ -41,7 +41,11 @@ isr_trap:
    bnez     a1, econet_rx
    lw       a1, 16(a0)        # console uart state
    andi     a1, a1, 1         # uart_valid bit
-   bnez     a1, console_rx 
+   bnez     a1, console_rx
+
+   lw       a1, 0x308(a0)     # econet timer A status
+   andi     a1, a1, 1
+   bnez     a1, econet_timeout
 
    lw       a0, 8(a1)         # timer state
    bnez     a0, timer_done 

@@ -37,15 +37,22 @@ struct econet_addr {
    uint8_t        station;
 };
 
-struct econet_dbg_buf {
-   uint32_t       hs_state;
+struct econet_state {
+   uint32_t       handshake_state;
    uint32_t       pending_port;
-   uint32_t       rx_offset;
-   uint32_t       rx_len;
-   uint32_t       tx_offset;
-   uint32_t       tx_end;
+   uint32_t       rx_buf_start;
+   uint32_t       rx_buf_len;
+   uint32_t       tx_buf_start;
+   uint32_t       tx_buf_end;
    uint32_t       tx_status;
+   uint32_t       timeout_state;
 };
+
+// Low-level states
+#define ECONET_STATE_WAITSCOUT   0
+#define ECONET_STATE_WAITDATA    1
+#define ECONET_STATE_TXSCOUT     2
+#define ECONET_STATE_TXDATA      3
 
 #endif
 

@@ -25,6 +25,7 @@
 # Handle reception of econet frames.
 # An interrupt is only triggered if the frame has a valid FCS (checksum)
 # and is for our station.
+.include "devices.inc"
 
 .set     state_waitscout,  0
 .set     state_waitdata,   1
@@ -51,6 +52,7 @@ econet_rx:
 
    li       s1, 1                # reset interrupt status
    sw       s1, 0x11c(a0)
+   sw       s1, 0x308(a0)        # reset and disable timeout timer
 
    la       a1, econet_handshake_state
    lw       s1, 0(a1)            # s1 = state
@@ -122,6 +124,11 @@ econet_rx:
    sw       a2, 0x200(a0)
    lw       a2, 20(a1)           # data packet end offset
    sw       a2, 0x204(a0)        # kicks off transmission
+
+   li       a2, timer_quarter_sec
+   sw       a2, 0x304(a0)        # set timeout value
+   li       a2, timer_enable
+   sw       a2, 0x308(a0)        # start timer
    j        .econet_rx_done
 
 .rx_data_ack:
@@ -130,7 +137,7 @@ econet_rx:
    bnez     s2, .tx_error        # if not, bale out now.
    sw       zero, 0(a1)          # set state back to idle (state_waitscout)
    la       s1, status_txdone
-   sw       s1, 24(a1)           # set TX done status bit
+   sw       s1, 24(a1)           # set econet_tx_status TX done status bit
    j        .econet_rx_done
 
 # TODO: retry sending the 4 way handshake sequence
@@ -140,9 +147,32 @@ econet_rx:
    sw       s1, 24(a1)           # set status bit
    j        .econet_rx_done
 
+#-----------------------------------------------------------
+# Timeout handling
+# on entry, a0 = device base address
+.globl econet_timeout
+econet_timeout:
+   addi     sp, sp, -16
+   sw       a2, 0(sp)
+
+   li       a1, timer_reset
+   sw       a1, 0x308(a0)        # reset and clear interrupt
+   la       a1, econet_handshake_state
+   lw       a2, 0(a1)
+   sw       a2, 28(a1)           # save the state when the timeout happened
+   sw       zero, 0(a1)          # reset receiving state 
+
+   lw       a2, 0(sp)
+   addi     sp, sp, 16
+   ret
+   
+
+#-----------------------------------------------------------
 .data
 .align 4
+.globl econet_state_val
 .globl econet_handshake_state       # offset 0
+econet_state_val:
 econet_handshake_state: .word 0
 .globl econet_pending_port          # offset 4
 econet_pending_port:    .word 0
@@ -156,6 +186,8 @@ econet_tx_start:        .word 0
 econet_tx_end:          .word 0
 .globl econet_tx_status             # offset 24
 econet_tx_status:       .word 0
+.globl econet_timeout_state         # offset 28
+econet_timeout_state:   .word 0
 
 .globl econet_port_list
 econet_port_list:
