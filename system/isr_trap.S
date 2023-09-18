@@ -23,7 +23,8 @@
 #
 
 # Interrupt service routine
-.include "devices.inc"
+
+#include "devices.h"
 
 .text
 .globl isr_trap
@@ -33,27 +34,27 @@ isr_trap:
    sw       a1, 8(sp)
    sw       a0, 4(sp)
 
-   la       ra, .isr_exit     # return here
-   la       a0, device_base
+   la       ra, .isr_exit              # return here
+   la       a0, DEV_BASE
 
-   lw       a1, 0x11c(a0)     # econet receive status offset
-   andi     a1, a1, 1         # frame valid waiting bit
+   lw       a1, OFFS_RXSTATUS(a0)      # econet receive status offset
+   andi     a1, a1, 1                  # frame valid waiting bit
    bnez     a1, econet_rx
-   lw       a1, 16(a0)        # console uart state
-   andi     a1, a1, 1         # uart_valid bit
+   lw       a1, OFFS_UARTSTATE(a0)     # console uart state
+   andi     a1, a1, 1                  # uart_valid bit
    bnez     a1, console_rx
 
-   lw       a1, 0x308(a0)     # econet timer A status
+   lw       a1, OFFS_TMR_A_STATUS(a0)  # econet timer A status
    andi     a1, a1, 1
    bnez     a1, econet_timeout
 
-   lw       a0, 8(a1)         # timer state
+   lw       a0, OFFS_TMRCTL(a0)        # general timer state
    bnez     a0, timer_done 
 
 .isr_fell_through:
-   la       a0, device_base
+   la       a0, DEV_BASE
    li       a1, 7
-   sw       a1, 0(a0)
+   sw       a1, OFFS_RGBLED(a0)
    
 .isr_exit:   
    lw       a0, 4(sp)
