@@ -89,6 +89,11 @@ econet_rx:
    sw       zero, OFFS_TXSTART(a0)     # tx buf start
    li       s1, 3                      # tx buf end
    sw       s1, OFFS_TXEND(a0)         # tx buf end, setting this causes transmission
+
+   li       s1, TIMER_QUARTER_SEC      # set up timeout for data frame
+   sw       s1, OFFS_TMR_A_SET(a0)
+   li       s1, TIMER_ENABLE
+   sw       s1, OFFS_TMR_A_STATUS(a0)  # timer starts
    j        .econet_rx_done
 
 .data_ack:
