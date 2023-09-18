@@ -23,13 +23,8 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
+#ifndef ASM
 #include <stdint.h>
-
-
-#define ECONET_SET_ADDR       0x01000000
-#define ECONET_SET_RECV_PORT  0x02000000
-#define ECONET_SET_SEND_ADDR  0x03000000
-#define ECONET_DBG_BUF        0xF0000000
 
 struct econet_addr {
    uint8_t        port;
@@ -47,12 +42,22 @@ struct econet_state {
    uint32_t       tx_status;
    uint32_t       timeout_state;
 };
+#endif
+
+#define ECONET_SET_ADDR       0x01000000
+#define ECONET_SET_RECV_PORT  0x02000000
+#define ECONET_SET_SEND_ADDR  0x03000000
+#define ECONET_DBG_BUF        0xF0000000
 
 // Low-level states
 #define ECONET_STATE_WAITSCOUT   0
 #define ECONET_STATE_WAITDATA    1
 #define ECONET_STATE_TXSCOUT     2
 #define ECONET_STATE_TXDATA      3
+
+// Bit fields
+#define ECONET_STATUS_TXDONE     1
+#define ECONET_STATUS_TXNETERR   2
 
 #endif
 
