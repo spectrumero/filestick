@@ -24,9 +24,16 @@
 
 #define OFFS_TXSTART       0x200
 #define OFFS_TXEND         0x204
+#define OFFS_TXSTATUS      0x208
 
 #define OFFS_TMR_A_SET     0x304
 #define OFFS_TMR_A_STATUS  0x308
+
+// Econet hardware bitfields
+// Transmit
+#define BIT_TX_TURNAROUND     1     // Indicates replying to another station
+#define BIT_TX_BUSY           2     // Transmitter has a buffer to transmit
+#define BIT_TX_TRANSMITTING   4     // Transmitter is actively transmitting
 
 #endif
 

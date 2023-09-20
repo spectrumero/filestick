@@ -3,7 +3,6 @@ module econet_tx_buffered
    input          reset,
    input          econet_clk,
    output         econet_data,
-   output         busy,             // set whenever there's an active buffer
    output         transmitting,     // used to turn on transmit line driver
    input          receiving,        // set when the receiver is active to inhibit transmit
 
@@ -11,10 +10,14 @@ module econet_tx_buffered
    input [3:0]    sys_we,
    input          sys_select,
    input [7:0]    sys_addr,         // bits [9:2]
-   input [31:0]   sys_data,
-   input          sys_select_frame_start,
-   input          sys_select_buffer_end
+   input [31:0]   sys_wdata,
+   output [31:0]  sys_rdata,        // Only for registers (buffer doesn't have a system write port)
+   input          sys_select_reg
 );
+
+   parameter REG_STARTADDR    = 2'b00;     // offset 0
+   parameter REG_ENDADDR      = 2'b01;     // offset 4
+   parameter REG_CONTROL      = 2'b10;     // offset 8
 
    parameter ECO_BUFSZ        = 512;
    parameter ECO_CNTWIDTH     = 9;
@@ -39,6 +42,8 @@ module econet_tx_buffered
 
    reg [31:0]              econet_buf[ECO_BUFSZ >> 2];
    reg [31:0]              buf_reg;
+   reg [3:0]               idle_counter;
+   reg                     turnaround;
    reg [ECO_CNTWIDTH-1:0]  econet_ctr;
    reg [ECO_CNTWIDTH-1:0]  buffer_start;
    reg [ECO_CNTWIDTH-1:0]  buffer_end;
@@ -49,23 +54,42 @@ module econet_tx_buffered
 
    wire busy = (state != STATE_IDLE) | transmitting;
 
+   // Econet transmit buffer
    always @(posedge sys_clk) begin
       if(sys_select) begin
-         if(sys_we[0])   econet_buf[sys_addr][7:0]     <= sys_data[7:0];
-         if(sys_we[1])   econet_buf[sys_addr][15:8]    <= sys_data[15:8];
-         if(sys_we[2])   econet_buf[sys_addr][23:16]   <= sys_data[23:16];
-         if(sys_we[3])   econet_buf[sys_addr][31:24]   <= sys_data[31:24];
+         if(sys_we[0])   econet_buf[sys_addr][7:0]     <= sys_wdata[7:0];
+         if(sys_we[1])   econet_buf[sys_addr][15:8]    <= sys_wdata[15:8];
+         if(sys_we[2])   econet_buf[sys_addr][23:16]   <= sys_wdata[23:16];
+         if(sys_we[3])   econet_buf[sys_addr][31:24]   <= sys_wdata[31:24];
       end
-      else if(sys_select_frame_start && sys_we != 0)
-         buffer_start  <= sys_data[ECO_CNTWIDTH-1:0];
-      else if(sys_select_buffer_end && sys_we != 0) 
-         buffer_end   <= sys_data[ECO_CNTWIDTH-1:0];
    end
 
+   // Transmit registers
+   always @(posedge sys_clk) begin
+      if(sys_select_reg && sys_we != 0) begin
+         case(sys_addr[1:0])
+            REG_STARTADDR:
+               buffer_start <= sys_wdata[ECO_CNTWIDTH-1:0];
+            REG_ENDADDR:
+               buffer_end <= sys_wdata[ECO_CNTWIDTH-1:0];
+            REG_CONTROL:
+               turnaround <= sys_wdata[0];
+         endcase
+      end
+   end
+   assign sys_rdata = 
+      sys_addr[1:0] == REG_STARTADDR ? 32'h0 | buffer_start :
+      sys_addr[1:0] == REG_ENDADDR   ? 32'h0 | buffer_end   :
+      sys_addr[1:0] == REG_CONTROL   ? { 29'b0, transmitting, busy, turnaround } :
+      32'h55555555;
+
+   // Setting the end offset initiates transmission
    wire tx_req_reset = reset | state != STATE_IDLE;
    always @(posedge sys_clk, posedge tx_req_reset) begin
-      if(tx_req_reset)                          tx_requested <= 0;
-      else if(sys_select_buffer_end && sys_we != 0)   tx_requested <= 1;
+      if(tx_req_reset)                          
+         tx_requested <= 0;
+      else if(sys_select_reg && sys_addr[1:0] == REG_ENDADDR && sys_we != 0)   
+         tx_requested <= 1;
    end
 
    // done this way to make sure nextpnr infers block ram
@@ -76,6 +100,17 @@ module econet_tx_buffered
                              econet_ctr[1:0] == 2'b01 ? buf_reg[15:8]   :
                              econet_ctr[1:0] == 2'b10 ? buf_reg[23:16]  :
                                                         buf_reg[31:24];
+
+   // Econet spec is to wait 15 bit periods after receive goes low
+   // unless we are turning around.
+   wire reset_idle = reset | receiving;
+   wire line_ready = !receiving && (idle_counter == 4'b1111 || turnaround);
+   always @(negedge econet_clk, posedge reset_idle) begin
+      if(reset_idle)
+         idle_counter <= 0;
+      else
+         if(idle_counter != 4'b1111) idle_counter <= idle_counter + 1;
+   end
 
    always @(negedge econet_clk, posedge reset) begin
       if(reset) begin
@@ -90,13 +125,13 @@ module econet_tx_buffered
                start_frame <= 0;
                end_frame <= 0;
                if(tx_requested) begin
-                  if(receiving)  state <= STATE_RXWAIT;
-                  else           state <= STATE_TX_START;
+                  if(!line_ready) state <= STATE_RXWAIT;
+                  else            state <= STATE_TX_START;
                end
             end
 
             STATE_RXWAIT:
-               if(!receiving)    state <= STATE_TX_START;
+               if(line_ready)     state <= STATE_TX_START;
 
             STATE_TX_START: begin
                start_frame <= 1;

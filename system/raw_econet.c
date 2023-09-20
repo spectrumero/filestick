@@ -48,6 +48,7 @@ extern volatile uint8_t econet_port_list[256];
 static volatile uint32_t *econet_state    = (uint32_t *)0x80011c;  // reg_status
 static volatile uint32_t *tx_start_offset = (uint32_t *)0x800200;
 static volatile uint32_t *tx_end_offset   = (uint32_t *)0x800204;
+static volatile uint32_t *tx_flags        = (uint32_t *)0x800208;
 static volatile uint32_t *timer_a_val     = (uint32_t *)0x800304;
 static volatile uint32_t *timer_a_stat    = (uint32_t *)0x800308;
 
@@ -141,6 +142,9 @@ ssize_t econet_write(int fd, const void *ptr, size_t count) {
    // Reset transmit flags
    econet_tx_status = 0;
    econet_timeout_state = 0;
+
+   // This is not a turnaround (reply)
+   *tx_flags = 0;
 
    // Validate that there is a valid destination
    struct econet_addr *dest = &fd_tx_destmap[fd];

@@ -63,9 +63,7 @@ wire  econet_rx_buf_sel          = mem_addr[23:16] == 8'h81;
 wire  econet_rx_reg_sel          = mem_addr[23:8]  == 16'h8001;
 wire  econet_timer_a_sel         = mem_addr[23:4]  == 20'h80030;
 wire  econet_tx_buf_sel          = mem_addr[23:16] == 8'h82;
-wire  econet_tx_sel_frame_start  = mem_addr == 24'h800200;
-wire  econet_tx_sel_frame_end    = mem_addr == 24'h800204;
-wire  econet_tx_state_sel        = mem_addr == 24'h800208;
+wire  econet_tx_reg_sel          = mem_addr[23:8]  == 16'h8002;
 
 // CPU memory read mux
 assign mem_rdata =
@@ -81,7 +79,7 @@ assign mem_rdata =
    timer_ctl_sel     ? { 31'b0, timer_intr } :
    econet_rx_buf_sel ? econet_rx_data        :
    econet_rx_reg_sel ? econet_rx_data        :
-   econet_tx_state_sel ? {30'b0, econet_transmitting, econet_tx_busy } :
+   econet_tx_reg_sel ? econet_tx_reg_data    :
    econet_timer_a_sel ? econet_timer_a_data  :
    32'hAAAAAAAA;
 
@@ -147,22 +145,22 @@ assign econet_tx_p = econet_tx_data;
 assign econet_tx_n = ~econet_tx_data;
 wire econet_transmitting;
 assign econet_tx_enable = ~econet_transmitting;
+wire [31:0] econet_tx_reg_data;
 
 econet_tx_buffered econet_transmitter(
    .reset(reset),
    .econet_clk(econet_clk),
    .econet_data(econet_tx_data),
    .transmitting(econet_transmitting),
-   .busy(econet_tx_busy),
    .receiving(econet_receiving),
    
    .sys_clk(clk),
    .sys_we(cpu_we),
    .sys_select(econet_tx_buf_sel),
+   .sys_select_reg(econet_tx_reg_sel),
    .sys_addr(mem_addr[9:2]),
-   .sys_data(mem_wdata),
-   .sys_select_frame_start(econet_tx_sel_frame_start),
-   .sys_select_buffer_end(econet_tx_sel_frame_end));
+   .sys_wdata(mem_wdata),
+   .sys_rdata(econet_tx_reg_data));
 
 wire econet_timer_a_intr;
 wire [31:0] econet_timer_a_data;

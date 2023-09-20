@@ -83,6 +83,8 @@ econet_rx:
    sw       s2, 4(a1)                  # set econet_pending_port
 
 .econet_ack:
+   li       s1, BIT_TX_TURNAROUND      # Tell the transmitter it doesn't have to wait 15 bit cycles
+   sw       s1, OFFS_TXSTATUS(a0)      # after the receiver goes idle.
    lw       s1, OFFS_REPLYADDR(a0)     # get reply address word
    la       a2, ECONET_TXBUF           # transmit buffer
    sw       s1, 0(a2)                  # reply address word makes the scout ack frame
@@ -118,6 +120,8 @@ econet_rx:
    addi     s2, s2, -6                 # which should be 6 bytes (addr + FCS)
    bnez     s2, .tx_error              # if not, bale out now. 
    # TODO: verify the ack is from the correct station!
+   li       s1, BIT_TX_TURNAROUND      # Tell the transmitter it doesn't have to wait 15 bit cycles
+   sw       s1, OFFS_TXSTATUS(a0)      # after the receiver goes idle.
    li       s1, ECONET_STATE_TXDATA    # next state - transmit data packet
    sw       s1, 0(a1)
    lw       a2, 16(a1)                 # data packet start offset
