@@ -9,7 +9,7 @@ module econet_tx_buffered
    input          sys_clk,
    input [3:0]    sys_we,
    input          sys_select,
-   input [7:0]    sys_addr,         // bits [9:2]
+   input [9:0]    sys_addr,         // bits [11:2]
    input [31:0]   sys_wdata,
    output [31:0]  sys_rdata,        // Only for registers (buffer doesn't have a system write port)
    input          sys_select_reg
@@ -19,8 +19,8 @@ module econet_tx_buffered
    parameter REG_ENDADDR      = 2'b01;     // offset 4
    parameter REG_CONTROL      = 2'b10;     // offset 8
 
-   parameter ECO_BUFSZ        = 512;
-   parameter ECO_CNTWIDTH     = 9;
+   parameter ECO_BUFSZ        = 2048;
+   parameter ECO_CNTWIDTH     = 11;
 
    parameter STATE_IDLE       = 3'b000;
    parameter STATE_RXWAIT     = 3'b001;

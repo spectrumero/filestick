@@ -27,8 +27,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define ECONET_TXBUFSZ     512
-#define ECONET_RXBUFSZ     512
+#define ECONET_TXBUFSZ     2048
+#define ECONET_RXBUFSZ     2048
 
 // Hardware driver states
 #define STATE_WAITSCOUT    0           // idle
