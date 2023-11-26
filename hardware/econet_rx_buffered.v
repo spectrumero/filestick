@@ -18,7 +18,7 @@ module buffered_econet
    input          sys_buf_select,   // Buffer select (sys_rdata set to buffer at sys_addr)
    input          sys_reg_select,   // Register select (sys_rdata set to register values)
    input [31:0]   sys_wdata,        // CPU write data (address set only)
-   input [7:0]    sys_addr,         // 32-bit addr [9:2]
+   input [9:0]    sys_addr,         // 32-bit addr [11:2]
    output [31:0]  sys_rdata,        // CPU read data
    output         sys_frame_valid,  // true when a valid frame is received
    output         receiving         // true while receiving
@@ -34,8 +34,8 @@ module buffered_econet
    parameter      REG_OUR_ADDRESS      = 6;     // 0x18
    parameter      REG_STATUS           = 7;     // 0x1C
 
-   parameter      ECO_BUFSZ = 512;
-   parameter      ECO_CNTWIDTH = 9;
+   parameter      ECO_BUFSZ = 2048;
+   parameter      ECO_CNTWIDTH = 11;
    parameter      FCS_GOOD = 16'hF0B8;
 
    reg [31:0]           econet_buf[ECO_BUFSZ >> 2];

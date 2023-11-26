@@ -133,7 +133,7 @@ buffered_econet econet_receiver(
    .sys_wr(cpu_we),
    .sys_buf_select(econet_rx_buf_sel),
    .sys_reg_select(econet_rx_reg_sel),
-   .sys_addr(mem_addr[9:2]),
+   .sys_addr(mem_addr[11:2]),
    .sys_rdata(econet_rx_data),
    .sys_wdata(mem_wdata),
    .sys_frame_valid(econet_rx_valid),
@@ -158,7 +158,7 @@ econet_tx_buffered econet_transmitter(
    .sys_we(cpu_we),
    .sys_select(econet_tx_buf_sel),
    .sys_select_reg(econet_tx_reg_sel),
-   .sys_addr(mem_addr[9:2]),
+   .sys_addr(mem_addr[11:2]),
    .sys_wdata(mem_wdata),
    .sys_rdata(econet_tx_reg_data));
 
