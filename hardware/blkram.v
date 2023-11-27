@@ -16,7 +16,7 @@ assign data_out = d_reg;
 
 initial begin
 `ifdef BENCH
-   $readmemh("../stage2/stage2.hex", mem);
+   $readmemh("test.hex", mem);
 `else
    $readmemh("filestick-boot.hex", mem);
 `endif   

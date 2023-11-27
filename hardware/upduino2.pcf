@@ -9,7 +9,7 @@ set_io -nowarn led_blue	40
 # FTDI chip interface
 set_io -nowarn serial_txd 14 # FPGA transmit to USB
 set_io -nowarn serial_rxd 15 # FPGA receive from USB
-set_io -nowarn spi_cs 16 # Connected to SPI flash, drive high unless using SPI flash!
+set_io -nowarn spi_ss[0] 16 # Connected to SPI flash, drive high unless using SPI flash!
 #set_io -nowarn spi_cs  12  # external CS
 
 # If using the FTDI MPSSE engine, the following signals apply
@@ -45,11 +45,11 @@ set_io -nowarn econet_receiving 28
 # clock input. Short across R16 (labelled OSC on the board) to enable 12MHz clock to
 # pin 20.
 set_io -nowarn input_clk 20
-set_io -nowarn gpio_10 10
+set_io -nowarn spi_ss[1] 10
 
 # Following are also found on v2.x of the UPduino
-set_io -nowarn gpio_12 12
-set_io -nowarn gpio_21 21
+set_io -nowarn spi_ss[2] 12
+set_io -nowarn spi_ss[3] 21
 set_io -nowarn gpio_13 13
 set_io -nowarn gpio_19 19
 set_io -nowarn gpio_18 18

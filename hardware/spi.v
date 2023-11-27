@@ -66,10 +66,9 @@ module spi
          reg_bitcount <= 31;
          reg_big_endian <= 1;
          reg_write <= 0;
-         reg_read  <= 0;
       end
 
-      if(select && we && addr == ADDR_CTRLREG) begin
+      else if(select && we && addr == ADDR_CTRLREG) begin
          if(we[0]) begin                        // sets number of bytes per trx
             case(wdata[1:0])
                BYTE:       reg_bitcount <= 7;
@@ -121,6 +120,7 @@ module spi
          state <= STATE_IDLE;
          shift_out <= 0;
          rdhold <= 0;
+         reg_read  <= 0;
       end
       else begin
          case(state)

@@ -15,7 +15,7 @@ module toplevel (
    input wire     uart_rx,
    output wire    uart_tx,
 
-   output         spi_cs,
+   output [3:0]   spi_ss,
    output         spi_sck,
    output         flash_mosi,
    input          flash_miso
@@ -39,6 +39,8 @@ module toplevel (
 wire [31:0]    mem_addr;
 wire [31:0]    mem_wdata;
 wire [31:0]    mem_rdata;
+wire           mem_rbusy;
+wire           mem_wbusy;
 wire [3:0]     cpu_we;
 wire           cpu_rd;
 wire           int;
@@ -54,8 +56,7 @@ wire  timer_ctl_sel  =  mem_addr == 24'h800008;
 wire  uart_sel       =  mem_addr == 24'h80000C;
 wire  uart_state_sel =  mem_addr == 24'h800010;
 `ifndef USE_SLOWROM
-wire  flashrom_spi_sel = mem_addr == 24'h800014;
-wire  flashrom_spi_ss_rst = mem_addr == 24'h800018;
+wire  spi_sel        =  mem_addr == 20'h80002;
 `endif
 
 // Econet selectors
@@ -72,7 +73,7 @@ assign mem_rdata =
    `ifdef USE_SLOWROM
    slowrom_sel       ? slowrom_rdata :
    `else
-   flashrom_spi_sel  ? { 23'b0, flashrom_spi_ready, flashrom_spi_rdata } :
+   spi_sel           ? spi_rdata    :
    `endif
    uart_sel          ? uart_rdata   :
    uart_state_sel    ? uart_rstate  :
@@ -92,8 +93,8 @@ FemtoRV32 #(
    .mem_wmask(cpu_we),
    .mem_rdata(mem_rdata),
    .mem_rstrb(cpu_rd),
-   .mem_rbusy(slowrom_rbusy),
-   .mem_wbusy(1'b0),
+   .mem_rbusy(mem_rbusy),
+   .mem_wbusy(mem_wbusy),
    .interrupt_request(int),
    .reset(~reset)
 );
@@ -320,24 +321,25 @@ always @(posedge clk)
 
 //-------spi------------------
 `ifndef USE_SLOWROM
-wire flashrom_spi_we = flashrom_spi_sel & cpu_we[0];
-wire [7:0] flashrom_spi_rdata;
-wire       flashrom_spi_ready;
-spicore #(
+wire [31:0]       spi_rdata;
+spi #(
    .POLARITY(1)
-   ) flashrom_spi (
-   .reset(reset),
-   .clk(clk),
-   .we(flashrom_spi_we),
-   .spi_di(mem_wdata[7:0]),
-   .spi_do(flashrom_spi_rdata),
-   .ready(flashrom_spi_ready),
-   .spi_ss_reset(flashrom_spi_ss_rst),
+   ) spicore (
+      .reset(reset),
+      .clk(clk),
+      .we(cpu_we),
+      .rd(cpu_rd),
+      .select(spi_sel),
+      .addr(mem_addr[3:2]),
+      .wdata(mem_wdata),
+      .wbusy(mem_wbusy),
+      .rdata(spi_rdata),
+      .rbusy(mem_rbusy),
 
-   .spi_clk(spi_sck),
-   .spi_ss(spi_cs),
-   .spi_miso(flash_miso),
-   .spi_mosi(flash_mosi));
+      .spi_clk(spi_sck),
+      .spi_ss(spi_ss),
+      .spi_miso(flash_miso),
+      .spi_mosi(flash_mosi));
 `endif
 
 // ---------- Reset -----------
