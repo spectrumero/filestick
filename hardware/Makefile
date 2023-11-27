@@ -16,8 +16,8 @@ bintohex:	$(OBJS)
 toplevel.bin: toplevel.asc
 	$(ICEPACK) toplevel.asc toplevel.bin
 
-toplevel.asc: toplevel.json upduino.pcf
-	$(NEXTPNR) --up5k --package sg48 --json toplevel.json --pcf upduino.pcf --asc toplevel.asc 
+toplevel.asc: toplevel.json upduino2.pcf
+	$(NEXTPNR) --up5k --package sg48 --json toplevel.json --pcf upduino2.pcf --asc toplevel.asc 
 
 toplevel.json: $(BINTOHEX) $(VERILOG_SRC)
 	$(BINTOHEX) ../build/boot/filestick-boot.bin filestick-boot.hex
