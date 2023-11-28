@@ -48,8 +48,10 @@ module spi
    // set output
    wire rd_datareg = (addr == ADDR_DATAREG) & select & rd;
    wire wr_datareg = (addr == ADDR_DATAREG) & select & (we != 0);
+   wire wr_ctrlreg = (addr == ADDR_CTRLREG) & select & (we != 0);
    assign rdata = addr == ADDR_DATAREG ? reg_read :
                   addr == ADDR_IMMDATA ? reg_read :
+                  addr == ADDR_CTRLREG ? { 7'b0, ss_active, 7'b0, reg_big_endian, 6'b0, reg_ss, 3'b0, reg_bitcount } :
                   32'hAAAAAAAA;
 
    // slave select output
@@ -66,9 +68,10 @@ module spi
          reg_bitcount <= 31;
          reg_big_endian <= 1;
          reg_write <= 0;
+         reg_ss <= 0;
       end
 
-      else if(select && we && addr == ADDR_CTRLREG) begin
+      else if(wr_ctrlreg) begin
          if(we[0]) begin                        // sets number of bytes per trx
             case(wdata[1:0])
                BYTE:       reg_bitcount <= 7;
@@ -78,7 +81,7 @@ module spi
             endcase
          end
 
-         if(we[1])      reg_ss <= wdata[8:7];         // sets which slave select is active
+         if(we[1])      reg_ss <= wdata[9:8];         // sets which slave select is active
          if(we[2])      reg_big_endian <= wdata[16];  // sets endianness
       end
       else if(select && we && (addr == ADDR_DATAREG || addr == ADDR_IMMDATA)) begin
@@ -97,9 +100,10 @@ module spi
    end
 
    // wait control
-   assign wbusy = (select && addr == ADDR_DATAREG && state == STATE_SHIFTING);
+   assign wbusy = (select && wrhold && addr == ADDR_DATAREG);
 
    reg rdhold;
+   reg wrhold;
    assign rbusy = (select && rdhold && addr == ADDR_DATAREG && state == STATE_SHIFTING);
 
    // spi output
@@ -107,7 +111,7 @@ module spi
    assign spi_clk  = state == STATE_SHIFTING & (clk ^ POLARITY);
 
    // trx control
-   wire trx_rq = rd_datareg | wr_datareg;
+   wire trx_rq = rd_datareg | wr_datareg | wrhold;
 
    // SPI state machine
    parameter STATE_IDLE       = 2'b00;
@@ -120,19 +124,28 @@ module spi
          state <= STATE_IDLE;
          shift_out <= 0;
          rdhold <= 0;
+         wrhold <= 0;
          reg_read  <= 0;
+         ss_active <= 0;
       end
       else begin
          case(state)
             STATE_IDLE:
                if(trx_rq) begin
-                  shift_out <= reg_write;
+
+                  // CPU write request, so load SR immediately from wdata
+                  if(wr_datareg) shift_out <= wdata;
+                  else           shift_out <= reg_write;
+
                   state     <= STATE_SHIFTING;
                   bitcount  <= reg_bitcount;
                   ss_active <= 1;
                   if(rd_datareg) rdhold <= 1;
+                  wrhold   <= 0;
                end
-            STATE_SHIFTING:
+               else if(wr_ctrlreg & we[3]) ss_active <= wdata[24];
+
+            STATE_SHIFTING: begin
                if(bitcount == 0) begin
                   reg_read <= shift_in;
                   state    <= STATE_IDLE;
@@ -141,6 +154,8 @@ module spi
                   shift_out <= shift_out << 1;
                   bitcount <= bitcount - 1;
                end
+               if(wr_datareg) wrhold <= 1;
+            end
          endcase
       end
    end
