@@ -49,10 +49,10 @@ module spi
    wire rd_datareg = (addr == ADDR_DATAREG) & select & rd;
    wire wr_datareg = (addr == ADDR_DATAREG) & select & (we != 0);
    wire wr_ctrlreg = (addr == ADDR_CTRLREG) & select & (we != 0);
-   assign rdata = addr == ADDR_DATAREG ? reg_read :
-                  addr == ADDR_IMMDATA ? reg_read :
+   assign rdata = addr == ADDR_DATAREG ? rdata_endian :
+                  addr == ADDR_IMMDATA ? rdata_endian :
                   addr == ADDR_CTRLREG ? { 7'b0, ss_active, 7'b0, reg_big_endian, 6'b0, reg_ss, 3'b0, reg_bitcount } :
-                  32'hAAAAAAAA;
+                  32'hBBBBBBBB;
 
    // slave select output
    assign spi_ss = ss_active ? 
@@ -62,6 +62,14 @@ module spi
                              4'b0111)
                : 4'b1111;
 
+   // Byte order
+   // In big endian mode the high byte gets shifted out first
+   // In little endian mode the low byte gets shifted out first (but still the high bit first)
+   wire [31:0] wdata_endian = reg_big_endian ? wdata :
+      { wdata[7:0], wdata[15:8], wdata[23:16], wdata[31:24] };
+   wire [31:0] rdata_endian = reg_big_endian ? reg_read :
+      { reg_read[7:0], reg_read[15:8], reg_read[23:16], reg_read[31:24] };
+      
    // Set control registers
    always @(posedge clk, posedge reset) begin
       if(reset) begin
@@ -85,17 +93,10 @@ module spi
          if(we[2])      reg_big_endian <= wdata[16];  // sets endianness
       end
       else if(select && we && (addr == ADDR_DATAREG || addr == ADDR_IMMDATA)) begin
-         if(reg_big_endian) begin
-            if(we[0])      reg_write[7:0]    <= wdata[7:0];
-            if(we[1])      reg_write[15:8]   <= wdata[15:8];
-            if(we[2])      reg_write[23:16]  <= wdata[23:16];
-            if(we[3])      reg_write[31:24]  <= wdata[31:24];
-         end else begin
-            if(we[0])      reg_write[31:24]  <= wdata[7:0];
-            if(we[1])      reg_write[23:16]  <= wdata[15:8];
-            if(we[2])      reg_write[15:8]   <= wdata[23:16];
-            if(we[3])      reg_write[7:0]    <= wdata[31:24];
-         end
+         if(we[0])      reg_write[7:0]    <= wdata_endian[7:0];
+         if(we[1])      reg_write[15:8]   <= wdata_endian[15:8];
+         if(we[2])      reg_write[23:16]  <= wdata_endian[23:16];
+         if(we[3])      reg_write[31:24]  <= wdata_endian[31:24];
       end
    end
 
@@ -134,7 +135,7 @@ module spi
                if(trx_rq) begin
 
                   // CPU write request, so load SR immediately from wdata
-                  if(wr_datareg) shift_out <= wdata;
+                  if(wr_datareg) shift_out <= wdata_endian;
                   else           shift_out <= reg_write;
 
                   state     <= STATE_SHIFTING;
@@ -153,6 +154,7 @@ module spi
                end else begin
                   shift_out <= shift_out << 1;
                   bitcount <= bitcount - 1;
+                  if(rd_datareg) rdhold <= 1;
                end
                if(wr_datareg) wrhold <= 1;
             end

@@ -56,7 +56,7 @@ wire  timer_ctl_sel  =  mem_addr == 24'h800008;
 wire  uart_sel       =  mem_addr == 24'h80000C;
 wire  uart_state_sel =  mem_addr == 24'h800010;
 `ifndef USE_SLOWROM
-wire  spi_sel        =  mem_addr == 20'h80002;
+wire  spi_sel        =  mem_addr[23:4] == 20'h80002;
 `endif
 
 // Econet selectors
@@ -82,7 +82,7 @@ assign mem_rdata =
    econet_rx_reg_sel ? econet_rx_data        :
    econet_tx_reg_sel ? econet_tx_reg_data    :
    econet_timer_a_sel ? econet_timer_a_data  :
-   32'hAAAAAAAA;
+   32'hDEADBEEF;
 
 FemtoRV32 #(
    .RESET_ADDR(32'h20000)
