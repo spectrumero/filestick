@@ -1,6 +1,6 @@
 .data
 flashstring:
-.ascii "boot: Flash id: "
+.ascii "TEST: Flash id: "
 .set flashstring_sz, .-flashstring
 crlf:
 .ascii "\r\n"

@@ -9,7 +9,7 @@ project(filestick-boot)
 set(EXECUTABLE_NAME "${PROJECT_NAME}.elf")
 
 enable_language(ASM)
-add_executable(${EXECUTABLE_NAME} stage0.s serial_putc.s serial_write.s spi_flash.s)
+add_executable(${EXECUTABLE_NAME} stage0.S serial_putc.S serial_write.S spi_flash.S)
 add_custom_target(bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_command(
    OUTPUT ${PROJECT_NAME}.bin
