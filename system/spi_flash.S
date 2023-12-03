@@ -111,6 +111,8 @@ flash_memcpy:
    beqz  t3, .copy_done                   # no remainder to deal with?
 
    sb    zero, OFFS_SPI_REG_BITCOUNT(t2)  # byte at a time
+   li    t1, 1
+   sb    t1, OFFS_SPI_REG_ENDIAN(t2)      # set endianness
 .remainder_loop:
    sw    t0, OFFS_SPI_DAT(t2)
    lb    t1, OFFS_SPI_DAT(t2)
