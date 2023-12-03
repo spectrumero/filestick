@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.18.1)
 
+include_directories(BEFORE, "../system")
 set(LINKER_SCRIPT    "stage0.ld")
 set(CMAKE_ASM_FLAGS  "-march=${ARCH}")
 set(CMAKE_EXE_LINKER_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/${LINKER_SCRIPT}")

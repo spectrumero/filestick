@@ -9,8 +9,13 @@
 #define OFFS_TMRCTL        8
 #define OFFS_UART          12
 #define OFFS_UARTSTATE     16
-#define OFFS_SPIFLASH      20
-#define OFFS_SPI_SS        24
+#define OFFS_SPI_DAT       0x20
+#define OFFS_SPI_IMM       0x24
+#define OFFS_SPI_REG       0x28
+#define OFFS_SPI_REG_BITCOUNT  0x28
+#define OFFS_SPI_REG_SS    0x29
+#define OFFS_SPI_REG_ENDIAN 0x2A
+#define OFFS_SPI_REG_ACTIVE 0x2B
 
 // Econet addresses and offsets
 #define ECONET_RXBUF       0x810000

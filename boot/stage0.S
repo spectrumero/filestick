@@ -1,9 +1,8 @@
+#include "devices.h"
 .data
 flashstring:
-.ascii "TEST: Flash id: "
+.ascii "boot: Flash id: "
 .set flashstring_sz, .-flashstring
-crlf:
-.ascii "\r\n"
 ok:
 .ascii "...OK\r\n"
 .set ok_sz, .-ok
@@ -16,59 +15,43 @@ booting:
 
 .option arch, +zicsr
 .text
-   la    sp, __stack_top   # initialize stack
-
-   la    s0, 0x800000      # device base
-   li    s1, 1
-   sw    s1, 0(s0)         # turn on RGB LED blue
-
-   la    a0, flashstring
-   li    a1, flashstring_sz
-   call  serial_write
-
-   call  flash_reset       # put flash in a known state
-   call  flash_id
-   call  serial_hexprint
+   la       sp, __stack_top
    
-   li    a1, 0xFFFFFFFF
-   beq   a1, a0, .badflash
+   # global pointer used as IO address space pointer during
+   # bootup sequence.
+   la       gp, DEV_BASE
 
-   la    a0, ok
-   li    a1, ok_sz
-   call  serial_write
+   li       a0, 1
+   sw       a0, OFFS_RGBLED(gp)  # RGB led -> blue
 
-   li    s1, 5
-   sw    s1, 0(s0)         # RGB magenta
+   la       a0, flashstring
+   li       a1, flashstring_sz
+   call     serial_write
 
-   la    a0, booting
-   la    a1, booting_sz
-   call  serial_write 
+   call     flash_reset          # put flash in a known state
+.loop:
+   call     flash_id
+   call     serial_hexprint
+   li       a1, 0xFFFFFFFF       # test that flash is present
+   beq      a1, a0, .badflash    
 
-.flash_copy:
-   li    s1, 0x00000       # destination address
-   li    s2, 0x10000       # bytes to copy
+   # flash address 0x20000, mem addr 0x0000, size 64k
+   li       a0, 0x20000
+   li       a1, 0
+   li       a2, 0x10000
+   call     flash_memcpy
 
-   li    a0, 0x03          # cmd = 3
-   call  flash_byte
-   li    a0, 0x02          # start at flash 0x020000
-   call  flash_byte
-   li    a0, 0x00
-   call  flash_byte
-   li    a0, 0x00
-   call  flash_byte
-.flash_copy_loop:
-   li    a0, 0x00
-   call  flash_byte        # byte now in lowest 8 bits of a0
-   sb    a0, 0(s1)         # store it
-   addi  s1, s1, 1
-   addi  s2, s2, -1
-   bnez  s2, .flash_copy_loop
+   la       a0, ok
+   li       a1, ok_sz
+   call     serial_write
 
-   la    a0, ok
-   li    a1, ok_sz
-   call  serial_write
+   # dump out first 32 bytes so we can check that things look OK
+   li       a0, 0
+   li       a1, 32
+   call     serial_hexdump
 
-   j     0x00000           # run
+   # run
+   j        0x00000
 
 .badflash:
    la    a0, bad
@@ -79,6 +62,4 @@ booting:
    sw    s1, 0(s0)         # RGB LED red
 .halt:
    j     .halt
-
-   
 
