@@ -44,6 +44,7 @@ module spi
    reg [31:0]  shift_in;         // SPI input reg
    reg [31:0]  shift_out;        // SPI output reg
    reg         ss_active;        // slave select active
+   reg         ss_req_active;    // allows delayed change to ss_active
 
    // set output
    wire rd_datareg = (addr == ADDR_DATAREG) & select & rd;
@@ -93,10 +94,17 @@ module spi
          if(we[2])      reg_big_endian <= wdata[16];  // sets endianness
       end
       else if(select && we && (addr == ADDR_DATAREG || addr == ADDR_IMMDATA)) begin
-         if(we[0])      reg_write[7:0]    <= wdata_endian[7:0];
-         if(we[1])      reg_write[15:8]   <= wdata_endian[15:8];
-         if(we[2])      reg_write[23:16]  <= wdata_endian[23:16];
-         if(we[3])      reg_write[31:24]  <= wdata_endian[31:24];
+         if(reg_big_endian) begin
+            if(we[0])      reg_write[7:0]    <= wdata[7:0];
+            if(we[1])      reg_write[15:8]   <= wdata[15:8];
+            if(we[2])      reg_write[23:16]  <= wdata[23:16];
+            if(we[3])      reg_write[31:24]  <= wdata[31:24];
+         end else begin
+            if(we[0])      reg_write[31:24]  <= wdata[7:0];
+            if(we[1])      reg_write[23:16]  <= wdata[15:8];
+            if(we[2])      reg_write[15:8]   <= wdata[23:16];
+            if(we[3])      reg_write[7:0]    <= wdata[31:24];
+         end
       end
    end
 
@@ -135,26 +143,42 @@ module spi
                if(trx_rq) begin
 
                   // CPU write request, so load SR immediately from wdata
-                  if(wr_datareg) shift_out <= wdata_endian;
-                  else           shift_out <= reg_write;
+                  if(wr_datareg)       shift_out <= wdata_endian;
+                  else                 shift_out <= reg_write;
 
                   state     <= STATE_SHIFTING;
                   bitcount  <= reg_bitcount;
                   ss_active <= 1;
+                  ss_req_active <= 1;
                   if(rd_datareg) rdhold <= 1;
                   wrhold   <= 0;
                end
-               else if(wr_ctrlreg & we[3]) ss_active <= wdata[24];
+               else if(wr_ctrlreg & we[3]) begin
+                  ss_active <= wdata[24];
+                  ss_req_active <= wdata[24];
+               end
 
             STATE_SHIFTING: begin
                if(bitcount == 0) begin
                   reg_read <= shift_in;
                   state    <= STATE_IDLE;
                   rdhold   <= 0;
+
+                  // ss_active can only change state when
+                  // shifting is complete.
+                  if(wr_ctrlreg & we[3]) begin
+                     ss_active <= wdata[24];
+                     ss_req_active <= wdata[24];
+                  end else
+                     ss_active <= ss_req_active;
+
                end else begin
                   shift_out <= shift_out << 1;
                   bitcount <= bitcount - 1;
                   if(rd_datareg) rdhold <= 1;
+
+                  // ss_active can't change, but we can queue a change.
+                  if(wr_ctrlreg & we[3]) ss_req_active <= wdata[24];
                end
                if(wr_datareg) wrhold <= 1;
             end
