@@ -25,14 +25,16 @@
 # Interrupt service routine
 
 #include "devices.h"
+#include "cpu.h"
+
+.option arch, +zicsr
 
 .text
 .globl isr_trap
+
+// When we arrive in the ISR, we are using the interrupt register bank.
 isr_trap:
-   addi     sp, sp, -16
-   sw       ra, 12(sp)
-   sw       a1, 8(sp)
-   sw       a0, 4(sp)
+   csrr     sp, CSR_SP                 # fetch the stack ptr from the main bank
 
    la       ra, .isr_exit              # return here
    la       a0, DEV_BASE
@@ -57,9 +59,5 @@ isr_trap:
    sw       a1, OFFS_RGBLED(a0)
    
 .isr_exit:   
-   lw       a0, 4(sp)
-   lw       a1, 8(sp)
-   lw       ra, 12(sp)
-   addi     sp, sp, 16
    mret
 
