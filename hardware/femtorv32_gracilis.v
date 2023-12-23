@@ -22,15 +22,18 @@
 // * Added some illegal instruction support
 // * Added define ENABLE_MULDIV to enable the multiply/divide instructions,
 // (with ENABLE_MULDIV not set, instruction set is RV32IC)
+// * Added an extra bank of registers when an interrupt is handled.
+// * Added some wires to the simulation so registers can easily be examined.
 //
 // Dylan Smith, 2023
 /******************************************************************************/
 
 // Firmware generation flags for this processor
-`define NRV_ARCH     "rv32imac"
+`define NRV_ARCH     "rv32ic"
 `define NRV_ABI      "ilp32"
 `define NRV_OPTIMIZE "-O3"
 `define NRV_INTERRUPTS
+`define EXTRABANK 
 
 module FemtoRV32(
    input          clk,
@@ -99,12 +102,21 @@ module FemtoRV32(
 
    reg [31:0] rs1;
    reg [31:0] rs2;
+`ifdef EXTRABANK
+   reg [31:0] registerFile[63:0];
+   reg bankSelect;
+`else
    reg [31:0] registerFile [31:0];
+`endif
 
    always @(posedge clk) begin
      if (writeBack)
        if (rdId != 0)
+         `ifdef EXTRABANK
+         registerFile[bankSelect ? rdId + 32 : rdId] <= writeBackData;
+         `else
          registerFile[rdId] <= writeBackData;
+         `endif
    end
 
    /***************************************************************************/
@@ -356,6 +368,13 @@ module FemtoRV32(
    wire sel_scause =  (instr[31:20] == 12'h142);
    //---------------------
 
+`ifdef EXTRABANK
+   //---------------------
+   // extra register set - gives sight of all banks
+   wire sel_regpeek = (instr[31:26] == 6'b110111);  // 0xDC0 to 0xDFF - custom supervisor RO
+   wire [5:0] sel_regfile = instr[25:20];
+`endif
+
    // Read CSRs
    /* verilator lint_off WIDTH */
    wire [31:0] CSR_read =
@@ -369,7 +388,12 @@ module FemtoRV32(
      (sel_stvec   ? stvec                  : 32'b0) |
      (sel_sscratch? sscratch               : 32'b0) |
      (sel_sepc    ? sepc                   : 32'b0) |
+`ifdef EXTRABANK
+     (sel_scause  ? {28'b0, scause}        : 32'b0) |
+     (sel_regpeek ? registerFile[sel_regfile] : 32'b0);
+`else
      (sel_scause  ? {28'b0, scause}        : 32'b0);
+`endif
    /* verilator lint_on WIDTH */
 
    // Write CSRs: 5 bit unsigned immediate or content of RS1
@@ -550,6 +574,9 @@ module FemtoRV32(
          mcause            <= 0;
          cached_addr       <= {ADDR_WIDTH-2{1'b1}};//Needs to be an invalid addr
          fetch_second_half <= 0;
+         `ifdef EXTRABANK
+            bankSelect <= 0;
+         `endif
       end else begin
 
 	 // See note [1] at the end of this file.
@@ -565,8 +592,13 @@ module FemtoRV32(
 		 end;
 
 		 // Decode instruction
+                 `ifdef EXTRABANK
+                 rs1 <= registerFile[bankSelect ? decompressed[19:15] + 32 : decompressed[19:15]];
+                 rs2 <= registerFile[bankSelect ? decompressed[24:20] + 32 : decompressed[24:20]];
+                 `else
 		 rs1 <= registerFile[decompressed[19:15]];
 		 rs2 <= registerFile[decompressed[24:20]];
+                 `endif
 		 instr      <= decompressed[31:2];
 		 long_instr <= &decomp_input[1:0];
 
@@ -588,6 +620,11 @@ module FemtoRV32(
 		 mepc   <= PC_new;
 		 mcause <= 1;
 		 state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
+
+                 // If we have a separate register bank for machine mode
+                 `ifdef EXTRABANK
+                    bankSelect <= 1;      // switch to interrupt register file
+                 `endif
               end 
               else if(ecall | ebreak | isILLEGAL) begin
                  PC     <= stvec;
@@ -598,7 +635,12 @@ module FemtoRV32(
                  state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
               end else begin
 		 PC <= PC_new;
-		 if (interrupt_return) mcause <= 0;
+                 if (interrupt_return) begin
+                    mcause <= 0;
+                    `ifdef EXTRABANK
+                       bankSelect <= 0;      // switch to regular register file
+                     `endif
+                 end
                  if (supervisor_return) scause <= 0;
 
 		 state <= next_cache_hit & ~next_unaligned_long
@@ -633,10 +675,96 @@ module FemtoRV32(
    end
 
 `ifdef BENCH
+integer i;
    initial begin
       cycles = 0;
-      registerFile[0] = 0;
+
+      for(i = 0; i < 32; i = i + 1) begin
+         registerFile[i] = 0;
+      end
+
+      `ifdef EXTRABANK
+         bankSelect = 0;
+         for(i = 32; i < 64; i = i + 1) begin
+            registerFile[i] = 0;
+         end
+      `endif
    end
+
+   wire [31:0] reg_a0 = registerFile[10];
+   wire [31:0] reg_a1 = registerFile[11];
+   wire [31:0] reg_a2 = registerFile[12];
+   wire [31:0] reg_a3 = registerFile[13];
+   wire [31:0] reg_a4 = registerFile[14];
+   wire [31:0] reg_a5 = registerFile[15];
+   wire [31:0] reg_a6 = registerFile[16];
+   wire [31:0] reg_a7 = registerFile[17];
+
+   wire [31:0] reg_s0 = registerFile[8];
+   wire [31:0] reg_s1 = registerFile[9];
+   wire [31:0] reg_s2 = registerFile[18];
+   wire [31:0] reg_s3 = registerFile[19];
+   wire [31:0] reg_s4 = registerFile[20];
+   wire [31:0] reg_s5 = registerFile[21];
+   wire [31:0] reg_s6 = registerFile[22];
+   wire [31:0] reg_s7 = registerFile[23];
+   wire [31:0] reg_s8 = registerFile[24];
+   wire [31:0] reg_s9 = registerFile[25];
+   wire [31:0] reg_s10= registerFile[26];
+   wire [31:0] reg_s11= registerFile[27];
+
+   wire [31:0] reg_t0 = registerFile[5];
+   wire [31:0] reg_t1 = registerFile[6];
+   wire [31:0] reg_t2 = registerFile[7];
+   wire [31:0] reg_t3 = registerFile[28];
+   wire [31:0] reg_t4 = registerFile[29];
+   wire [31:0] reg_t5 = registerFile[30];
+   wire [31:0] reg_t6 = registerFile[31];
+
+   wire [31:0] reg_zero = registerFile[0];
+   wire [31:0] reg_ra = registerFile[1];
+   wire [31:0] reg_sp = registerFile[2];
+   wire [31:0] reg_gp = registerFile[3];
+   wire [31:0] reg_tp = registerFile[4];
+
+`ifdef EXTRABANK
+   wire [31:0] xtr_a0 = registerFile[10 + 32];
+   wire [31:0] xtr_a1 = registerFile[11 + 32];
+   wire [31:0] xtr_a2 = registerFile[12+ 32];
+   wire [31:0] xtr_a3 = registerFile[13+ 32];
+   wire [31:0] xtr_a4 = registerFile[14+ 32];
+   wire [31:0] xtr_a5 = registerFile[15+ 32];
+   wire [31:0] xtr_a6 = registerFile[16+ 32];
+   wire [31:0] xtr_a7 = registerFile[17+ 32];
+
+   wire [31:0] xtr_s0 = registerFile[8+ 32];
+   wire [31:0] xtr_s1 = registerFile[9+ 32];
+   wire [31:0] xtr_s2 = registerFile[18+ 32];
+   wire [31:0] xtr_s3 = registerFile[19+ 32];
+   wire [31:0] xtr_s4 = registerFile[20+ 32];
+   wire [31:0] xtr_s5 = registerFile[21+ 32];
+   wire [31:0] xtr_s6 = registerFile[22+ 32];
+   wire [31:0] xtr_s7 = registerFile[23+ 32];
+   wire [31:0] xtr_s8 = registerFile[24+ 32];
+   wire [31:0] xtr_s9 = registerFile[25+ 32];
+   wire [31:0] xtr_s10= registerFile[26+ 32];
+   wire [31:0] xtr_s11= registerFile[27+ 32];
+
+   wire [31:0] xtr_t0 = registerFile[5+ 32];
+   wire [31:0] xtr_t1 = registerFile[6+ 32];
+   wire [31:0] xtr_t2 = registerFile[7+ 32];
+   wire [31:0] xtr_t3 = registerFile[28+ 32];
+   wire [31:0] xtr_t4 = registerFile[29+ 32];
+   wire [31:0] xtr_t5 = registerFile[30+ 32];
+   wire [31:0] xtr_t6 = registerFile[31+ 32];
+
+   wire [31:0] xtr_zero = registerFile[0+ 32];
+   wire [31:0] xtr_ra = registerFile[1+ 32];
+   wire [31:0] xtr_sp = registerFile[2+ 32];
+   wire [31:0] xtr_gp = registerFile[3+ 32];
+   wire [31:0] xtr_tp = registerFile[4+ 32];
+`endif
+
 `endif
 
 endmodule
