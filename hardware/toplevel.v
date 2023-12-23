@@ -288,7 +288,7 @@ wire [31:0] uart_rstate = { 28'b0, uart_wr_busy_state, uart_wr_busy, uart_valid 
 
 buart #(
    .FREQ_HZ(CLOCK_HZ),
-   .BAUDS(115200)
+   .BAUDS(230400)
    ) uart (
    .clk(clk),
    .resetq(!reset),

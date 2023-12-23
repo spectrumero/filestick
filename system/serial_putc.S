@@ -22,9 +22,7 @@
 #THE SOFTWARE.
 #
 
-# Handle reception of econet frames.
-# An interrupt is only triggered if the frame has a valid FCS (checksum)
-# and is for our station.
+# UART low level driver
 
 #include "devices.h"
 #include "sysdefs.h"
@@ -52,11 +50,11 @@ serial_putc:
    andi t1, t1, 2             # apply write busy mask
    bne t1, zero, .busy        # wait until uart is free
 
-   li t1, 100                 # delay - there's a bug in the UART that means it prematurely
+//   li t1, 100                 # delay - there's a bug in the UART that means it prematurely
                               # is not busy!
-.delay:
-   addi t1, t1, -1
-   bnez t1, .delay
+//.delay:
+//   addi t1, t1, -1
+//   bnez t1, .delay
    
    sw a0, OFFS_UART(t0)       # send data 
    ret
