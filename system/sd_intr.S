@@ -22,46 +22,14 @@
 #THE SOFTWARE.
 #
 
-# Interrupt service routine
-
 #include "devices.h"
-#include "cpu.h"
 
-.option arch, +zicsr
-
+// Handle SD card switch change interrupts.
 .text
-.globl isr_trap
 
-// When we arrive in the ISR, we are using the interrupt register bank.
-isr_trap:
-   csrr     sp, CSR_SP                 # fetch the stack ptr from the main bank
-
-   la       ra, .isr_exit              # return here
-   la       a0, DEV_BASE
-
-   lw       a1, OFFS_RXSTATUS(a0)      # econet receive status offset
-   andi     a1, a1, 1                  # frame valid waiting bit
-   bnez     a1, econet_rx
-   lw       a1, OFFS_UARTSTATE(a0)     # console uart state
-   andi     a1, a1, 1                  # uart_valid bit
-   bnez     a1, console_rx
-
-   lw       a1, OFFS_TMR_A_STATUS(a0)  # econet timer A status
-   andi     a1, a1, 1
-   bnez     a1, econet_timeout
-
-   lw       a1, OFFS_TMRCTL(a0)        # general timer state
-   bnez     a1, timer_done 
-
-   lw       a1, OFFS_SD_DETECT(a0)     # SD card insert switch
-   andi     a1, a1, 1                  # mask out pin change bit
-   bnez     a1, sdcard_change
-
-.isr_fell_through:
-   la       a0, DEV_BASE
-   li       a1, 7
-   sw       a1, OFFS_RGBLED(a0)
-   
-.isr_exit:   
-   mret
-
+// a0 = device base
+.globl sdcard_change
+sdcard_change:
+   li       a1, 1          // setting MSB will reset the interrupt
+   sw       a1, OFFS_SD_DETECT(a0)
+   ret

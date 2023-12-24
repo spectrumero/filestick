@@ -14,11 +14,11 @@ set_io -nowarn spi_ss[0] 16 # Connected to SPI flash, drive high unless using SP
 
 # If using the FTDI MPSSE engine, the following signals apply
 set_io -nowarn spi_sck 15  # Shared with the flash
-set_io -nowarn spi_ssn 16  # Connected to SPI flash, drive high unless using SPI flash!
+#set_io -nowarn spi_ssn 16  # Connected to SPI flash, drive high unless using SPI flash!
 #set_io -nowarn spi_mosi 17 # Shared with the flash
 #set_io -nowarn spi_miso 14 # Shared with the flash
-set_io flash_mosi 14
-set_io flash_miso 17
+set_io spi_mosi 14
+set_io spi_miso 17
 
 # Normal GPIO pins, left side
 set_io -nowarn uart_brn 23
@@ -50,6 +50,7 @@ set_io -nowarn spi_ss[1] 10
 # Following are also found on v2.x of the UPduino
 set_io -nowarn spi_ss[2] 12
 set_io -nowarn spi_ss[3] 21
+set_io -nowarn sd_present 13
 set_io -nowarn gpio_13 13
 set_io -nowarn gpio_19 19
 set_io -nowarn gpio_18 18

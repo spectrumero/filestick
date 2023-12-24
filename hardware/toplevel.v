@@ -17,11 +17,38 @@ module toplevel (
 
    output [3:0]   spi_ss,
    output         spi_sck,
-   output         flash_mosi,
-   input          flash_miso
+   output         spi_mosi,
+   input          spi_miso,
+
+   input          sd_present
 );
 
-`ifdef DIVIDE_CLOCK
+// Configuration - add the general purpose timer
+`define GP_TIMER
+
+`ifdef PLL_CLOCK
+   parameter CLOCK_HZ = 10000000;
+   wire pll_out;
+   wire pll_lock;
+   wire clk;
+   SB_PLL40_CORE #(
+      .FEEDBACK_PATH("SIMPLE"),
+      .DIVR(4'b0000),
+      .DIVF(7'b0110100),
+      .DIVQ(3'b101),
+      .FILTER_RANGE(3'b001)
+   ) pll1 (
+      .LOCK(pll_lock),
+      .RESETB(1'b1),
+      .REFERENCECLK(input_clk),
+      .PLLOUTGLOBAL(pll_out));
+   reg clk_div;
+   always @(posedge pll_out)
+      clk_div <= clk_div + 1;
+   SB_GB clkbuf(
+      .USER_SIGNAL_TO_GLOBAL_BUFFER(clk_div),
+      .GLOBAL_BUFFER_OUTPUT(clk));
+`elsif DIVIDE_CLOCK
    parameter CLOCK_HZ = 6000000;
    wire clk;
    reg clk_div;
@@ -47,17 +74,15 @@ wire           int;
 
 wire  spram_sel      =  mem_addr[23:17] == 7'b0;   // 0x000000 - 0x01FFFF
 wire  blkram_sel     =  mem_addr[23:17] == 7'b1;   // 0x020000
-`ifdef USE_SLOWROM
-wire  slowrom_sel    =  mem_addr[23:22] == 2'b01;  // 0x400000
-`endif
 wire  rgbled_sel     =  mem_addr == 24'h800000;
+`ifdef GP_TIMER
 wire  timer_set_sel  =  mem_addr == 24'h800004;
 wire  timer_ctl_sel  =  mem_addr == 24'h800008;
+`endif
 wire  uart_sel       =  mem_addr == 24'h80000C;
 wire  uart_state_sel =  mem_addr == 24'h800010;
-`ifndef USE_SLOWROM
+wire  sdstatus_sel   =  mem_addr == 24'h800014;
 wire  spi_sel        =  mem_addr[23:4] == 20'h80002;
-`endif
 
 // Econet selectors
 wire  econet_rx_buf_sel          = mem_addr[23:16] == 8'h81;
@@ -70,18 +95,17 @@ wire  econet_tx_reg_sel          = mem_addr[23:8]  == 16'h8002;
 assign mem_rdata =
    spram_sel         ? spram_rdata  :
    blkram_sel        ? blkram_rdata :
-   `ifdef USE_SLOWROM
-   slowrom_sel       ? slowrom_rdata :
-   `else
    spi_sel           ? spi_rdata    :
-   `endif
    uart_sel          ? uart_rdata   :
    uart_state_sel    ? uart_rstate  :
+   `ifdef GP_TIMER
    timer_ctl_sel     ? { 31'b0, timer_intr } :
+   `endif
    econet_rx_buf_sel ? econet_rx_data        :
    econet_rx_reg_sel ? econet_rx_data        :
    econet_tx_reg_sel ? econet_tx_reg_data    :
    econet_timer_a_sel ? econet_timer_a_data  :
+   sdstatus_sel      ? sdstatus_rdata        :
    32'hDEADBEEF;
 
 FemtoRV32 #(
@@ -175,28 +199,6 @@ timer econet_timer_a(
    .data_out(econet_timer_a_data),
    .interrupt(econet_timer_a_intr));
 
-
-`ifdef USE_SLOWROM
-wire [31:0] slowrom_rdata;
-wire        slowrom_rbusy;
-wire        slowrom_rstrb = slowrom_sel & cpu_rd;
-`define UPDUINO 1
-MappedSPIFlash slowrom (
-   .clk(clk),
-   .rstrb(slowrom_rstrb),
-   .word_address(mem_addr[21:2]),
-   .rdata(slowrom_rdata),
-   .rbusy(slowrom_rbusy),
-
-   .CLK(spi_sck),
-   .CS_N(spi_cs),
-   .MOSI(flash_mosi),
-   .MISO(flash_miso)
-);
-`else
-wire     slowrom_rbusy = 0;
-`endif
-
 // -------   Devices ------
 // RGB LED
 reg [2:0] rgb_led;
@@ -219,6 +221,7 @@ SB_RGBA_DRV RGB_DRIVER (
   defparam RGB_DRIVER.RGB2_CURRENT = "0b000001";
 
 // ----- Timer -------
+`ifdef GP_TIMER
 reg [31:0]  timer_reg;
 reg [31:0]  timer_stop;
 reg         timer_enable;
@@ -270,6 +273,7 @@ always @(posedge clk, posedge timer_intr_reset)
       timer_intr <= 0;
    else if(timer_done)
       timer_intr <= 1;
+`endif // GP_TIMER
 
 //---------------- uart -----------------
 wire uart_wr_busy;
@@ -320,7 +324,6 @@ always @(posedge clk)
 //-------end-uart-------------
 
 //-------spi------------------
-`ifndef USE_SLOWROM
 wire [31:0]       spi_rdata;
 spi #(
    .POLARITY(1)
@@ -338,9 +341,25 @@ spi #(
 
       .spi_clk(spi_sck),
       .spi_ss(spi_ss),
-      .spi_miso(flash_miso),
-      .spi_mosi(flash_mosi));
-`endif
+      .spi_miso(spi_miso),
+      .spi_mosi(spi_mosi));
+
+// ---------- SD card detect ---------
+// Note that data is handled by the SPI
+// module. This just provides the interrupt
+// when a card is inserted/removed and
+// allows reading of the sd_present switch.
+wire [31:0] sdstatus_rdata;
+wire        sdcard_intr;
+sdcard_detect sdcard (
+   .reset(reset),
+   .clk(clk),
+   .select(sdstatus_sel),
+   .we(cpu_we),
+   .wdata(mem_wdata),
+   .rdata(sdstatus_rdata),
+   .pin_change(sdcard_intr),
+   .sd_present_l(sd_present));
 
 // ---------- Reset -----------
 reg         reset = 1;
@@ -354,7 +373,11 @@ always @(posedge clk)
    end
 
 // ------- Interrupts ------------
-assign int = timer_intr | uart_valid | econet_rx_valid | econet_timer_a_intr;
+`ifdef GP_TIMER
+assign int = timer_intr | uart_valid | econet_rx_valid | econet_timer_a_intr | sdcard_intr;
+`else
+assign int = uart_valid | econet_rx_valid | econet_timer_a_intr | sdcard_intr;
+`endif
 
 endmodule
 
