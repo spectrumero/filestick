@@ -113,6 +113,9 @@ module FemtoRV32(
      if (writeBack)
        if (rdId != 0)
          `ifdef EXTRABANK
+         // note that the ternary expression and adding 32 results in the
+         // lowest LC usage and nearly the best maximum frequency, so there
+         // is a really good reason it's like this!
          registerFile[bankSelect ? rdId + 32 : rdId] <= writeBackData;
          `else
          registerFile[rdId] <= writeBackData;
@@ -593,6 +596,10 @@ module FemtoRV32(
 
 		 // Decode instruction
                  `ifdef EXTRABANK
+
+                 // note that the ternary expression and adding 32 results in the
+                 // lowest LC usage and nearly the best maximum frequency, so there
+                 // is a really good reason it's like this!
                  rs1 <= registerFile[bankSelect ? decompressed[19:15] + 32 : decompressed[19:15]];
                  rs2 <= registerFile[bankSelect ? decompressed[24:20] + 32 : decompressed[24:20]];
                  `else
