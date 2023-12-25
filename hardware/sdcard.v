@@ -12,7 +12,7 @@ module sdcard_detect
    input  [31:0]  wdata,
    output         pin_change,
 
-   input          sd_present_l         // active low
+   input          sd_present
 );
 
 reg last_state;
@@ -20,7 +20,6 @@ reg pin_change;
 
 // CPU can reset the state by writing 1 to the LSB.
 wire rst_state = reset | (select & we[0] & wdata[0]);
-wire sd_present = ~sd_present_l;
 assign rdata = { 30'b0, sd_present, pin_change };
 
 always @(posedge clk, posedge rst_state) begin

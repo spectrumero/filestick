@@ -25,6 +25,7 @@ module toplevel (
 
 // Configuration - add the general purpose timer
 `define GP_TIMER
+`define PLL_CLOCK
 
 `ifdef PLL_CLOCK
    parameter CLOCK_HZ = 10000000;
@@ -359,7 +360,7 @@ sdcard_detect sdcard (
    .wdata(mem_wdata),
    .rdata(sdstatus_rdata),
    .pin_change(sdcard_intr),
-   .sd_present_l(sd_present));
+   .sd_present(sd_present));
 
 // ---------- Reset -----------
 reg         reset = 1;
