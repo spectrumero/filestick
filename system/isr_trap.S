@@ -34,6 +34,7 @@
 
 // When we arrive in the ISR, we are using the interrupt register bank.
 isr_trap:
+   csrwi    CSR_REGBANK, 1             # switch to alternate register bank
    csrr     sp, CSR_SP                 # fetch the stack ptr from the main bank
 
    la       ra, .isr_exit              # return here
@@ -59,5 +60,6 @@ isr_trap:
    sw       a1, OFFS_RGBLED(a0)
    
 .isr_exit:   
+   csrwi    CSR_REGBANK, 0             # switch to main register bank
    mret
 

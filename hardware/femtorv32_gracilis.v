@@ -376,6 +376,8 @@ module FemtoRV32(
    // extra register set - gives sight of all banks
    wire sel_regpeek = (instr[31:26] == 6'b110111);  // 0xDC0 to 0xDFF - custom supervisor RO
    wire [5:0] sel_regfile = instr[25:20];
+
+   wire sel_regbank  = (instr[31:20] == 12'h5C0);
 `endif
 
    // Read CSRs
@@ -392,6 +394,7 @@ module FemtoRV32(
      (sel_sscratch? sscratch               : 32'b0) |
      (sel_sepc    ? sepc                   : 32'b0) |
 `ifdef EXTRABANK
+     (sel_regbank ? {31'b0, bankSelect}    : 32'b0) |
      (sel_scause  ? {28'b0, scause}        : 32'b0) |
      (sel_regpeek ? registerFile[sel_regfile] : 32'b0);
 `else
@@ -409,6 +412,9 @@ module FemtoRV32(
    always @(posedge clk) begin
       if(!reset) begin
 	 mstatus <= 0;
+         `ifdef EXTRABANK
+         bankSelect <= 0;
+         `endif
       end else begin
 	 // Execute a CSR opcode
 	 if (isSYSTEM & (instr[14:12] != 0) & state[EXECUTE_bit]) begin
@@ -419,7 +425,10 @@ module FemtoRV32(
             //---- ecall/sret
             if (sel_stvec  )  stvec    <= CSR_write[ADDR_WIDTH-1:0];
             if (sel_sscratch) sscratch <= CSR_write[31:0];
-            //----            
+            //----           
+            `ifdef EXTRABANK
+            if (sel_regbank)  bankSelect <= CSR_write[0]; 
+            `endif
 	 end
       end
    end
@@ -577,9 +586,6 @@ module FemtoRV32(
          mcause            <= 0;
          cached_addr       <= {ADDR_WIDTH-2{1'b1}};//Needs to be an invalid addr
          fetch_second_half <= 0;
-         `ifdef EXTRABANK
-            bankSelect <= 0;
-         `endif
       end else begin
 
 	 // See note [1] at the end of this file.
@@ -628,10 +634,6 @@ module FemtoRV32(
 		 mcause <= 1;
 		 state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
 
-                 // If we have a separate register bank for machine mode
-                 `ifdef EXTRABANK
-                    bankSelect <= 1;      // switch to interrupt register file
-                 `endif
               end 
               else if(ecall | ebreak | isILLEGAL) begin
                  PC     <= stvec;
@@ -644,9 +646,6 @@ module FemtoRV32(
 		 PC <= PC_new;
                  if (interrupt_return) begin
                     mcause <= 0;
-                    `ifdef EXTRABANK
-                       bankSelect <= 0;      // switch to regular register file
-                     `endif
                  end
                  if (supervisor_return) scause <= 0;
 
