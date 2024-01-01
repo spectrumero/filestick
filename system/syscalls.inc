@@ -28,7 +28,7 @@ syscall_table:
 .byte 0           # 37
 .byte 0           # 38
 .byte 0           # 39
-.byte 0           # 40
+.byte 11          # 40 SYS_mount
 .byte 0           # 41
 .byte 0           # 42
 .byte 0           # 43
@@ -118,5 +118,6 @@ syscall_address:
 .word console_hexdump # 8
 .word console_hexword # 9
 .word SYS_ioctl   # 10
+.word SYS_mount   # 11
 
 

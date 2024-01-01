@@ -1,9 +1,7 @@
-#ifndef SPI_H
-#define SPI_H
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2024 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -25,25 +23,43 @@
 */
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <sys/types.h>
+#include <errno.h>
+#include <string.h>
 
-// Deassert slave select.
-void spi_deassert_ss();
+#include "disk_io.h"
+#include "ff.h"         // FatFS
+#include "cust_errno.h"
 
-// Select slave.
-// Valid values are 0 to 3.
-void spi_set_slave(uint8_t slave);
+static FATFS fs;        // FatFS filesystem TODO: array of these
 
-// Write data to SPI
-void spi_write(const void *src, size_t size, bool deassert_ss_when_done);
+// Implements the mount syscall
+int SYS_mount(const char *src, const char *target, const char *fstype,
+              unsigned long mountflags, const void *data)
+{
+   // It's quite likely we'll only ever support fatfs but never say never.
+   if(strcmp(fstype, "fatfs"))
+      return -EINVAL;
 
-// Read data from SPI
-// wr_word is the data to write while reading, normally should be set to
-// a value such as 0xFFFFFFFF or 0x0 depending on the device.
-void spi_read(void *dst, size_t size, bool deassert_ss_when_done, uint32_t wr_word);
+   FRESULT res = f_mount(&fs, "", 1);
 
-// Write/read a single byte. Writes wr_byte and returns what was transferred back.
-uint8_t spi_byte(uint8_t wr_byte);
+   // convert results to standard errno types
+   //return fatfs_to_errno(res);
+   return res;
+}
 
-#endif
+int fatfs_to_errno(FRESULT res) {
+   switch(res) {
+      case FR_OK:
+         return 0;
+      case FR_NO_FILE:
+         return -ENOENT;
+      case FR_NO_PATH:
+         return -ENOENT;
+      case FR_NOT_ENOUGH_CORE:
+         return -ENOMEM;
+      case FR_TOO_MANY_OPEN_FILES:
+         return -ENFILE;
+      default:
+         return -(res + EFATFS_START);
+   }
+}

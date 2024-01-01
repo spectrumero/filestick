@@ -7,5 +7,5 @@ set(LIBRARY_NAME "${PROJECT_NAME}")
 
 enable_language(C ASM)
 include_directories(BEFORE ../include)
-add_library(${LIBRARY_NAME} STATIC sbrk.c ioctl.c)
+add_library(${LIBRARY_NAME} STATIC sbrk.c ioctl.c mount.c)
 

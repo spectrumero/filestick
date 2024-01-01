@@ -59,7 +59,6 @@ uint32_t elf_boot() {
 uint32_t elf_load(int fd, uint32_t offset) {
    Elf32_Ehdr header;
    Elf32_Phdr phdr;
-   ssize_t bytes;
 
    SYS_lseek(fd, offset, SEEK_SET);
    SYS_read(fd, &header, sizeof(Elf32_Ehdr));

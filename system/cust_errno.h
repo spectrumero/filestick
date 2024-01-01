@@ -1,9 +1,9 @@
-#ifndef SPI_H
-#define SPI_H
+#ifndef CUST_ERRNO_H
+#define CUST_ERRNO_H
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2024 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -24,26 +24,8 @@
 ;THE SOFTWARE.
 */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <sys/types.h>
+// More error numbers
 
-// Deassert slave select.
-void spi_deassert_ss();
-
-// Select slave.
-// Valid values are 0 to 3.
-void spi_set_slave(uint8_t slave);
-
-// Write data to SPI
-void spi_write(const void *src, size_t size, bool deassert_ss_when_done);
-
-// Read data from SPI
-// wr_word is the data to write while reading, normally should be set to
-// a value such as 0xFFFFFFFF or 0x0 depending on the device.
-void spi_read(void *dst, size_t size, bool deassert_ss_when_done, uint32_t wr_word);
-
-// Write/read a single byte. Writes wr_byte and returns what was transferred back.
-uint8_t spi_byte(uint8_t wr_byte);
+#define EFATFS_START          2000
 
 #endif

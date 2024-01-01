@@ -1,9 +1,7 @@
-#ifndef SPI_H
-#define SPI_H
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2024 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -24,26 +22,35 @@
 ;THE SOFTWARE.
 */
 
+// mount syscall wrapper
+
 #include <stdint.h>
-#include <stdbool.h>
-#include <sys/types.h>
+#include <errno.h>
 
-// Deassert slave select.
-void spi_deassert_ss();
+#define SYS_MOUNT    40
 
-// Select slave.
-// Valid values are 0 to 3.
-void spi_set_slave(uint8_t slave);
+int mount(const char *source, const char *target, const char *filesystemtype,
+      unsigned long mountflags, const void *data)
+{
+   register uint32_t       syscall  asm("a7") = SYS_MOUNT;
+   register const char *   _src     asm("a0");
+   register const char *   _tgt     asm("a1");
+   register const char *   _fstype  asm("a2");
+   register uint32_t       _mntflg  asm("a3");
+   register const void *   _data    asm("a4");
+   register int            _rc      asm("a0");
+   _src = source;
+   _tgt = target;
+   _fstype = filesystemtype;
+   _mntflg = mountflags;
+   _data = data;
+   asm volatile("ecall"
+         : "=r"(_rc)
+         : "r"(_src), "r"(_tgt), "r"(_fstype), "r"(_mntflg), "r"(_data), "r"(syscall));
+   if(_rc < 0) {
+      errno = _rc;
+      return -1;
+   }
+   return 0;
+}
 
-// Write data to SPI
-void spi_write(const void *src, size_t size, bool deassert_ss_when_done);
-
-// Read data from SPI
-// wr_word is the data to write while reading, normally should be set to
-// a value such as 0xFFFFFFFF or 0x0 depending on the device.
-void spi_read(void *dst, size_t size, bool deassert_ss_when_done, uint32_t wr_word);
-
-// Write/read a single byte. Writes wr_byte and returns what was transferred back.
-uint8_t spi_byte(uint8_t wr_byte);
-
-#endif
