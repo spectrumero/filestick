@@ -152,3 +152,14 @@ spi_read:
 
 .read_exit:
    ret
+
+.globl spi_byte
+// uint8_t spi_byte(uint8_t wr_byte);
+spi_byte:
+   li    t0, DEV_BASE
+   sb    zero, OFFS_SPI_REG_BITCOUNT(t0)  # bytes per xfer = 1
+   sb    zero, OFFS_SPI_REG_ENDIAN(t0)    # set endianness
+   sb    a0, OFFS_SPI_DAT(t0)             # write out pattern in arg
+   lbu   a0, OFFS_SPI_DAT+3(t0)           # read result into a0
+   ret
+

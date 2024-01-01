@@ -43,4 +43,7 @@ void spi_write(void *src, size_t size, bool deassert_ss_when_done);
 // a value such as 0xFFFFFFFF or 0x0 depending on the device.
 void spi_read(void *dst, size_t size, bool deassert_ss_when_done, uint32_t wr_word);
 
+// Write/read a single byte. Writes wr_byte and returns what was transferred back.
+uint8_t spi_byte(uint8_t wr_byte);
+
 #endif
