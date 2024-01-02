@@ -1,5 +1,5 @@
-#ifndef CUST_ERRNO_H
-#define CUST_ERRNO_H
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
 /*
 ;The MIT License
 ;
@@ -23,10 +23,16 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
+#include <stdint.h>
+#include "ff.h"
+#include <sys/dirent.h>
 
-// More error numbers
-
-#define EBADSYSCALL           2000
-#define EFATFS_START          2001
+int SYS_mount(const char *src, const char *target, const char *fstype,
+              unsigned long mountflags, const void *data);
+int fatfs_to_errno(FRESULT res);
+int SYS_opendir(DIR *dir, const char *path);
+int SYS_closedir(DIR *dir);
+int SYS_readdir(DIR *dir, struct dirent *d);
 
 #endif
+

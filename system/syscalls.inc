@@ -6,15 +6,15 @@
 .data
 syscall_table:
 .byte 0           # 17 SYS_getcwd
-.byte 0           # 18
-.byte 0           # 19
-.byte 0           # 20
-.byte 0           # 21
+.byte 12          # 18 SYS_opendir (nonstd)
+.byte 13          # 19 SYS_closedir (nonstd)
+.byte 14          # 20 SYS_readdir (nonstd)
+.byte 0           # 21 
 .byte 0           # 22
 .byte 0           # 23 SYS_dup
 .byte 0           # 24
 .byte 0           # 25 SYS_fcntl
-.byte 0           # 26
+.byte 0           # 26 
 .byte 0           # 27
 .byte 0           # 28
 .byte 10          # 29 SYS_ioctl
@@ -119,5 +119,7 @@ syscall_address:
 .word console_hexword # 9
 .word SYS_ioctl   # 10
 .word SYS_mount   # 11
-
+.word SYS_opendir # 12
+.word SYS_closedir # 13
+.word SYS_readdir # 14
 

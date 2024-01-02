@@ -1,5 +1,5 @@
-#ifndef DISKIO_H
-#define DISKIO_H
+#ifndef DIRENT_H
+#define DIRENT_H
 /*
 ;The MIT License
 ;
@@ -24,11 +24,24 @@
 ;THE SOFTWARE.
 */
 #include <stdint.h>
-#include "ff.h"
+#include <stdbool.h>
 
-int SYS_mount(const char *src, const char *target, const char *fstype,
-              unsigned long mountflags, const void *data);
-int fatfs_to_errno(FRESULT res);
+// Somewhat not-posix dirent
+struct dirent {
+   char        d_name[256];
+   bool        d_isdir;
+   uint32_t    d_size;
+};
+
+// in system, this exists and is defined by ff.h
+// outside of system, this should be opaque.
+#ifndef SYSTEM
+typedef struct _DIR DIR;
+
+DIR *opendir(const char *name);
+int closedir(DIR *dirp);
+struct dirent *readdir(DIR *dirp);
+#endif
 
 #endif
 

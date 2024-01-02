@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "disk_io.h"
+#include "filesystem.h"
 #include "ff.h"         // FatFS
 #include "cust_errno.h"
 
@@ -43,8 +43,7 @@ int SYS_mount(const char *src, const char *target, const char *fstype,
    FRESULT res = f_mount(&fs, "", 1);
 
    // convert results to standard errno types
-   //return fatfs_to_errno(res);
-   return res;
+   return fatfs_to_errno(res);
 }
 
 int fatfs_to_errno(FRESULT res) {

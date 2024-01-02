@@ -1,5 +1,3 @@
-#ifndef CUST_ERRNO_H
-#define CUST_ERRNO_H
 /*
 ;The MIT License
 ;
@@ -24,9 +22,40 @@
 ;THE SOFTWARE.
 */
 
-// More error numbers
+// Directory access syscalls. These are somewhat minimal wrappers around
+// FatFS calls.
 
-#define EBADSYSCALL           2000
-#define EFATFS_START          2001
+#include <stdbool.h>
+#include <stdint.h>
+#include <sys/dirent.h>
+#include <string.h>
 
-#endif
+#include "ff.h"
+#include "filesystem.h"
+
+int SYS_opendir(DIR *dir, const char *path)
+{
+   FRESULT res = f_opendir(dir, path);
+   return fatfs_to_errno(res);
+}
+
+int SYS_closedir(DIR *dir)
+{
+   FRESULT res = f_closedir(dir);
+   return fatfs_to_errno(res);
+}
+
+int SYS_readdir(DIR *dir, struct dirent *d)
+{
+   FILINFO fno;
+
+   FRESULT res = f_readdir(dir, &fno);
+   if(res = FR_OK) {
+      strcpy(d->d_name, fno.fname);
+      d->d_isdir = fno.fattrib & AM_DIR;
+      d->d_size = fno.fsize;
+   }
+
+   return fatfs_to_errno(res);
+}
+

@@ -1,5 +1,3 @@
-#ifndef CUST_ERRNO_H
-#define CUST_ERRNO_H
 /*
 ;The MIT License
 ;
@@ -24,9 +22,44 @@
 ;THE SOFTWARE.
 */
 
-// More error numbers
+#define SYS_opendir     18
+#define SYS_closedir    19
+#define SYS_readdir     20
+#define SYS_mount       40
 
-#define EBADSYSCALL           2000
-#define EFATFS_START          2001
+// Syscall wrappers
+.text
+.globl mount
+mount:
+   li       a7, SYS_mount
+   j        syscall
+.globl opendir
+opendir:
+   li       a7, SYS_opendir
+   j        syscall
+.globl closedir
+closedir:
+   li       a7, SYS_closedir
+   j        syscall
+.globl _readdir
+_readdir:
+   li       a7, SYS_readdir
 
-#endif
+.globl syscall
+syscall:                      // Syscall number in a7
+   ecall
+   bgez     a0, .sys_done     // OK if return >= 0
+   addi     sp, sp, -16
+   sw       ra, 12(sp)
+   sw       s0, 8(sp)
+   mv       s0, a0            // save error number
+   call     __errno           // get address of errno
+   neg      s0, s0            // errno is positive, so negate return code
+   sw       s0, 0(a0)         // store in errno
+   li       a0, -1            // rc = -1
+
+   lw       s0, 8(sp)
+   lw       ra, 12(sp)
+.sys_done:
+   addi     sp, sp, 16
+   ret
