@@ -6,7 +6,7 @@ ICEPROG=iceprog
 BINTOHEX=./bintohex
 OBJS=bintohex.o
 
-VERILOG_SRC=toplevel.v femtorv32_gracilis.v blkram.v uart_picosoc_shrunk.v MappedSPIFlash.v spi.v ice40up5k_spram.v econet_rx_buffered.v econet_rx_phy.v econet_rx.v fcs.v econet_tx_buffered.v econet_tx_phy.v timer.v sdcard.v
+VERILOG_SRC=toplevel.v femtorv32_gracilis.v blkram.v uart_picosoc_shrunk.v MappedSPIFlash.v spi.v ice40up5k_spram.v econet_rx_buffered.v econet_rx_phy.v econet_rx.v fcs.v econet_tx_buffered.v econet_tx_phy.v timer.v sdcard.v 
 
 all:	bintohex toplevel.bin
 
@@ -21,7 +21,7 @@ toplevel.asc: toplevel.json upduino2.pcf
 
 toplevel.json: $(BINTOHEX) $(VERILOG_SRC)
 	$(BINTOHEX) ../build/boot/filestick-boot.bin filestick-boot.hex
-	$(YOSYS) -q -p "synth_ice40 -json toplevel.json -top toplevel" $(VERILOG_SRC)
+	$(YOSYS) -q -p "synth_ice40 -dsp -json toplevel.json -top toplevel" $(VERILOG_SRC)
 
 .PHONY: flash
 flash:

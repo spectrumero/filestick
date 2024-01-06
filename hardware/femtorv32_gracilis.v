@@ -34,6 +34,7 @@
 `define NRV_OPTIMIZE "-O3"
 `define NRV_INTERRUPTS
 `define EXTRABANK 
+`define ENABLE_MULDIV
 
 module FemtoRV32(
    input          clk,
