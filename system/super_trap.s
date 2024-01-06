@@ -32,6 +32,7 @@
 
 .option arch, +zicsr
 .text
+#define STACK_TOP 0xFF00
 
 ##---------------------------------------------------------------------------
 ## supervisor trap entry point: don't use the temp registers because we could
@@ -39,12 +40,13 @@
 .globl super_trap
 super_trap:
    csrw     sscratch, sp      # store userland stack pointer
-   la       sp, __stack_top - 16   # set up supervisor stack
-   sw       s1, 0(sp)         # save s1
-   sw       s2, 4(sp)         # save s2
-   sw       ra, 8(sp)
+#   la       sp, __stack_top - 16   # set up supervisor stack
+   li       sp, 0xFEF0
+   sw       s1, 0(sp)         # save s1      128
+   sw       s2, 4(sp)         # save s2      132
+   sw       ra, 8(sp)         #              136
    csrr     s1, sscratch      # retrieve user stack ptr
-   sw       s1, 12(sp)        # save it on the stack IMPORTANT: always store at 12(sp)
+   sw       s1, 12(sp)        # save it on the stack IMPORTANT: always store at 12(sp) (142)
                               # some syscalls check the user sp!
 
    la       ra, .trap_done
@@ -63,9 +65,9 @@ super_trap:
    sw       a6, 24(sp)
    sw       a7, 28(sp)
    sw       s0, 32(sp)
-   lw       a0, 124(sp)       # original s1 
+   lw       a0, 128(sp)       # original s1 
    sw       a0, 36(sp)
-   lw       a0, 128(sp)       # original s2
+   lw       a0, 132(sp)       # original s2
    sw       a0, 40(sp)
    sw       s3, 44(sp)
    sw       s4, 48(sp)
@@ -85,9 +87,9 @@ super_trap:
    sw       t6, 104(sp)
    sw       gp, 108(sp)
    sw       tp, 112(sp)
-   lw       a0, 132(sp)       # original ra
+   lw       a0, 136(sp)       # original ra
    sw       a0, 116(sp)
-   lw       a0, 136(sp)       # user sp
+   lw       a0, 142(sp)       # user sp
    sw       a0, 120(sp)
    csrr     a0, sepc
    sw       a0, 124(sp)       # supervisor trap return address

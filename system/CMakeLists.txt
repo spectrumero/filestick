@@ -13,7 +13,7 @@ set_property(SOURCE dev_open.c memcpy.c console.c strncmp.c strcmp.c rgbled.c br
 
 enable_language(C ASM)
 include_directories(BEFORE ../include)
-add_executable(${EXECUTABLE_NAME} init.s super_trap.s isr_trap.S timer.s console_rx.s serial_putc.S spi_flash.S econet_rx.S fd.c dev_open.c memset.S memcpy.c console.c raw_econet.c strncmp.c strcmp.c rgbled.c brk.c exit.c spi_flashdev.c elfload.c strlen.c elfload.c crash.c regdump.c debug_syscall.c spi.S sd_intr.S sd_io.c sd_ldio.c diskio.c ff.c ffunicode.c mount.c directory.c memcmp.c strchr.c muldi3.S div.S)
+add_executable(${EXECUTABLE_NAME} init.S super_trap.s isr_trap.S timer.s console_rx.s serial_putc.S spi_flash.S econet_rx.S fd.c dev_open.c memset.S memcpy.c console.c raw_econet.c strncmp.c strcmp.c strlcpy.c rgbled.c brk.c exit.c spi_flashdev.c elfload.c strlen.c elfload.c crash.c regdump.c debug_syscall.c spi.S sd_intr.S sd_io.c sd_ldio.c diskio.c ff.c ffunicode.c mount.c directory.c memcmp.c strchr.c )
 target_include_directories(${EXECUTABLE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_custom_target(system_bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_command(

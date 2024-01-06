@@ -22,35 +22,17 @@
 ;THE SOFTWARE.
 */
 
-// mount syscall wrapper
+#include <stdlib.h>
+#include <sys/dirent.h>
 
-#include <stdint.h>
-#include <errno.h>
+#include "syscall.h"
 
-#define SYS_MOUNT    40
+static struct dirent d;
 
-int mount(const char *source, const char *target, const char *filesystemtype,
-      unsigned long mountflags, const void *data)
+struct dirent *readdir(int dirhnd)
 {
-   register uint32_t       syscall  asm("a7") = SYS_MOUNT;
-   register const char *   _src     asm("a0");
-   register const char *   _tgt     asm("a1");
-   register const char *   _fstype  asm("a2");
-   register uint32_t       _mntflg  asm("a3");
-   register const void *   _data    asm("a4");
-   register int            _rc      asm("a0");
-   _src = source;
-   _tgt = target;
-   _fstype = filesystemtype;
-   _mntflg = mountflags;
-   _data = data;
-   asm volatile("ecall"
-         : "=r"(_rc)
-         : "r"(_src), "r"(_tgt), "r"(_fstype), "r"(_mntflg), "r"(_data), "r"(syscall));
-   if(_rc < 0) {
-      errno = _rc;
-      return -1;
-   }
-   return 0;
-}
+   int rc = _readdir(dirhnd, &d);
+   if(rc < 0 || d.d_name[0] == 0) return NULL;
 
+   return &d;
+}

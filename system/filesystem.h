@@ -27,12 +27,18 @@
 #include "ff.h"
 #include <sys/dirent.h>
 
+typedef struct {
+   bool  open;
+   DIR   dir;
+} DIRHND;
+
+void init_dirs(void);
 int SYS_mount(const char *src, const char *target, const char *fstype,
               unsigned long mountflags, const void *data);
 int fatfs_to_errno(FRESULT res);
-int SYS_opendir(DIR *dir, const char *path);
-int SYS_closedir(DIR *dir);
-int SYS_readdir(DIR *dir, struct dirent *d);
+int SYS_opendir(const char *path);
+int SYS_closedir(int dh);
+int SYS_readdir(int dh, struct dirent *d);
 
 #endif
 

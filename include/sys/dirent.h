@@ -36,11 +36,11 @@ struct dirent {
 // in system, this exists and is defined by ff.h
 // outside of system, this should be opaque.
 #ifndef SYSTEM
-typedef struct _DIR DIR;
 
-DIR *opendir(const char *name);
-int closedir(DIR *dirp);
-struct dirent *readdir(DIR *dirp);
+int opendir(const char *name);
+int closedir(int dhnd);
+struct dirent *readdir(int dhnd);
+int _readdir(int dhnd, struct dirent *d);
 #endif
 
 #endif

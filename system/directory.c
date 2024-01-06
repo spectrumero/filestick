@@ -23,35 +23,82 @@
 */
 
 // Directory access syscalls. These are somewhat minimal wrappers around
-// FatFS calls.
+// FatFS calls. The intention is to hide the filesystem implementation from
+// userland (which shouldn't ever need to know about FatFS).
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/dirent.h>
 #include <string.h>
+#include <errno.h>
 
 #include "ff.h"
 #include "filesystem.h"
+#include "strlcpy.h"
 
-int SYS_opendir(DIR *dir, const char *path)
+#define MAX_DHND     8
+
+static DIRHND dhnd[MAX_DHND];
+
+//--------------------------------------------------
+// Do any required initialization.
+void init_dirs() 
 {
-   FRESULT res = f_opendir(dir, path);
+   for(int i = 0; i < MAX_DHND; i++)
+      dhnd[i].open = false;
+}
+
+//-------------------------------------------------
+// Allocate a directory handle and open a dir.
+int SYS_opendir(const char *path)
+{
+   DIRHND *dirp = NULL;
+   int i;
+
+   for(i = 0; i < MAX_DHND; i++) {
+      if(dhnd[i].open == false) {
+         dirp = &dhnd[i];
+         break;
+      }
+   }
+
+   if(!dirp) return -ENFILE;
+
+   FRESULT res = f_opendir(&dirp->dir, path);
+
+   if(res == FR_OK) {
+      dirp->open = true;
+      return i;            // directory handle number
+   }
+
    return fatfs_to_errno(res);
 }
 
-int SYS_closedir(DIR *dir)
+//------------------------------------------------
+// Close dir and deallocate handle
+int SYS_closedir(int dh)
 {
-   FRESULT res = f_closedir(dir);
+   if(dh > MAX_DHND) return -EMFILE;
+   if(dhnd[dh].open == false) return -EBADF;
+
+   FRESULT res = f_closedir(&dhnd[dh].dir);
+   if(res == FR_OK) dhnd[dh].open = false;
+
    return fatfs_to_errno(res);
 }
 
-int SYS_readdir(DIR *dir, struct dirent *d)
+static FILINFO fno;
+//------------------------------------------------
+// Read a dir.
+int SYS_readdir(int dh, struct dirent *d)
 {
-   FILINFO fno;
+   if(dh > MAX_DHND) return -EMFILE;
+   if(dhnd[dh].open == false) return -EBADF;
 
-   FRESULT res = f_readdir(dir, &fno);
-   if(res = FR_OK) {
-      strcpy(d->d_name, fno.fname);
+
+   FRESULT res = f_readdir(&dhnd[dh].dir, &fno);
+   if(res == FR_OK) {
+      strlcpy(d->d_name, fno.fname, sizeof(d->d_name));
       d->d_isdir = fno.fattrib & AM_DIR;
       d->d_size = fno.fsize;
    }

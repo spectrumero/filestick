@@ -28,7 +28,8 @@
 initstr:
 .ascii "Loading initial program\r\n"
 .set initstr_sz, .-initstr
-.set user_sp, 0x20800            # end of RAM
+
+#define USER_SP      0x20800     # end of RAM
 
 .text
 .globl init
@@ -36,6 +37,7 @@ init:
    la    sp, __stack_top         # initialize system stack
 
    call  fd_init                 # initialize file descriptors
+   call  init_dirs               # initialize directory handles
 
    la    a0, __cons_buff         # clear down the console buffer
    mv    a1, zero
@@ -62,7 +64,7 @@ init:
    csrw  mtvec, t0
    csrwi mstatus, 8              # enable interrupts
 
-   la    sp, user_sp             # set user stack pointer
+   li    sp, USER_SP             # set user stack pointer
    jr    a0                      # start initial program
 
 .badboot:

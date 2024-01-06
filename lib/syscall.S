@@ -29,19 +29,19 @@
 
 // Syscall wrappers
 .text
-.globl mount
+.globl mount                  // called directly
 mount:
    li       a7, SYS_mount
    j        syscall
-.globl opendir
+.globl opendir                // called directly
 opendir:
    li       a7, SYS_opendir
    j        syscall
-.globl closedir
+.globl closedir               // called directly
 closedir:
    li       a7, SYS_closedir
    j        syscall
-.globl _readdir
+.globl _readdir               // needs args and return val rearranging
 _readdir:
    li       a7, SYS_readdir
 
@@ -60,6 +60,6 @@ syscall:                      // Syscall number in a7
 
    lw       s0, 8(sp)
    lw       ra, 12(sp)
-.sys_done:
    addi     sp, sp, 16
+.sys_done:
    ret
