@@ -1,5 +1,3 @@
-#ifndef FILESYSTEM_H
-#define FILESYSTEM_H
 /*
 ;The MIT License
 ;
@@ -23,30 +21,59 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
+
+// file.c: mostly a wrapper around FatFS to provide POSIX-style open/read/write
+// close operations, and abstract away FatFS, integrating it with the other
+// open/read/write/close etc. operations we have on devices.
+
 #include <stdint.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <stdbool.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include "spi_flashdev.h"
+#include "fd.h"
+#include "sysdefs.h"
 #include "ff.h"
-#include <sys/dirent.h>
-#include <sys/types.h>
+#include "filesystem.h"
 
-typedef struct {
-   bool  open;
-   DIR   dir;
-} DIRHND;
+static FDfunction fileio_func = {
+   .fd_read          = fileio_read,
+   .fd_write         = fileio_write,
+   .fd_close         = fileio_close
+};
 
-int SYS_mount(const char *src, const char *target, const char *fstype,
-              unsigned long mountflags, const void *data);
-int fatfs_to_errno(FRESULT res);
+void init_fileio()
+{
+}
 
-void init_dirs(void);
-int SYS_opendir(const char *path);
-int SYS_closedir(int dh);
-int SYS_readdir(int dh, struct dirent *d);
+int fileio_open(const char *path, int flags, mode_t mode)
+{
+   int fdnum;
+   FD *fd = fd_alloc(&fdnum);
+   if(!fd)
+      return -EMFILE;
 
-void init_fileio(void);
-int fileio_open(const char *path, int flags, mode_t mode);
-ssize_t fileio_read(int fd, void *buf, size_t count);
-ssize_t fileio_write(int fd, const void *buf, size_t count);
-int fileio_close(int fd);
+   // Not found
+   fd_dealloc(fd);
+   return -ENOENT;
+}
 
-#endif
+ssize_t fileio_read(int fd, void *buf, size_t count)
+{
+   return 0;
+}
+
+ssize_t fileio_write(int fd, const void *buf, size_t count)
+{
+   return 0;
+}
+
+int fileio_close(int fd) {
+   return 0;
+}
 

@@ -35,6 +35,7 @@
 #include "console.h"
 #include "errno.h"
 #include "dev_open.h"
+#include "filesystem.h"
 
 FD fdtable[MAX_FILE_DESCRIPTORS];
 
@@ -150,11 +151,11 @@ int SYS_close(int fd) {
 // Open an fd
 //
 int SYS_open(const char *pathname, int flags, mode_t mode) {
-   // Device or file?
-   if(!strncmp(pathname, "/dev/", 5)) {
+   // Device or filesystem?
+   if(!strncmp(pathname, "/dev/", 5))
       return open_device(pathname + 5, flags, mode);
-   }
-   return -ENOENT;
+
+   return fileio_open(pathname, flags, mode);
 }
 
 //-----------------------------------------------------------------------
