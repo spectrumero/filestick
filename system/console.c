@@ -197,3 +197,13 @@ void kerr_puts(const char *string) {
    SYS_write(2, "\r\n", 2);
 }
 
+int putchar(int c) {
+   if(c == '\n') {
+      serial_putc('\r');
+      serial_putc('\n');
+   }
+   else
+      serial_putc(c);
+   return c;
+}
+

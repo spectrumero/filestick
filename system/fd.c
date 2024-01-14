@@ -33,6 +33,7 @@
 
 #include "fd.h"
 #include "console.h"
+#include "printk.h"
 #include "errno.h"
 #include "dev_open.h"
 #include "filesystem.h"

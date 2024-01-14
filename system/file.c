@@ -40,6 +40,7 @@
 #include "sysdefs.h"
 #include "ff.h"
 #include "filesystem.h"
+#include "printk.h"
 
 static FDfunction fileio_func = {
    .fd_read          = fileio_read,
@@ -47,8 +48,11 @@ static FDfunction fileio_func = {
    .fd_close         = fileio_close
 };
 
+FIL   fhnd[MAX_FD_COUNT];
+
 void init_fileio()
 {
+   memset(&fhnd, 0, sizeof(fhnd));
 }
 
 int fileio_open(const char *path, int flags, mode_t mode)
@@ -58,22 +62,55 @@ int fileio_open(const char *path, int flags, mode_t mode)
    if(!fd)
       return -EMFILE;
 
-   // Not found
+   fd->fdfunc = &fileio_func;
+
+   FIL *fp = &fhnd[fdnum - MIN_FD_NUMBER];
+
+   // translate posix open flags to FatFS flags
+   uint8_t fatfs_flags = 0;
+   if((flags + 1) & _FREAD)   fatfs_flags |= FA_READ;
+   if((flags + 1) & _FWRITE)  fatfs_flags |= FA_WRITE;
+   if(flags & _FAPPEND)       fatfs_flags |= FA_OPEN_APPEND;
+   if(flags & _FCREAT)        fatfs_flags |= FA_CREATE_NEW;
+   if(flags & _FTRUNC)        fatfs_flags |= FA_CREATE_ALWAYS;
+
+   FRESULT res = f_open(fp, path, fatfs_flags);
+
+   if(res == FR_OK) 
+      return fdnum;
+
    fd_dealloc(fd);
-   return -ENOENT;
+   return fatfs_to_errno(res);
 }
 
 ssize_t fileio_read(int fd, void *buf, size_t count)
 {
-   return 0;
+   FIL *fp = &fhnd[fd - MIN_FD_NUMBER];
+   UINT bytes_read;
+
+   FRESULT res = f_read(fp, buf, count, &bytes_read);
+   if(res == FR_OK)
+      return bytes_read;
+
+   return fatfs_to_errno(res);
 }
 
 ssize_t fileio_write(int fd, const void *buf, size_t count)
 {
-   return 0;
+   FIL *fp = &fhnd[fd - MIN_FD_NUMBER];
+   UINT bytes_written;
+
+   FRESULT res = f_write(fp, buf, count, &bytes_written);
+   if(res == FR_OK)
+      return bytes_written;
+
+   return fatfs_to_errno(res);
 }
 
 int fileio_close(int fd) {
-   return 0;
+   FIL *fp = &fhnd[fd - MIN_FD_NUMBER];
+   FRESULT res = f_close(fp);
+
+   return fatfs_to_errno(res);
 }
 

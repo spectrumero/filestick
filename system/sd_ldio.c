@@ -30,6 +30,7 @@
 #include "partition.h"
 #include "ff.h"      // FatFS defines and types
 #include "diskio.h"  // FatFS diskio defines
+#include "printk.h"
 
 #include "console.h"
 

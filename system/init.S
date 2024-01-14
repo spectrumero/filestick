@@ -38,6 +38,7 @@ init:
 
    call  fd_init                 # initialize file descriptors
    call  init_dirs               # initialize directory handles
+   call  init_fileio             # initialize file io
 
    la    a0, __cons_buff         # clear down the console buffer
    mv    a1, zero

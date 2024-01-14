@@ -31,6 +31,8 @@
 #include <sys/stat.h>
 
 #define MAX_FILE_DESCRIPTORS  16
+#define MIN_FD_NUMBER         3        // after stdout, stdin, stderr
+#define MAX_FD_COUNT          (MAX_FILE_DESCRIPTORS - MIN_FD_NUMBER)
 
 // Temporary flag to reserve a file descriptor
 #define FLAG_ALLOCATED  0x80000000
