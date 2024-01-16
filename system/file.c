@@ -45,7 +45,9 @@
 static FDfunction fileio_func = {
    .fd_read          = fileio_read,
    .fd_write         = fileio_write,
-   .fd_close         = fileio_close
+   .fd_close         = fileio_close,
+   .fd_lseek         = fileio_lseek,
+   .fd_fstat         = fileio_fstat
 };
 
 FIL   fhnd[MAX_FD_COUNT];
@@ -112,5 +114,43 @@ int fileio_close(int fd) {
    FRESULT res = f_close(fp);
 
    return fatfs_to_errno(res);
+}
+
+off_t fileio_lseek(int fd, off_t offset, int whence)
+{
+   FRESULT res;
+   off_t target;
+   FIL *fp = &fhnd[fd - MIN_FD_NUMBER];
+
+   switch(whence) {
+      case SEEK_CUR:
+         target = f_tell(fp) + offset;
+         res = f_lseek(fp, target);
+         break;
+      case SEEK_END:
+         target = f_size(fp) + offset;
+         res = f_lseek(fp, target);
+         break;
+      default:       // SEEK_SET
+         res = f_lseek(fp, offset);
+   }
+
+   if(res == FR_OK) 
+      return f_tell(fp);
+
+   return fatfs_to_errno(res);
+}
+
+// Warning: this is partial, because FatFS doesn't have fstat
+// that works on a file pointer. Really it just returns the size.
+int fileio_fstat(int fd, struct stat *statbuf)
+{
+   FRESULT res;
+   FIL *fp = &fhnd[fd - MIN_FD_NUMBER];
+   memset(statbuf, 0, sizeof(struct stat));
+   statbuf->st_mode = S_IFREG;
+   statbuf->st_size = f_size(fp);
+
+   return 0;
 }
 

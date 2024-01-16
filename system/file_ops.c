@@ -1,5 +1,3 @@
-#ifndef FILESYSTEM_H
-#define FILESYSTEM_H
 /*
 ;The MIT License
 ;
@@ -23,40 +21,33 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
+
 #include <stdint.h>
-#include "ff.h"
-#include <sys/dirent.h>
-#include <sys/types.h>
+#include <stdbool.h>
+#include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <stdbool.h>
+#include <fcntl.h>
+#include <errno.h>
 
-typedef struct {
-   bool  open;
-   DIR   dir;
-} DIRHND;
+#include "fd.h"
+#include "sysdefs.h"
+#include "ff.h"
+#include "filesystem.h"
+#include "printk.h"
 
-int SYS_mount(const char *src, const char *target, const char *fstype,
-              unsigned long mountflags, const void *data);
-int fatfs_to_errno(FRESULT res);
+int SYS_unlink(const char *pathname)
+{
+   return 0;
+}
 
-void init_dirs(void);
+int SYS_mkdir(const char *pathname, mode_t mode)
+{
+   return 0;
+}
 
-// System calls
-int SYS_opendir(const char *path);
-int SYS_closedir(int dh);
-int SYS_readdir(int dh, struct dirent *d);
-
-int SYS_unlink(const char *pathname);
-int SYS_mkdir(const char *pathname, mode_t mode);
-int SYS_stat(const char *pathname, struct stat *statbuf);
-
-// File i/o on open files
-void init_fileio(void);
-int fileio_open(const char *path, int flags, mode_t mode);
-ssize_t fileio_read(int fd, void *buf, size_t count);
-ssize_t fileio_write(int fd, const void *buf, size_t count);
-int fileio_close(int fd);
-off_t fileio_lseek(int fd, off_t offset, int whence);
-int fileio_fstat(int fd, struct stat *statbuf);
-
-#endif
-
+int SYS_stat(const char *pathname, struct stat *statbuf)
+{
+   return 0;
+}

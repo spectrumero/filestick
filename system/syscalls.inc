@@ -88,11 +88,11 @@ syscall_table:
 syscall_high_table:
 .byte 3           # 1024 SYS_open
 .byte 0           # 1025 SYS_link
-.byte 0           # 1026 SYS_unlink
+.byte 15          # 1026 SYS_unlink
 .byte 0           # 1027
 .byte 0           # 1028
 .byte 0           # 1029
-.byte 0           # 1030 SYS_mkdir
+.byte 16          # 1030 SYS_mkdir
 .byte 0           # 1031
 .byte 0           # 1032
 .byte 0           # 1033 SYS_access
@@ -100,7 +100,7 @@ syscall_high_table:
 .byte 0           # 1035
 .byte 0           # 1036
 .byte 0           # 1037
-.byte 0           # 1038 SYS_stat
+.byte 17          # 1038 SYS_stat
 .byte 0           # 1039 SYS_lstat
 .byte 0
 .set syscall_high_table_sz, .-syscall_high_table
@@ -122,4 +122,7 @@ syscall_address:
 .word SYS_opendir # 12
 .word SYS_closedir # 13
 .word SYS_readdir # 14
+.word SYS_unlink  # 15
+.word SYS_mkdir   # 16
+.word SYS_stat    # 17
 
