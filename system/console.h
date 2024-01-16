@@ -44,8 +44,8 @@ void console_hexbyte(uint8_t byte);
 int open_console(const char *devname, int flags, mode_t mode, FD *fd);
 
 // Convenience
-void kputs(const char *string);
-void kerr_puts(const char *string);
+//void kputs(const char *string);
+//void kerr_puts(const char *string);
 
 #endif
 

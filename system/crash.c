@@ -25,17 +25,18 @@
 #include "console.h"
 #include "crash.h"
 #include "regdump.h"
+#include "printk.h"
 
 void ebreak_handler(uint32_t *registers)
 {
-   kerr_puts("Hit EBREAK instruction");
+   printk("INFO: Hit EBREAK instruction\n");
    dump_registers(registers);
    while(1);
 }
 
 void illegal_handler(uint32_t *registers)
 {
-   kerr_puts("Hit illegal instruction");
+   printk("ERROR: Hit illegal instruction\n");
    dump_registers(registers);
    while(1);
 }

@@ -32,6 +32,7 @@
 #include "fd.h"
 #include "elfload.h"
 #include "brk.h"
+#include "printk.h"
 
 //-------------------------------------------------------------------
 // Loads the boot file from SPI flash. Returns the start address.
@@ -44,7 +45,7 @@ uint32_t elf_boot() {
 
    fd = SYS_open("/dev/spiflash", O_RDONLY, 0);
    if(fd < 0) {
-      kerr_puts("Unable to open SPI flash");
+      printk("error: Unable to open SPI flash\n");
       return 0;
    }
 
@@ -67,27 +68,27 @@ uint32_t elf_load(int fd, uint32_t offset) {
    uint8_t     *eidata  = ((uint8_t *)&header) + EI_DATA;
 
    if(*magic != ELF_MAGIC) {
-      kerr_puts("Not an ELF file");
+      printk("Not an ELF file\n");
       return 0;
    }
 
    if(*class != 1) {
-      kerr_puts("Not a 32-bit executable");
+      printk("Not a 32-bit executable\n");
       return 0;
    }
 
    if(*eidata != 1) {
-      kerr_puts("Not a little-endian data format");
+      printk("Not a little-endian data format\n");
       return 0;
    }
 
    if(header.e_machine != EM_RISCV) {
-      kerr_puts("Not a RISCV executable");
+      printk("Not a RISCV executable\n");
       return 0;
    }
 
    if(header.e_type != ET_EXEC) {
-      kerr_puts("Not an executable file");
+      printk("Not an executable file\n");
       return 0;
    }
 
@@ -101,7 +102,7 @@ uint32_t elf_load(int fd, uint32_t offset) {
 
       if(phdr.p_type == PT_LOAD) {
          if(phdr.p_paddr < USRMEM_START) {
-            kerr_puts("Invalid physical address");
+            printk("Invalid physical address: %x\n", phdr.p_paddr);
             return 0;
          }
 

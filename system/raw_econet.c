@@ -33,6 +33,8 @@
 #include "sysdefs.h"
 #include <sys/econet.h>
 
+#include "printk.h"
+
 extern volatile struct econet_state econet_state_val;
 extern volatile uint32_t econet_handshake_state;
 extern volatile uint32_t econet_pending_port;
@@ -100,7 +102,7 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
          memcpy(ptr, (uint8_t *)&econet_state_val, sizeof(struct econet_state));
          return 0;
       default:
-         kerr_puts("econet_ioctl: bad request");
+         printk("econet_ioctl: bad request\n");
          return -EINVAL;
    }
 

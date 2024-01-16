@@ -28,20 +28,14 @@
 
 #include "fd.h"
 #include "regdump.h"
+#include "printk.h"
 
 void dump_registers(uint32_t *registers) {
-   dump_reg("sp", registers[REG_SP]);
-   dump_reg("ra", registers[REG_RA]);
-   dump_reg("gp", registers[REG_GP]);
-   dump_reg("tp", registers[REG_TP]);
-   dump_reg("sepc", registers[REG_SEPC]);
-   SYS_write(1, "\r\n", 2);
+   printk("sp: %x ra: %x gp: %x tp: %x sepc: %x\n",
+         registers[REG_SP],
+         registers[REG_RA],
+         registers[REG_GP],
+         registers[REG_TP],
+         registers[REG_SEPC]);
 }
 
-void dump_reg(char *regname, uint32_t regval) {
-   SYS_write(1, regname, strlen(regname));
-   SYS_write(1, ": ", 2);
-
-   console_hexword(regval);
-   SYS_write(1, "  ", 2);
-}

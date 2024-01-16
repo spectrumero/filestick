@@ -26,19 +26,19 @@
 
 #include "console.h"
 #include "fd.h"
-#include "regdump.h"
+#include "printk.h"
 
 void syscall_reglist(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
                      uint32_t a5, uint32_t a6, uint32_t a7) {
    uint32_t *stk = (uint32_t *)0xFEF0;
-   dump_reg("\r\nSYS", a7);
-   dump_reg("ra", *(stk+2));
-   dump_reg("a0", a0);
-   dump_reg("a1", a1);
-   dump_reg("a2", a2);
-   dump_reg("a3", a3);
-   dump_reg("a4", a4);
-   dump_reg("a5", a5);
-   dump_reg("a6", a6);
-   SYS_write(1, "\r\n", 2);
+
+   printk("\nsyscall: %d\n", a7);
+   printk("ra: %x\n", *(stk+2));
+   printk("a0: %x\n", a0);
+   printk("a1: %x\n", a1);
+   printk("a2: %x\n", a2);
+   printk("a3: %x\n", a3);
+   printk("a4: %x\n", a4);
+   printk("a5: %x\n", a5);
+   printk("a6: %x\n", a6);
 }
