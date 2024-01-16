@@ -22,17 +22,37 @@
 ;THE SOFTWARE.
 */
 
-// TODO: faster memcpy
-
 #include <string.h>
 #include <stdint.h>
 
+#define UNALIGNED(x,y) \
+    (((uint32_t)x & 3) | ((uint32_t)y & 3))
+
+// note: the use of volatile prevents the optimiser from trying to use
+// libgcc's memcpy (which will cause a lock up, as it doesn't exist so we'll
+// just get stuck in an infinite loop...)
 void *memcpy(void *__restrict dest, const void *__restrict src, size_t n) {
-   uint8_t *d = dest;
-   const uint8_t *s = src;
-   while(n--) {
-      *d++ = *s++;
-   }
-   return dest;
+    volatile uint8_t *ud = dest;
+    volatile const uint8_t *us = src;
+
+    if(!UNALIGNED(dest,src) && n >= 4) {
+        size_t aligned = n >> 2;
+        volatile uint32_t *d = (uint32_t *)dest;
+        volatile const uint32_t *s = (uint32_t *)src;
+
+        while(aligned--) {
+            *d++ = *s++;
+        }
+
+        // pick up remainder
+        n &= 3;
+        ud = (uint8_t *)d;
+        us = (uint8_t *)s;
+    }
+
+    while(n--) {
+        *ud++ = *us++;
+    }
+    return dest;
 }
 
