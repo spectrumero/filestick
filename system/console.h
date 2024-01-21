@@ -35,17 +35,8 @@ ssize_t console_read(int fd, void *buf, size_t count);
 int console_fstat(int fd, struct stat *statbuf);
 void serial_putc(uint8_t ch);
 
-// Debugging routings
-void console_hexdump(void *buf, size_t count);
-void console_hexword(uint32_t word);
-void console_hexbyte(uint8_t byte);
-
 // Syscall support
 int open_console(const char *devname, int flags, mode_t mode, FD *fd);
-
-// Convenience
-//void kputs(const char *string);
-//void kerr_puts(const char *string);
 
 #endif
 

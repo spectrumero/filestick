@@ -1,3 +1,5 @@
+#ifndef HEXDUMP_H
+#define HEXDUMP_H
 /*
 ;The MIT License
 ;
@@ -22,19 +24,13 @@
 ;THE SOFTWARE.
 */
 
-#include <unistd.h>
-#include <stdbool.h>
+#include <stdint.h>
 
-#include "exit.h"
-#include "printk.h"
-#include "super_shell.h"
+void hexdump(const void *ptr, int size, uint32_t addr);
+bool hextoint(const char *hexstr, uint32_t *val);
 
-//---------------------------------------------------------------
-// TODO: reload initial program
-void SYS_exit(int status) {
-   printk("Exit called: status = %d\n", status);
-   while(true) {
-      super_shell();
-   }
-}
+void super_hexdump(int argc, char **argv);
+void super_peek(int argc, char **argv);
+
+#endif
 

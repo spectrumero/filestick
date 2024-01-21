@@ -26,18 +26,19 @@
 #include "crash.h"
 #include "regdump.h"
 #include "printk.h"
+#include "super_shell.h"
 
 void ebreak_handler(uint32_t *registers)
 {
    printk("INFO: Hit EBREAK instruction\n");
    dump_registers(registers);
-   while(1);
+   super_shell();
 }
 
 void illegal_handler(uint32_t *registers)
 {
    printk("ERROR: Hit illegal instruction\n");
    dump_registers(registers);
-   while(1);
+   super_shell();
 }
 

@@ -20,8 +20,8 @@ syscall_table:
 .byte 10          # 29 SYS_ioctl
 .byte 0           # 30
 .byte 0           # 31
-.byte 8           # 32 console_hexdump  -- (nonstd)
-.byte 9           # 33 console_hexword  -- (nonstd)
+.byte 8           # 32 hexdump  -- (nonstd)
+.byte 9           # 33 super_shell  -- (nonstd)
 .byte 0           # 34
 .byte 0           # 35
 .byte 0           # 36
@@ -115,8 +115,8 @@ syscall_address:
 .word SYS_fstat   # 5
 .word SYS_lseek   # 6
 .word SYS_exit    # 7
-.word console_hexdump # 8
-.word console_hexword # 9
+.word hexdump     # 8
+.word super_shell # 9      # invalid, was console_hexword
 .word SYS_ioctl   # 10
 .word SYS_mount   # 11
 .word SYS_opendir # 12

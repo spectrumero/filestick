@@ -1,7 +1,10 @@
+#ifndef SUPER_SHELL_H
+#define SUPER_SHELL_H
+
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2024 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +25,7 @@
 ;THE SOFTWARE.
 */
 
-#include <unistd.h>
-#include <stdbool.h>
+void super_shell(void);
 
-#include "exit.h"
-#include "printk.h"
-#include "super_shell.h"
-
-//---------------------------------------------------------------
-// TODO: reload initial program
-void SYS_exit(int status) {
-   printk("Exit called: status = %d\n", status);
-   while(true) {
-      super_shell();
-   }
-}
+#endif
 
