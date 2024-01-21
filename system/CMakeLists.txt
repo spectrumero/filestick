@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.18.1)
 
 set(LINKER_SCRIPT    "system.ld")
 set(CMAKE_ASM_FLAGS  "-march=${ARCH}")
-set(CMAKE_C_FLAGS    "-march=${ARCH} -mabi=${ABI} -DSYSTEM")
+set(CMAKE_C_FLAGS    "-march=${ARCH} -mabi=${ABI} -DSYSTEM -O2")
 set(CMAKE_EXE_LINKER_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/${LINKER_SCRIPT}")
 set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <LINK_FLAGS> -o <TARGET> <OBJECTS>")
 
 project(filestick-system)
 set(EXECUTABLE_NAME "${PROJECT_NAME}.elf")
 
-set_property(SOURCE dev_open.c console.c strncmp.c strcmp.c rgbled.c brk.c exit.c spi_flashdev.c elfload.c strlen.c elfload.c memcpy.c PROPERTY COMPILE_FLAGS -O2)
+#set_property(SOURCE dev_open.c console.c strncmp.c strcmp.c rgbled.c brk.c exit.c spi_flashdev.c elfload.c strlen.c elfload.c memcpy.c PROPERTY COMPILE_FLAGS -O2)
 
 enable_language(C ASM)
 include_directories(BEFORE ../include)
