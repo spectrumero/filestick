@@ -33,31 +33,50 @@
 #include "elfload.h"
 #include "brk.h"
 #include "printk.h"
+#include "init.h"
+
+void elf_run(const char *filename)
+{
+   start_addr s = elf_load(filename, 0);
+   if(s)
+      init_user(s);
+   else
+      printk("Unable to run %s\n", filename);
+}
 
 //-------------------------------------------------------------------
 // Loads the boot file from SPI flash. Returns the start address.
-uint32_t elf_boot() {
+start_addr elf_boot() 
+{
+   return elf_load("/dev/spiflash", FLASH_OFFSET);
+}
+
+//------------------------------------------------------------------
+// Loads an ELF program, returning the start address
+start_addr elf_load(const char *filename, uint32_t offset) 
+{
    int fd;
-   uint32_t start_addr;
+   start_addr s;
 
    // Clear user memory
    memset((uint8_t *)USRMEM_START, 0, USRMEM_SIZE);
 
-   fd = SYS_open("/dev/spiflash", O_RDONLY, 0);
+   fd = SYS_open(filename, O_RDONLY, 0);
    if(fd < 0) {
-      printk("error: Unable to open SPI flash\n");
+      printk("error: Unable to open file, rc = %d\n", fd);
       return 0;
    }
 
-   start_addr = elf_load(fd, FLASH_OFFSET);
+   s = elf_load_fd(fd, offset);
    SYS_close(fd);
-   return start_addr;
+   return s;
 }
 
 //------------------------------------------------------------------
 // Loads an ELF executable from the specified file descriptor.
 // Returns a start address or 0 on failure.
-uint32_t elf_load(int fd, uint32_t offset) {
+start_addr elf_load_fd(int fd, uint32_t offset) 
+{
    Elf32_Ehdr header;
    Elf32_Phdr phdr;
 
@@ -115,6 +134,18 @@ uint32_t elf_load(int fd, uint32_t offset) {
       } 
    }
 
-   return header.e_entry;
+   return (start_addr)header.e_entry;
 }
 
+// Supervisor cmdlet
+void super_elf(int argc, char **argv)
+{
+   if(!strcmp(argv[0], "boot"))
+      init_user(elf_boot());
+   else {
+      if(argc != 2) 
+         printk("usage: run <filename>\n");
+      else 
+         elf_run(argv[1]);
+   }
+}

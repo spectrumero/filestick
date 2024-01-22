@@ -59,14 +59,19 @@ init:
    call  flash_reset
 
    call  elf_boot                # load boot code from flash
-   beqz  a0, .badboot            # boot file not OK?
 
    la    t0, isr_trap            # Interrupt routine address
    csrw  mtvec, t0
    csrwi mstatus, 8              # enable interrupts
 
+   beqz  a0, .badboot            # boot file not OK?
+
+.globl init_user
+init_user:
    li    sp, USER_SP             # set user stack pointer
    jr    a0                      # start initial program
 
 .badboot:
-   j     .badboot                # halt
+   call  super_shell
+   j     .badboot
+

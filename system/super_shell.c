@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "super_shell.h"
+#include "elfload.h"
 #include "console.h"
 #include "printk.h"
 
@@ -44,6 +45,8 @@ typedef struct cmdtable {
 CmdTable commands[] = {
    {.cmd = "hexdump",   .cmdfunc = super_hexdump},
    {.cmd = "peek",      .cmdfunc = super_peek},
+   {.cmd = "boot",      .cmdfunc = super_elf},
+   {.cmd = "run",       .cmdfunc = super_elf},
    {.cmd = "ret",       .cmdfunc = NULL },
    {.cmd = NULL }
 };
