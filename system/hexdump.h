@@ -29,8 +29,10 @@
 void hexdump(const void *ptr, int size, uint32_t addr);
 bool hextoint(const char *hexstr, uint32_t *val);
 
+// Debugging cmdlets
 void super_hexdump(int argc, char **argv);
 void super_peek(int argc, char **argv);
+void super_poke(int argc, char **argv);
 
 #endif
 

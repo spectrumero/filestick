@@ -95,6 +95,51 @@ super_peek(int argc, char **argv)
    }
 }
 
+void
+super_poke(int argc, char **argv)
+{
+   uint32_t addr;
+   uint32_t val;
+
+   if(argc != 4) {
+      printk("usage: poke [w|h|b] [address] [value]\n");
+      return;
+   }
+
+   if(!hextoint(argv[2], &addr)) {
+      printk("invalid address\n");
+      return;
+   }
+   if(!hextoint(argv[3], &val)) {
+      printk("invalid value\n");
+      return;
+   }
+
+   char sz = argv[1][0];
+   switch(sz) {
+      case 'w':
+      {
+         uint32_t *a = (uint32_t *)addr;
+         *a = val;
+         break;
+      }
+      case 'h':
+      {
+         uint16_t *a = (uint16_t *)addr;
+         *a = (uint16_t)val;
+         break;
+      }
+      case 'b':
+      {
+         uint8_t *a= (uint8_t *)addr;
+         *a = (uint8_t)val;
+         break;
+      }
+      default:
+         printk("invalid size\n");
+   }
+}
+
 bool 
 hextoint(const char *hexstr, uint32_t *val)
 {

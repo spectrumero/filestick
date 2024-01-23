@@ -45,6 +45,7 @@ typedef struct cmdtable {
 CmdTable commands[] = {
    {.cmd = "hexdump",   .cmdfunc = super_hexdump},
    {.cmd = "peek",      .cmdfunc = super_peek},
+   {.cmd = "poke",      .cmdfunc = super_poke},
    {.cmd = "boot",      .cmdfunc = super_elf},
    {.cmd = "run",       .cmdfunc = super_elf},
    {.cmd = "ret",       .cmdfunc = NULL },
