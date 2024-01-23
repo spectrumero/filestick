@@ -52,9 +52,9 @@ int sd_init() {
    spi_set_slave(SD_SLAVE_ID);
 
    // Send 10 dummy bytes
-   //for(i=0; i < 10; i++) {
-   //   spi_byte(0xFF);
-   //}
+   for(i=0; i < 10; i++) {
+      spi_byte(0xFF);
+   }
 
    spi_write(&idle, sizeof(idle), false);
    rx=sd_readres1();

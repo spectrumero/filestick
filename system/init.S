@@ -57,6 +57,7 @@ init:
    call  syscall_handler
 
    call  flash_reset
+   call  sd_insert_mount         # Mount SD card if present
 
    call  elf_boot                # load boot code from flash
 

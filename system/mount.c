@@ -29,6 +29,8 @@
 #include "filesystem.h"
 #include "ff.h"         // FatFS
 #include "cust_errno.h"
+#include "devices.h"
+#include "printk.h"
 
 static FATFS fs;        // FatFS filesystem TODO: array of these
 
@@ -62,3 +64,26 @@ int fatfs_to_errno(FRESULT res) {
          return -(res + EFATFS_START);
    }
 }
+
+//----------------------------------------------------------------------
+// Mount on card insert and startup
+// Returns true if the SD card filesystem was mounted.
+bool sd_insert_mount()
+{
+   volatile uint32_t *sd_slot = (uint32_t *)(DEV_BASE + OFFS_SD_DETECT);
+
+   // SD card present?
+   if(*sd_slot & 2) {
+      printk("SD card present\n");
+      FRESULT res = f_mount(&fs, "", 1);
+
+      if(res == FR_OK) {
+         printk("Mounted SD card\n");
+         return true;
+      }
+
+      printk("SD mount failed, code=%d\n", res);
+   }
+   return false;
+}
+

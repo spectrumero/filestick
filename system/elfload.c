@@ -48,7 +48,15 @@ void elf_run(const char *filename)
 // Loads the boot file from SPI flash. Returns the start address.
 start_addr elf_boot() 
 {
-   return elf_load("/dev/spiflash", FLASH_OFFSET);
+   // first try the root filesystem for a boot file
+   printk("trying !boot...\n");
+   start_addr s = elf_load("/!boot", 0);
+   if(s)
+      return s;
+   else {
+      printk("!boot not available, trying serial flash...\n");
+      return elf_load("/dev/spiflash", FLASH_OFFSET);
+   }
 }
 
 //------------------------------------------------------------------

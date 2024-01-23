@@ -58,5 +58,8 @@ int fileio_close(int fd);
 off_t fileio_lseek(int fd, off_t offset, int whence);
 int fileio_fstat(int fd, struct stat *statbuf);
 
+// Automount/mount at start
+bool sd_insert_mount();
+
 #endif
 
