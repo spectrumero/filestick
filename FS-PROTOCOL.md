@@ -109,7 +109,7 @@ BB          FS error 0xBB, incorrect password
 String      String "Incorrect password\n"
 ```
 
-## Call 0 (Command line, including *I AM)
+## Function code 0x00 (Command line, including `*I AM`)
 
 Payload is simply the command line terminated by a newline
 character (0x0d) and without the `*`. For instance,
@@ -121,9 +121,86 @@ FE 00       Dst: Stn 254, net 0
 19 00       Src: Stn 25, net 0
 90          Reply port 0x90
 00          Function code 0 (command line)
-03          User root dir context handle
-05          Current directory context handle
-06          Current library context handle
-....        Command line terminated by 0x0D
+rh          User root dir context handle
+dh          Current directory context handle
+lh          Current library context handle
+String      Command line terminated by 0x0D
 ```
+
+## Function code 0x12, Read object information
+
+The general form of this command is an argument code after the
+standard NetFS data, followed by an object name terminated by
+a CR (0x0D). The following arguments exist:
+
+* 1         Object creation date
+* 2         Load and execute address
+* 3         Object extent (3 bytes only)
+* 4         Access byte (as for EXAMINE)
+* 5         All object attributes
+* 6         Access and cycle number of directory
+* 64        Read creation and update date
+
+The reply for arg 1-5 is:
+
+For arg 6:
+
+```
+00          Undefined
+00          Always zero
+0A          ?
+String[10]  Directory name padded by spaces
+Access      Access to dir, 0x00 - owner, 0xFF - public
+cc          Cycle number
+```
+
+
+### Arg=6, Access and cycle number of dir
+
+Note that the directory name is just sent as-is, so
+a bare name is relative, but you may have `$.` (root)
+or anything else in there.
+
+Example: `*. LIBRARY` is run on the client.
+
+```
+FE 00       Dst: Stn 254, net 0
+19 00       Src: Stn 25, net 0
+90          Reply port 0x90
+12          Function code 12 (read object info)
+rh          User root dir context handle
+dh          Current directory context handle
+lh          Current library context handle
+06          Argument code
+String      Directory name terminated with \n
+```
+
+Reply:
+```
+19 00       Dst: Stn 25, net 0
+FE 00       Src: Stn 254, net 0
+00          undefined
+00          always 0
+0A          always 0x0A ?
+String[10]  Library   \n
+00          Owner access
+00          Cycle number
+```
+
+## Execution of various commands
+
+Many operations consist of multiple different file server commands sent
+in a sequence. Listed is a summary of the sequence of operations for common
+commands run on the client.
+
+### `*CAT` directory listing
+
+* Client sends 0x12 (Read object information) with argument=6 (Access and cycle of dir)
+* Server responds with dir name, access and cycle
+* Client sends 0x15 (Read user environment)
+* Server responds with disc name, CSD and LIB (all padded with spaces)
+
+For as many times as is required to get entire listing:
+* Client sends 0x03 (Examine) on named directory with arg=3 (Object names and formats)
+* Server responds with directory listing in arg=3 format
 
