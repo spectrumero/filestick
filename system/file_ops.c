@@ -39,15 +39,31 @@
 
 int SYS_unlink(const char *pathname)
 {
-   return 0;
+   FRESULT res = f_unlink(pathname);
+   return fatfs_to_errno(res);
 }
 
 int SYS_mkdir(const char *pathname, mode_t mode)
 {
-   return 0;
+   FRESULT res = f_mkdir(pathname);
+   return fatfs_to_errno(res);
 }
 
 int SYS_stat(const char *pathname, struct stat *statbuf)
 {
-   return 0;
+   FILINFO fno;
+   memset(statbuf, 0, sizeof(struct stat));
+
+   FRESULT res = f_stat(pathname, &fno);
+   if(res == FR_OK) {
+      statbuf->st_size = fno.fsize;
+      if(fno.fattrib & AM_DIR) statbuf->st_mode = S_IFDIR;
+      else                     statbuf->st_mode = S_IFREG;
+
+      if(fno.fattrib & AM_RDO) statbuf->st_mode |= S_IRUSR;
+      else                     statbuf->st_mode |= (S_IRUSR|S_IWUSR);
+
+      // TODO: timestamps
+   }
+   return fatfs_to_errno(res);
 }
