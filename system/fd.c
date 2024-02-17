@@ -137,10 +137,10 @@ int SYS_close(int fd) {
    if(fd < 3)
       return 0;
 
-   FD fd_ent = fdtable[fd];
-   if(fd_ent.flags && fd_ent.fdfunc->fd_close != NULL) {
-      int rc=fd_ent.fdfunc->fd_close(fd);
-      fd_dealloc(&fd_ent);
+   FD *fd_ent = &fdtable[fd];
+   if(fd_ent->flags && fd_ent->fdfunc->fd_close != NULL) {
+      int rc=fd_ent->fdfunc->fd_close(fd);
+      fd_dealloc(fd_ent);
 
       return rc;
    }
