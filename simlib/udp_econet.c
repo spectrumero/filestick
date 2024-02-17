@@ -84,6 +84,7 @@ sim_waitformsg()
    fd_set rfds;
    FD_ZERO(&rfds);
    FD_SET(sockfd, &rfds);
+   struct timeval tv;
 
    tv.tv_sec = 1;
    tv.tv_usec = 0;
@@ -96,8 +97,20 @@ sim_waitformsg()
    return 0;
 }
 
-// Main econet listening thread.
 static int
+handle_scout(uint8_t *rxbuf, size_t size)
+{
+   return WAIT_SCOUT;
+}
+
+static int
+handle_data(uint8_t *rxbuf, size_t size)
+{
+   return WAIT_SCOUT;
+}
+
+// Main econet listening thread.
+static void *
 sim_econet_thread(void *ptr)
 {
    socklen_t len;
@@ -113,13 +126,13 @@ sim_econet_thread(void *ptr)
          case WAIT_SCOUT: 
             rxbytes = recvfrom(sockfd, (uint8_t *)rxbuf, sizeof(rxbuf), 0,
                (struct sockaddr *)&cliaddr, &len);
-            state = handle_scout(rxbuf);
+            state = handle_scout(rxbuf, len);
             break;
          case WAIT_DATA:
             if(sim_waitformsg() > 0) {
                rxbytes = recvfrom(sockfd, (uint8_t *)rxbuf, sizeof(rxbuf), 0,
                   (struct sockaddr *)&cliaddr, &len);
-               handle_data(rxbuf); 
+               handle_data(rxbuf, len); 
             }
             state = WAIT_SCOUT;
             break;
