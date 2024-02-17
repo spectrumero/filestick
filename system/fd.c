@@ -163,7 +163,9 @@ int SYS_open(const char *pathname, int flags, mode_t mode) {
 // Dealloc an fd
 //
 void fd_dealloc(FD *fd) {
-   memset(fd, 0, sizeof(FD));
+   fd->flags = 0;
+   fd->fdfunc = NULL;
+   fd->data = NULL;
 }
 
 //-----------------------------------------------------------------------
