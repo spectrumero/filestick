@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "filestick_ic_lib")(type "KiCad")(uri "${KIPRJMOD}/filestick_ic_lib.kicad_sym")(options "")(descr ""))
+)
