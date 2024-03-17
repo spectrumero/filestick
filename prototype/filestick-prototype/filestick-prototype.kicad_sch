@@ -992,6 +992,9 @@
   (junction (at 95.25 95.25) (diameter 0) (color 0 0 0 0)
     (uuid 2e13ac2b-fab3-4b74-8a5a-9b0f5e8976cb)
   )
+  (junction (at 118.11 77.47) (diameter 0) (color 0 0 0 0)
+    (uuid 3b5d6e18-233f-4fdd-9df1-cdfe8c791fcf)
+  )
   (junction (at 237.49 153.67) (diameter 0) (color 0 0 0 0)
     (uuid 3bb18b11-ed70-4ec1-a370-e010577e0f2e)
   )
@@ -2756,6 +2759,24 @@
     (pin "2" (uuid 8f03e174-b366-4389-b498-f075afaa428a))
   )
 
+  (symbol (lib_id "Connector:Conn_01x01_Female") (at 123.19 77.47 0) (unit 1)
+    (in_bom yes) (on_board yes) (fields_autoplaced)
+    (uuid fdec3421-c7db-441a-bb89-5d9ad1a7c793)
+    (property "Reference" "TP?" (id 0) (at 124.46 76.1999 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "Conn_01x01_Female" (id 1) (at 124.46 78.7399 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "" (id 2) (at 123.19 77.47 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (id 3) (at 123.19 77.47 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 496f7a2d-0da1-487e-b2c1-1ddd75bfdcc2))
+  )
+
   (sheet_instances
     (path "/" (page "1"))
   )
@@ -2900,6 +2921,9 @@
       (reference "R?") (unit 1) (value "1k") (footprint "")
     )
     (path "/c7ba7277-528a-472f-9745-810713900589"
+      (reference "TP?") (unit 1) (value "Conn_01x01_Female") (footprint "")
+    )
+    (path "/fdec3421-c7db-441a-bb89-5d9ad1a7c793"
       (reference "TP?") (unit 1) (value "Conn_01x01_Female") (footprint "")
     )
     (path "/b19894d5-7fa9-4eca-8f7f-504f876287db"
