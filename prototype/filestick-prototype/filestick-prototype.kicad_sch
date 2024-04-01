@@ -4699,7 +4699,7 @@
   (symbol (lib_id "power:+3.3V") (at 233.68 80.01 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 4fa48868-af46-4293-be22-ae8095005663)
-    (property "Reference" "#PWR?" (id 0) (at 233.68 83.82 0)
+    (property "Reference" "#PWR0102" (id 0) (at 233.68 83.82 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (id 1) (at 233.68 74.93 0))
@@ -5371,7 +5371,7 @@
   (symbol (lib_id "Transistor_FET:2N7002") (at 236.22 97.79 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid a435be7c-2bfb-4409-8c19-29abd1496700)
-    (property "Reference" "Q?" (id 0) (at 229.87 96.5199 0)
+    (property "Reference" "Q5" (id 0) (at 229.87 96.5199 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2N7002" (id 1) (at 229.87 99.0599 0)
@@ -6052,7 +6052,7 @@
       (reference "#PWR0101") (unit 1) (value "GND") (footprint "")
     )
     (path "/4fa48868-af46-4293-be22-ae8095005663"
-      (reference "#PWR?") (unit 1) (value "+3.3V") (footprint "")
+      (reference "#PWR0102") (unit 1) (value "+3.3V") (footprint "")
     )
     (path "/1d828a71-404c-49c6-8956-820fdda0224a"
       (reference "#V0101") (unit 1) (value "VDD_TX") (footprint "")
@@ -6142,7 +6142,7 @@
       (reference "Q4") (unit 1) (value "2N7002") (footprint "Package_TO_SOT_SMD:SOT-23")
     )
     (path "/a435be7c-2bfb-4409-8c19-29abd1496700"
-      (reference "Q?") (unit 1) (value "2N7002") (footprint "Package_TO_SOT_SMD:SOT-23")
+      (reference "Q5") (unit 1) (value "2N7002") (footprint "Package_TO_SOT_SMD:SOT-23")
     )
     (path "/132b8b80-d5dd-45a7-bb02-da5c00177cdf"
       (reference "R1") (unit 1) (value "1k") (footprint "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder")
