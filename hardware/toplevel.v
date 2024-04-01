@@ -3,8 +3,7 @@ module toplevel (
 
    input wire     econet_clk,
    input wire     econet_rx,
-   output wire    econet_tx_p,
-   output wire    econet_tx_n,
+   output wire    econet_tx,
    output wire    econet_tx_enable,
    output wire    econet_receiving, // debug
    
@@ -167,10 +166,9 @@ buffered_econet econet_receiver(
 
 wire econet_tx_data;
 wire econet_tx_busy;
-assign econet_tx_p = econet_tx_data;
-assign econet_tx_n = ~econet_tx_data;
+assign econet_tx = ~econet_tx_data;
 wire econet_transmitting;
-assign econet_tx_enable = ~econet_transmitting;
+assign econet_tx_enable = econet_transmitting;
 wire [31:0] econet_tx_reg_data;
 
 econet_tx_buffered econet_transmitter(

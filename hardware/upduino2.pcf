@@ -26,14 +26,14 @@ set_io -nowarn uart_3v3 25
 set_io -nowarn uart_rx 26
 set_io -nowarn uart_tx 27
 set_io -nowarn uart_grn 32
-set_io -nowarn gpio_35 35
-set_io -nowarn gpio_31 31
+set_io -nowarn term_en 35
+set_io -nowarn collision_ref_pwm 31
 set_io -nowarn gpio_37 37
 set_io -nowarn econet_clk 34
 set_io -nowarn econet_rx 43
-set_io -nowarn econet_tx_p 36
-set_io -nowarn econet_tx_n 42
-set_io -nowarn econet_tx_enable 38
+set_io -nowarn econet_tx 36
+set_io -nowarn econet_tx_enable 42
+set_io -nowarn econet_clken 38
 set_io -nowarn econet_receiving 28
 
 # Normal GPIO pins, right side
