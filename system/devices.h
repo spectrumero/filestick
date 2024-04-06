@@ -26,6 +26,7 @@
 #define OFFS_RXLEN         0x108
 #define OFFS_REPLYADDR     0x110
 #define OFFS_RXPORT        0x114
+#define OFFS_RXFLAG        0x115
 #define OFFS_RXSTATUS      0x11c
 
 #define OFFS_TXSTART       0x200
@@ -40,6 +41,8 @@
 #define BIT_TX_TURNAROUND     1     // Indicates replying to another station
 #define BIT_TX_BUSY           2     // Transmitter has a buffer to transmit
 #define BIT_TX_TRANSMITTING   4     // Transmitter is actively transmitting
+
+#define ECONET_MACHTYPE       0x00012F42  // version 1.0, machine 0x42 make 0x2F
 
 #endif
 

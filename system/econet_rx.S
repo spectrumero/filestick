@@ -71,8 +71,8 @@ econet_rx:
 .scout_ack:
    lw       s2, OFFS_RXLEN(a0)         # get the frame size
    addi     s2, s2, -8                 # which should be 8 bytes
-   bnez     s2, .econet_rx_done        # if not bale out now
-   lb       s2, OFFS_RXPORT(a0)        # get the port from the scout frame
+   bnez     s2, .econet_rx_imm         # if not, check for immediate op
+   lbu      s2, OFFS_RXPORT(a0)        # get the port from the scout frame
    la       a2, econet_port_list
    add      a2, a2, s2
    lb       s3, 0(a2)                  # get the file descriptor for the port
@@ -150,6 +150,31 @@ econet_rx:
    la       s1, ECONET_STATUS_TXNETERR
    sw       s1, 24(a1)                 # set status bit
    j        .econet_rx_done
+
+# Test for immediate operation
+.econet_rx_imm:
+   lw       s2, OFFS_RXLEN(a0)         # get the frame size
+   addi     s2, s2, -12                # which should be 12 bytes
+   bnez     s2, .econet_rx_done        # bale out if not
+
+   lbu      s2, OFFS_RXFLAG(a0)        # get the scout flag byte
+   addi     s2, s2, -0x88              # 0x88 = machine type
+   bnez     s2, .econet_rx_done        # is the only immediate we respond to.
+
+   li       s1, BIT_TX_TURNAROUND      # Tell the transmitter it doesn't have to wait 15 bit cycles
+   sw       s1, OFFS_TXSTATUS(a0)      # after the receiver goes idle.
+   lw       s1, OFFS_REPLYADDR(a0)     # get reply address word
+   la       a2, ECONET_TXBUF           # transmit buffer
+   sw       s1, 0(a2)                  # set the address
+   li       s1, ECONET_MACHTYPE        # set the machine type
+   sw       s1, 4(a2)
+
+   sw       zero, OFFS_TXSTART(a0)     # tx buf start
+   li       s1, 7                      # tx buf end
+   sw       s1, OFFS_TXEND(a0)         # tx buf end, setting this causes transmission
+
+   j        .econet_rx_done
+
 
 #-----------------------------------------------------------
 # Timeout handling
