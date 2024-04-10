@@ -44,6 +44,7 @@ typedef struct _FDfunction {
    int     (*fd_fstat)(int fd, struct stat *statbuf);
    int     (*fd_close)(int fd);
    int     (*fd_ioctl)(int fd, unsigned long request, void *ptr);
+   ssize_t (*fd_peek)(int fd);
 } FDfunction;
 
 typedef struct _FD {
@@ -61,6 +62,7 @@ void fd_dealloc(FD *fd);
 // System calls
 ssize_t SYS_write(int fd, const void *buf, size_t count);
 ssize_t SYS_read (int fd, void *buf, size_t count);
+ssize_t SYS_peek(int fd);
 int     SYS_fstat(int fd, struct stat *statbuf);
 off_t   SYS_lseek(int fd, off_t offset, int whence);
 int     SYS_ioctl(int fd, unsigned long request, void *ptr);

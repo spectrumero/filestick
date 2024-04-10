@@ -32,6 +32,7 @@
 
 ssize_t console_write(int fd, const void *buf, size_t count);
 ssize_t console_read(int fd, void *buf, size_t count);
+ssize_t console_peek(int fd);
 int console_fstat(int fd, struct stat *statbuf);
 void serial_putc(uint8_t ch);
 

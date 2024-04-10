@@ -9,8 +9,8 @@ syscall_table:
 .byte 12          # 18 SYS_opendir (nonstd)
 .byte 13          # 19 SYS_closedir (nonstd)
 .byte 14          # 20 SYS_readdir (nonstd)
-.byte 0           # 21 
-.byte 0           # 22
+.byte 18          # 21 SYS_peek (nonstd)
+.byte 19          # 22 printk (nonstd)
 .byte 0           # 23 SYS_dup
 .byte 0           # 24
 .byte 0           # 25 SYS_fcntl
@@ -125,4 +125,6 @@ syscall_address:
 .word SYS_unlink  # 15
 .word SYS_mkdir   # 16
 .word SYS_stat    # 17
+.word SYS_peek    # 18
+.word printk      # 19
 

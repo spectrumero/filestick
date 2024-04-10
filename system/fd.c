@@ -83,6 +83,20 @@ ssize_t SYS_read(int fd, void *buf, size_t count) {
 }
 
 //------------------------------------------------------------------------
+// Peek an fd and return how many bytes are available to read
+ssize_t SYS_peek(int fd) {
+   if(fd > MAX_FILE_DESCRIPTORS || fd < 0)
+      return -EBADF;
+
+   FD fd_ent = fdtable[fd];
+   if(fd_ent.flags && fd_ent.fdfunc->fd_peek != NULL) {
+      return fd_ent.fdfunc->fd_peek(fd);
+   }
+
+   return -EBADF;
+}
+
+//------------------------------------------------------------------------
 // ioctl
 int SYS_ioctl(int fd, unsigned long request, void *ptr) {
    if(fd > MAX_FILE_DESCRIPTORS || fd < 0)

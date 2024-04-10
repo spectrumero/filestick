@@ -32,15 +32,13 @@
 #include "fd.h"
 #include "sysdefs.h"
 
-static size_t console_hexline(void *buf, size_t count);
-static void console_nibble(uint8_t nibble);
-
 static FDfunction cons_func = {
    .fd_read  = console_read,
    .fd_write = console_write,
    .fd_lseek = NULL,
    .fd_fstat = console_fstat,
    .fd_close = NULL,
+   .fd_peek  = console_peek
 };
 
 extern volatile uint32_t bufindex;
@@ -91,6 +89,12 @@ ssize_t console_read(int fd, void *buf, size_t count) {
    }
 
    return bytes_read;
+}
+
+//------------------------------------------------------------------
+// Return the number of bytes available
+ssize_t console_peek(int fd) {
+   return cons_rx_count;
 }
 
 //------------------------------------------------------------------

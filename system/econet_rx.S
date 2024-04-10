@@ -173,6 +173,10 @@ econet_rx:
    li       s1, 7                      # tx buf end
    sw       s1, OFFS_TXEND(a0)         # tx buf end, setting this causes transmission
 
+   # DEBUG
+   li       s1, 4
+   sw       s1, OFFS_RGBLED(a0)
+
    j        .econet_rx_done
 
 

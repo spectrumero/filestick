@@ -65,7 +65,8 @@ static FDfunction econet_func = {
    .fd_lseek = NULL,
    .fd_fstat = NULL,
    .fd_ioctl = econet_ioctl,
-   .fd_close = econet_close
+   .fd_close = econet_close,
+   .fd_peek  = econet_peek
 };
 
 static uint32_t *addr_set = (uint32_t *)0x800118;
@@ -132,6 +133,18 @@ ssize_t econet_read(int fd, void *ptr, size_t count) {
    }
 
    return copy_sz;
+}
+
+ssize_t econet_peek(int fd)
+{
+   uint8_t port = fd_rx_portmap[fd];
+   if(!port)
+      return -EINVAL;
+
+   // no data
+   if(!(econet_port_list[port] & 0x80)) return 0;
+
+   return econet_buf_len; 
 }
 
 ssize_t econet_write(int fd, const void *ptr, size_t count) {

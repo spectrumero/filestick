@@ -22,6 +22,8 @@
 ;THE SOFTWARE.
 */
 
+#define SYS_peek        21
+#define SYS_printk      22
 #define SYS_opendir     18
 #define SYS_closedir    19
 #define SYS_readdir     20
@@ -29,6 +31,14 @@
 
 // Syscall wrappers
 .text
+.globl fd_peek                // called directly
+fd_peek:
+   li       a7, SYS_peek
+   j        syscall
+.globl printk                 // called directly
+printk:
+   li       a7, SYS_printk
+   j        syscall
 .globl mount                  // called directly
 mount:
    li       a7, SYS_mount
