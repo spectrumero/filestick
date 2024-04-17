@@ -6,7 +6,7 @@ ICEPROG=iceprog
 BINTOHEX=./bintohex
 OBJS=bintohex.o
 
-VERILOG_SRC=toplevel.v femtorv32_gracilis.v blkram.v uart_picosoc_shrunk.v MappedSPIFlash.v spi.v ice40up5k_spram.v econet_rx_buffered.v econet_rx_phy.v econet_rx.v fcs.v econet_tx_buffered.v econet_tx_phy.v timer.v sdcard.v 
+VERILOG_SRC=toplevel.v femtorv32_gracilis.v blkram.v uart_picosoc_shrunk.v MappedSPIFlash.v spi.v ice40up5k_spram.v econet_rx_buffered.v econet_rx_phy.v econet_rx.v fcs.v econet_tx_buffered.v econet_tx_phy.v timer.v sdcard.v econet_hwctl.v
 
 all:	bintohex toplevel.bin
 

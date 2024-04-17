@@ -109,12 +109,9 @@ wire  spi_sel        =  mem_addr[23:4] == 20'h80002;
 wire  econet_rx_buf_sel          = mem_addr[23:16] == 8'h81;
 wire  econet_rx_reg_sel          = mem_addr[23:8]  == 16'h8001;
 wire  econet_timer_a_sel         = mem_addr[23:4]  == 20'h80030;
+wire  econet_hwctl_sel           = mem_addr        == 24'h800320;
 wire  econet_tx_buf_sel          = mem_addr[23:16] == 8'h82;
 wire  econet_tx_reg_sel          = mem_addr[23:8]  == 16'h8002;
-
-// FIXME
-assign term_en = 1'b0;
-assign econet_clken = 1'b0;
 
 // CPU memory read mux
 assign mem_rdata =
@@ -130,6 +127,7 @@ assign mem_rdata =
    econet_rx_reg_sel ? econet_rx_data        :
    econet_tx_reg_sel ? econet_tx_reg_data    :
    econet_timer_a_sel ? econet_timer_a_data  :
+   econet_hwctl_sel  ? econet_hwctl_data     :
    sdstatus_sel      ? sdstatus_rdata        :
    32'hDEADBEEF;
 
@@ -222,6 +220,18 @@ timer econet_timer_a(
    .data_in(mem_wdata),
    .data_out(econet_timer_a_data),
    .interrupt(econet_timer_a_intr));
+
+wire econet_collision_intr;
+wire [31:0] econet_hwctl_data;
+econet_hwctl ehctl(
+   .reset(reset),
+   .clk(clk),
+   .wr(cpu_we),
+   .select(econet_hwctl_sel),
+   .data_in(mem_wdata),
+   .data_out(econet_hwctl_data),
+   .econet_clken(econet_clken),
+   .econet_termen(term_en));
 
 // -------   Devices ------
 // RGB LED
