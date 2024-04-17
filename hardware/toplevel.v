@@ -1,11 +1,14 @@
 module toplevel (
    input wire     input_clk,
 
-   input wire     econet_clk,
+   input wire     econet_clkio,
    input wire     econet_rx,
    output wire    econet_tx,
    output wire    econet_tx_enable,
    output wire    econet_receiving, // debug
+   output wire    econet_clken,
+   output wire    term_en,
+   output wire    collision_ref_pwm,
    
    output wire    led_red,
    output wire    led_green,
@@ -62,6 +65,24 @@ module toplevel (
    wire clk = input_clk;
 `endif
 
+// FIXME: econet clock
+wire econet_clkout;
+assign econet_clkout = 0;
+wire econet_clk;
+
+// econet clock I/O pin
+// note that when output enabled, D_OUT_0 comes out
+// on D_IN_0
+SB_IO #(
+   // PIN_OUTPUT_TRISTATE, PIN_INPUT
+   .PIN_TYPE(6'b 1010_01)
+   ) e_clkio (
+      .PACKAGE_PIN(econet_clkio),
+      .OUTPUT_ENABLE(econet_clken),
+      .D_OUT_0(econet_clkout),
+      .D_IN_0(econet_clk)
+   );
+
 // CPU bus
 wire [31:0]    mem_addr;
 wire [31:0]    mem_wdata;
@@ -90,6 +111,10 @@ wire  econet_rx_reg_sel          = mem_addr[23:8]  == 16'h8001;
 wire  econet_timer_a_sel         = mem_addr[23:4]  == 20'h80030;
 wire  econet_tx_buf_sel          = mem_addr[23:16] == 8'h82;
 wire  econet_tx_reg_sel          = mem_addr[23:8]  == 16'h8002;
+
+// FIXME
+assign term_en = 1'b0;
+assign econet_clken = 1'b0;
 
 // CPU memory read mux
 assign mem_rdata =
@@ -370,6 +395,15 @@ always @(posedge clk)
       reset <= 1;
       reset_cnt <= reset_cnt + 1;
    end
+
+// ------- Collision ref PWM -----
+// R=1k C=100nF 3dB pt = 1.6kHz
+// TODO: actual PWM
+reg [7:0]   pwm_ctr = 0;
+always @(posedge clk) begin
+   pwm_ctr <= pwm_ctr + 1;
+end
+assign collision_ref_pwm = pwm_ctr[7];
 
 // ------- Interrupts ------------
 `ifdef GP_TIMER
