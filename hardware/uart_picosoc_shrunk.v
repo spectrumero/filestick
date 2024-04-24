@@ -30,7 +30,7 @@ module buart #(
     input resetq,
 
     output tx,
-    input  rx,
+    input  rx_raw,
 
     input  wr,
     input  rd,
@@ -65,6 +65,10 @@ module buart #(
     assign rx_data = recv_buf_data;
     assign valid = recv_buf_valid;
 
+    reg [1:0] rx_clean;
+    always @(posedge clk) rx_clean[0] <= rx_raw;
+    always @(posedge clk) rx_clean[1] <= rx_clean[0];
+    wire rx = rx_clean[1];
 
     always @(posedge clk) begin
 

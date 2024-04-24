@@ -333,7 +333,7 @@ buart #(
    .resetq(!reset),
 
    .tx(uart_tx),
-   .rx(uart_rx),
+   .rx_raw(uart_rx),
 
    .wr(uart_wr),
    .rd(uart_rd),
