@@ -28,10 +28,11 @@
 .globl timer_done
 timer_done:
    li    a1, 6          # reset timer interrupt and enable
-   sw    a1, 8(a1)      # timer control reg
-   la    a0, timer_count
-   lw    a1, 0(a0)      # get timer count and increment
+   sw    a1, 8(a0)      # timer control reg
+   la    a2, timer_count
+   lw    a1, 0(a2)      # get timer count and increment
    addi  a1, a1, 1
+   sw    a1, 0(a2)
    sw    a1, 0(a0)
    ret                  # isr_exit
 

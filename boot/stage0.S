@@ -21,9 +21,6 @@ booting:
    # bootup sequence.
    la       gp, DEV_BASE
 
-   li       a0, 1
-   sw       a0, OFFS_RGBLED(gp)  # RGB led -> blue
-
    la       a0, flashstring
    li       a1, flashstring_sz
    call     serial_write

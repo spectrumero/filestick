@@ -67,7 +67,6 @@ module toplevel (
 
 // FIXME: econet clock
 wire econet_clkout;
-assign econet_clkout = 0;
 wire econet_clk;
 
 // econet clock I/O pin
@@ -231,6 +230,7 @@ econet_hwctl ehctl(
    .data_in(mem_wdata),
    .data_out(econet_hwctl_data),
    .econet_clken(econet_clken),
+   .econet_clkout(econet_clkout),
    .econet_termen(term_en));
 
 // -------   Devices ------
@@ -409,11 +409,11 @@ always @(posedge clk)
 // ------- Collision ref PWM -----
 // R=1k C=100nF 3dB pt = 1.6kHz
 // TODO: actual PWM
-reg [7:0]   pwm_ctr = 0;
+reg [8:0]   pwm_ctr = 0;
 always @(posedge clk) begin
    pwm_ctr <= pwm_ctr + 1;
 end
-assign collision_ref_pwm = pwm_ctr[7];
+assign collision_ref_pwm = pwm_ctr[8]|pwm_ctr[7]|pwm_ctr[6];
 
 // ------- Interrupts ------------
 `ifdef GP_TIMER
