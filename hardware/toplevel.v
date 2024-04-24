@@ -184,7 +184,7 @@ buffered_econet econet_receiver(
    .sys_addr(mem_addr[11:2]),
    .sys_rdata(econet_rx_data),
    .sys_wdata(mem_wdata),
-   .sys_frame_valid(econet_rx_valid),
+   .sys_frame_valid_out(econet_rx_valid),
    .receiving(econet_receiving));
 
 wire econet_tx_data;

@@ -20,7 +20,7 @@ module buffered_econet
    input [31:0]   sys_wdata,        // CPU write data (address set only)
    input [9:0]    sys_addr,         // 32-bit addr [11:2]
    output [31:0]  sys_rdata,        // CPU read data
-   output         sys_frame_valid,  // true when a valid frame is received
+   output         sys_frame_valid_out,  // true when a valid frame is received
    output         receiving         // true while receiving
 );
 
@@ -41,6 +41,7 @@ module buffered_econet
    reg [31:0]           econet_buf[ECO_BUFSZ >> 2];
    reg [31:0]           buf_data;
    reg                  sys_frame_valid;
+   reg [1:0]            sys_frame_valid_sync;
    reg [15:0]           econet_address;
 
    reg [ECO_CNTWIDTH-1:0] econet_ptr;
@@ -82,6 +83,7 @@ module buffered_econet
       frame_address[3] = 0;
       frame_address[4] = 0;
       frame_address[5] = 0;
+      sys_frame_valid_sync = 0;
    end
 
    wire [31:0] fr_address;
@@ -158,6 +160,12 @@ module buffered_econet
    always @(posedge sys_clk)
       if(sys_rd & sys_buf_select) buf_data <= econet_buf[sys_addr];
 
+   always @(posedge sys_clk)
+      sys_frame_valid_sync[0] <= sys_frame_valid;
+   always @(posedge sys_clk)
+      sys_frame_valid_sync[1] <= sys_frame_valid_sync[0];
+   assign sys_frame_valid_out = sys_frame_valid_sync;
+
    assign sys_rdata =
       sys_buf_select ? buf_data : reg_data;
 
@@ -174,7 +182,9 @@ module buffered_econet
       sys_reg_addr == REG_STATUS          ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
       32'h55555555;
 
-   reg valid_rst;
+   //reg valid_rst;
+   wire valid_rst;
+   assign valid_rst = sys_wr[0] & sys_reg_select;
    always @(posedge sys_clk) begin
       if(sys_wr & sys_reg_select) begin
          case(sys_reg_addr)
@@ -183,15 +193,15 @@ module buffered_econet
                if(sys_wr[1]) econet_address[15:8] <= sys_wdata[15:8];
             end
 
-            REG_STATUS: begin
-               if(sys_wr[0]) begin
+            //REG_STATUS: begin
+            //   if(sys_wr[0]) begin
                   // asynchronously resets valid flag on its posedge
-                  valid_rst <= sys_wdata[0];
-               end
-            end
+            //      valid_rst <= sys_wdata[0];
+            //   end
+            //end
          endcase
       end
-      else valid_rst <= 0;
+      //else valid_rst <= 0;
    end
 
    // Measure the econet clock period
