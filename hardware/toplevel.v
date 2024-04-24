@@ -9,6 +9,7 @@ module toplevel (
    output wire    econet_clken,
    output wire    term_en,
    output wire    collision_ref_pwm,
+   input wire     collision_detect,
    
    output wire    led_red,
    output wire    led_green,

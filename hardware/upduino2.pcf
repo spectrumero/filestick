@@ -28,6 +28,7 @@ set_io -nowarn uart_tx 27
 set_io -nowarn uart_grn 32
 set_io -nowarn term_en 35
 set_io -nowarn collision_ref_pwm 31
+set_io -nowarn collision_detect  32
 set_io -nowarn gpio_37 37
 set_io -nowarn econet_clkio 34
 set_io -nowarn econet_rx 43
