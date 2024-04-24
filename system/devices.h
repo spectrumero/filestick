@@ -36,6 +36,8 @@
 #define OFFS_TMR_A_SET     0x304
 #define OFFS_TMR_A_STATUS  0x308
 
+#define OFFS_NET_HWCTL     0x320
+
 // Econet hardware bitfields
 // Transmit
 #define BIT_TX_TURNAROUND     1     // Indicates replying to another station
