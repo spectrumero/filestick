@@ -409,11 +409,11 @@ always @(posedge clk)
 // ------- Collision ref PWM -----
 // R=1k C=100nF 3dB pt = 1.6kHz
 // TODO: actual PWM
-reg [8:0]   pwm_ctr = 0;
+reg [7:0]   pwm_ctr = 0;
 always @(posedge clk) begin
    pwm_ctr <= pwm_ctr + 1;
 end
-assign collision_ref_pwm = pwm_ctr[8]|pwm_ctr[7]|pwm_ctr[6];
+assign collision_ref_pwm = pwm_ctr[7];
 
 // ------- Interrupts ------------
 `ifdef GP_TIMER
