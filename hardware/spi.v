@@ -17,9 +17,14 @@ module spi
    output          rbusy,
 
    // SPI interface
-   output         spi_clk,
-   input          spi_miso,
-   output         spi_mosi,
+   output         spi_clk1,
+   input          spi_miso1,
+   output         spi_mosi1,
+
+   output         spi_clk2,
+   input          spi_miso2,
+   output         spi_mosi2,
+
    output   [3:0] spi_ss
 );
 
@@ -62,6 +67,20 @@ module spi
                reg_ss == 2 ? 4'b1011 :
                              4'b0111)
                : 4'b1111;
+
+   // port select
+   wire     spi_clk;
+   wire     spi_miso;
+   wire     spi_mosi;
+
+   // port 1 is reserved for the flash memory
+   assign   spi_clk1    = reg_ss == 0 ? spi_clk : 0;
+   assign   spi_mosi1   = reg_ss == 0 ? spi_mosi : 0;
+   assign   spi_miso    = reg_ss == 0 ? spi_miso1 : spi_miso2;
+
+   // port 2 is for all other peripherals
+   assign   spi_clk2    = reg_ss != 0 ? spi_clk : 0;
+   assign   spi_mosi2   = reg_ss != 0 ? spi_mosi : 0;
 
    // Byte order
    // In big endian mode the high byte gets shifted out first

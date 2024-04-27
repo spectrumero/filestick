@@ -12,13 +12,10 @@ set_io -nowarn serial_rxd 15 # FPGA receive from USB
 set_io -nowarn spi_ss[0] 16 # Connected to SPI flash, drive high unless using SPI flash!
 #set_io -nowarn spi_cs  12  # external CS
 
-# If using the FTDI MPSSE engine, the following signals apply
-set_io -nowarn spi_sck 15  # Shared with the flash
-#set_io -nowarn spi_ssn 16  # Connected to SPI flash, drive high unless using SPI flash!
-#set_io -nowarn spi_mosi 17 # Shared with the flash (FPGA is also slave)
-#set_io -nowarn spi_miso 14 # Shared with the flash (FPGA is also slave)
-set_io spi_mosi 14      # when FPGA is master
-set_io spi_miso 17      # when FPGA is master
+# dedicated SPI port for the flash memory
+set_io -nowarn flash_sck 15  # Shared with the flash
+set_io flash_mosi 14      # when FPGA is master
+set_io flash_miso 17      # when FPGA is master
 
 # Normal GPIO pins, left side
 set_io -nowarn uart_brn 23
@@ -53,9 +50,9 @@ set_io -nowarn spi_ss[2] 12
 set_io -nowarn spi_ss[3] 21
 set_io -nowarn sd_present 13
 set_io -nowarn gpio_13 13
-set_io -nowarn gpio_19 19
-set_io -nowarn gpio_18 18
-set_io -nowarn gpio_11 11
+set_io -nowarn spi_mosi 19    # Peripheral SPI (SS1-3)
+set_io -nowarn spi_miso 18    #
+set_io -nowarn spi_sck 11     #
 set_io -nowarn gpio_9 9
 set_io -nowarn gpio_6 6
 set_io -nowarn gpio_44 44

@@ -19,7 +19,10 @@ module toplevel (
    output wire    uart_tx,
 
    output [3:0]   spi_ss,
-   output         spi_sck,
+   output         flash_sck,     // spi_ss 0
+   output         flash_mosi,
+   input          flash_miso,
+   output         spi_sck,       // spi_ss > 0
    output         spi_mosi,
    input          spi_miso,
 
@@ -374,10 +377,15 @@ spi #(
       .rdata(spi_rdata),
       .rbusy(mem_rbusy),
 
-      .spi_clk(spi_sck),
+      // flash has a dedicated SPI port
+      // when spi_ss[0] is asserted
       .spi_ss(spi_ss),
-      .spi_miso(spi_miso),
-      .spi_mosi(spi_mosi));
+      .spi_clk1(flash_sck),
+      .spi_miso1(flash_miso),
+      .spi_mosi1(flash_mosi),
+      .spi_clk2(spi_sck),
+      .spi_miso2(spi_miso),
+      .spi_mosi2(spi_mosi));
 
 // ---------- SD card detect ---------
 // Note that data is handled by the SPI
