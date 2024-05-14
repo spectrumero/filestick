@@ -24,6 +24,7 @@
 ;THE SOFTWARE.
 */
 #include <stdint.h>
+#include <elf.h>
 
 #define ELF_MAGIC       0x464c457f     // 0x7f,E,L,F
 #define FLASH_OFFSET    0x30000        // Where in flash the startup is
@@ -36,15 +37,18 @@ typedef void (*start_addr)(void);
 start_addr elf_boot();
 
 // Runs the named elf file.
-void elf_run(const char *filename);
+int elf_run(const char *filename);
 
 // Loads the named file, returning the start address.
-start_addr elf_load(const char *filename, uint32_t offset);
+start_addr elf_load(const char *filename, uint32_t offset, int *status);
 
 // Loads from a file descriptor. The offset is how many bytes into the
 // open file the ELF data starts (normally 0). Returns the entry address
-// or 0 on failure.
-start_addr elf_load_fd(int fd, uint32_t offset);
+// or 0 on failure. Returns status (0 = success) in status ptr.
+start_addr elf_load_fd(int fd, uint32_t offset, int *status);
+
+int elf_read_ehdr(int fd, uint32_t offset, Elf32_Ehdr *header);
+int elf_validate_phdr(int fd, uint32_t offset, Elf32_Ehdr *header);
 
 // Supervisor cmdlet
 void super_elf(int argc, char **argv);
