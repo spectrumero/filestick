@@ -46,8 +46,11 @@ econet_rx:
    sw       a2, 12(sp)
 
    li       s1, 1                      # reset interrupt status
-   sw       s1, OFFS_RXSTATUS(a0)
+   sb       s1, OFFS_RXSTATUS(a0)
    sw       s1, OFFS_TMR_A_STATUS(a0)  # reset and disable timeout timer
+
+   lbu      s1, OFFS_MONITORMODE(a0)
+   bnez     s1, .econet_monitor
 
    la       a1, econet_handshake_state
    lw       s1, 0(a1)                  # s1 = state
@@ -179,6 +182,12 @@ econet_rx:
 
    j        .econet_rx_done
 
+.econet_monitor:
+   la       s1, econet_monitor_frames  # in monitor mode, just update
+   lw       s2, 0(s1)                  # the number of frames we've
+   addi     s2, s2, 1                  # received in monitor mode.
+   sw       s2, 0(s1)
+   j        .econet_rx_done
 
 #-----------------------------------------------------------
 # Timeout handling
@@ -221,6 +230,8 @@ econet_tx_end:          .word 0
 econet_tx_status:       .word 0
 .globl econet_timeout_state         # offset 28
 econet_timeout_state:   .word 0
+.globl econet_monitor_frames        # offset 32
+econet_monitor_frames:  .word 0
 
 .globl econet_port_list
 econet_port_list:

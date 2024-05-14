@@ -47,6 +47,7 @@ struct econet_state {
 #define ECONET_SET_ADDR       0x01000000
 #define ECONET_SET_RECV_PORT  0x02000000
 #define ECONET_SET_SEND_ADDR  0x03000000
+#define ECONET_SET_MONITOR    0x04000000
 #define ECONET_DBG_BUF        0xF0000000
 
 // Low-level states

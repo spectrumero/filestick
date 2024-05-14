@@ -49,6 +49,7 @@ module buffered_econet
    reg [ECO_CNTWIDTH-1:0] frame_start;
    reg [7:0]            frame_address[6];
    reg                  frame_state;
+   reg                  monitor_mode;
 
    // These are set when a frame with a valid FCS for our econet address
    // is received. Storing values here will mean software has more
@@ -120,13 +121,16 @@ module buffered_econet
 
    // register select acts as an async reset for the frame_valid flag (which is intended to be used to trigger
    // an interrupt)
+   wire our_frame = rx_frame_end && rx_fcs == FCS_GOOD &&
+                    econet_address[7:0] == frame_address[0] && econet_address[15:8] == frame_address[1];
+   wire monitor_frame = rx_frame_end && monitor_mode;
+
    always @(posedge econet_clk, posedge valid_rst) begin
       if(valid_rst)
          sys_frame_valid <= 0;
       else
-         // Frame for our address received and is valid
-         if(rx_frame_end && rx_fcs == FCS_GOOD && 
-            econet_address[7:0] == frame_address[0] && econet_address[15:8] == frame_address[1]) begin
+         // Frame for our address received and is valid, or any frame if monitoring
+         if(our_frame || monitor_frame) begin
             valid_start          <= frame_start;
             valid_end            <= econet_ptr;
             valid_cnt            <= econet_ctr;
@@ -179,26 +183,30 @@ module buffered_econet
       sys_reg_addr == REG_OUR_ADDRESS     ? { 16'b0, econet_address } :
       sys_reg_addr == REG_REPLY_ADDRESS   ? { valid_address[15:8], valid_address[7:0], valid_address[31:24], valid_address[23:16] } :
       sys_reg_addr == REG_SCOUT_DATA      ? { 16'b0, valid_scout } :
-      sys_reg_addr == REG_STATUS          ? { period, 13'b0, clk_detected, receiving, sys_frame_valid } :
+      sys_reg_addr == REG_STATUS          ? { period, 7'b0, monitor_mode, 5'b0, clk_detected, receiving, sys_frame_valid } :
       32'h55555555;
 
    //reg valid_rst;
-   wire valid_rst;
+   wire valid_rst;         // resets sys_frame_valid
    assign valid_rst = sys_wr[0] & sys_reg_select;
-   always @(posedge sys_clk) begin
-      if(sys_wr & sys_reg_select) begin
+
+   always @(posedge sys_clk, posedge reset) begin
+      if(reset) begin
+         monitor_mode <= 0;
+      end
+      else if(sys_wr & sys_reg_select) begin
          case(sys_reg_addr)
             REG_OUR_ADDRESS: begin
                if(sys_wr[0]) econet_address[7:0] <= sys_wdata[7:0];
                if(sys_wr[1]) econet_address[15:8] <= sys_wdata[15:8];
             end
 
-            //REG_STATUS: begin
-            //   if(sys_wr[0]) begin
-                  // asynchronously resets valid flag on its posedge
-            //      valid_rst <= sys_wdata[0];
-            //   end
-            //end
+            REG_STATUS: begin
+               if(sys_wr[1]) begin     // reg_status + 1
+                  monitor_mode <= sys_wdata[8];
+               end
+            end
+
          endcase
       end
       //else valid_rst <= 0;

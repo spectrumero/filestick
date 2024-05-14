@@ -44,10 +44,12 @@ extern volatile uint32_t econet_tx_start;
 extern volatile uint32_t econet_tx_end;
 extern volatile uint32_t econet_tx_status;
 extern volatile uint32_t econet_timeout_state;
+extern volatile uint32_t econet_monitor_frames;
 extern volatile uint8_t econet_port_list[256];
 
 // Hardware registers
 static volatile uint32_t *econet_state    = (uint32_t *)0x80011c;  // reg_status
+static volatile uint8_t  *econet_mon      = (uint8_t  *)0x80011d;
 static volatile uint32_t *tx_start_offset = (uint32_t *)0x800200;
 static volatile uint32_t *tx_end_offset   = (uint32_t *)0x800204;
 static volatile uint32_t *tx_flags        = (uint32_t *)0x800208;
@@ -71,10 +73,13 @@ static FDfunction econet_func = {
 
 static uint32_t *addr_set = (uint32_t *)0x800118;
 
+static uint32_t last_monitor_frames = 0;
+
 // Internal functions
 static int econet_set_rx_port(int fd, uint8_t port);     // sets recvfrom port
 static int econet_set_addr(uint16_t netstation);         // sets our net and station number
 static int econet_set_tx_addr(int fd, struct econet_addr *dest);
+static ssize_t econet_monitor(int fd, void *ptr, size_t count); 
 
 static uint32_t *led = (uint32_t *)0x800000;
 
@@ -99,6 +104,11 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
          return econet_set_rx_port(fd, request & 0xFF);
       case ECONET_SET_SEND_ADDR:
          return econet_set_tx_addr(fd, ptr);
+      case ECONET_SET_MONITOR:
+         econet_monitor_frames = 0;
+         last_monitor_frames = 0;
+         *econet_mon = (uint8_t)(request & 0xFF);
+         return 0;
       case ECONET_DBG_BUF:
          memcpy(ptr, (uint8_t *)&econet_state_val, sizeof(struct econet_state));
          return 0;
@@ -111,6 +121,8 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
 }
 
 ssize_t econet_read(int fd, void *ptr, size_t count) {
+   if(*econet_mon) return econet_monitor(fd, ptr, count);
+
    uint8_t port = fd_rx_portmap[fd];
    if(!port)
       return -EINVAL;
@@ -130,6 +142,28 @@ ssize_t econet_read(int fd, void *ptr, size_t count) {
    else {
       // this resets 'valid data ready' flag
       econet_port_list[port] = fd;
+   }
+
+   return copy_sz;
+}
+
+static ssize_t econet_monitor(int fd, void *ptr, size_t count) {
+   // wait for a frame
+   while(econet_monitor_frames == last_monitor_frames);
+
+   size_t copy_sz = econet_buf_len > count ? count : econet_buf_len;
+
+   // FIXME: define for buffer address
+   uint8_t *bufptr = ((uint8_t *)0x810000) + econet_buf_start;
+   memcpy(ptr, bufptr, copy_sz);
+
+   if(copy_sz < econet_buf_len) {
+      econet_buf_len -= copy_sz;
+      econet_buf_start += copy_sz;
+   }
+   else {
+      // done with this frame, account for it
+      last_monitor_frames++;
    }
 
    return copy_sz;

@@ -12,7 +12,7 @@ syscall_table:
 .byte 18          # 21 SYS_peek (nonstd)
 .byte 19          # 22 printk (nonstd)
 .byte 0           # 23 SYS_dup
-.byte 0           # 24
+.byte 20          # 24 SYS_run (nonstd)
 .byte 0           # 25 SYS_fcntl
 .byte 0           # 26 
 .byte 0           # 27
@@ -27,7 +27,7 @@ syscall_table:
 .byte 0           # 36
 .byte 0           # 37
 .byte 0           # 38
-.byte 0           # 39
+.byte 0           # 39 SYS_umount
 .byte 11          # 40 SYS_mount
 .byte 0           # 41
 .byte 0           # 42
@@ -127,4 +127,5 @@ syscall_address:
 .word SYS_stat    # 17
 .word SYS_peek    # 18
 .word printk      # 19
+.word elf_run     # 20
 

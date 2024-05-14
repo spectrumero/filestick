@@ -28,6 +28,7 @@
 #define OFFS_RXPORT        0x114
 #define OFFS_RXFLAG        0x115
 #define OFFS_RXSTATUS      0x11c
+#define OFFS_MONITORMODE   0x11d
 
 #define OFFS_TXSTART       0x200
 #define OFFS_TXEND         0x204
