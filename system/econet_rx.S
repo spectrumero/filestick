@@ -185,8 +185,14 @@ econet_rx:
 .econet_monitor:
    la       s1, econet_monitor_frames  # in monitor mode, just update
    lw       s2, 0(s1)                  # the number of frames we've
-   addi     s2, s2, 1                  # received in monitor mode.
+   addi     s2, s2, 1                  # received in monitor mode, we don't ack!
    sw       s2, 0(s1)
+
+   la       a1, econet_handshake_state # variables addr
+   lw       s1, OFFS_RXSTART(a0)       # get buffer start offset
+   sw       s1, 8(a1)                  # save in econet_buf_start
+   lw       s1, OFFS_RXLEN(a0)         # get bytes received length
+   sw       s1, 12(a1)                 # save in econet_buf_len
    j        .econet_rx_done
 
 #-----------------------------------------------------------
