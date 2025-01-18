@@ -8261,12 +8261,6 @@
 		(uuid "89ab255a-7443-4ff2-b411-d998c6bcc033")
 	)
 	(junction
-		(at 254 40.64)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8aa0efa6-9f6b-4aec-8a44-c597b2c588d0")
-	)
-	(junction
 		(at 317.5 311.15)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -8433,6 +8427,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "e906f943-0fda-40ba-94b3-a3cbb5b39339")
+	)
+	(junction
+		(at 254 40.64)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e930edba-34cc-47f9-a1e4-e7f7fdb999c3")
 	)
 	(junction
 		(at 63.5 251.46)
@@ -10786,6 +10786,16 @@
 	)
 	(wire
 		(pts
+			(xy 254 40.64) (xy 259.08 40.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "815e4617-6a71-4731-ab9f-dd824f6853ec")
+	)
+	(wire
+		(pts
 			(xy 52.07 140.97) (xy 77.47 140.97)
 		)
 		(stroke
@@ -10893,6 +10903,16 @@
 			(type default)
 		)
 		(uuid "844f20b6-e157-4376-9c45-ce27d6a800b0")
+	)
+	(wire
+		(pts
+			(xy 157.48 45.72) (xy 170.18 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "84b902b6-f756-42a3-aaec-bf68a1b79237")
 	)
 	(wire
 		(pts
@@ -12196,16 +12216,6 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 45.72) (xy 170.18 45.72)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d25012f2-0d09-44c1-b439-c32734c1a9f5")
-	)
-	(wire
-		(pts
 			(xy 281.94 226.06) (xy 307.34 226.06)
 		)
 		(stroke
@@ -12833,16 +12843,6 @@
 			(type default)
 		)
 		(uuid "f6f124f4-7cde-4d84-8033-dcd14a70c3be")
-	)
-	(wire
-		(pts
-			(xy 254 40.64) (xy 259.08 40.64)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f72c637e-5545-462d-ac30-98ac74252283")
 	)
 	(wire
 		(pts
@@ -13664,17 +13664,6 @@
 		)
 		(uuid "50745a51-6752-45cc-8f0b-9f7e34cd0fbf")
 	)
-	(label "SD_CS"
-		(at 157.48 50.8 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "55a36ecb-a443-4a3e-8dfa-557102cd4579")
-	)
 	(label "UART_TX"
 		(at 127 241.3 0)
 		(fields_autoplaced yes)
@@ -13800,6 +13789,17 @@
 		)
 		(uuid "67a8f2f2-4b97-4cf7-a7ba-a796e0627dff")
 	)
+	(label "SD_MOSI"
+		(at 157.48 43.18 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "68537804-bda1-49da-bc88-28e8f7dc0603")
+	)
 	(label "GPIO_13"
 		(at 180.34 157.48 0)
 		(fields_autoplaced yes)
@@ -13822,6 +13822,17 @@
 			(justify left bottom)
 		)
 		(uuid "6d10d3fe-a0c2-4557-9071-cb418cdc708d")
+	)
+	(label "SD_CS"
+		(at 157.48 53.34 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "6da25a30-48e5-40d7-ac65-15d8e22e96ba")
 	)
 	(label "SD_CS"
 		(at 474.98 50.8 0)
@@ -14145,17 +14156,6 @@
 		)
 		(uuid "a1df242b-b78b-4275-b45a-af114ccc02ea")
 	)
-	(label "SD_MOSI"
-		(at 157.48 45.72 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a5495205-e24a-4a0c-8f67-102d20a9fb97")
-	)
 	(label "GPIO_18"
 		(at 58.42 66.04 0)
 		(fields_autoplaced yes)
@@ -14431,17 +14431,6 @@
 		)
 		(uuid "daaa58ce-9a32-4a6d-9e88-b16c4af7fcd3")
 	)
-	(label "SD_SCK"
-		(at 157.48 43.18 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ddd5b9bf-145c-40f4-acd5-209fd539296e")
-	)
 	(label "GPIO_26"
 		(at 180.34 162.56 0)
 		(fields_autoplaced yes)
@@ -14488,6 +14477,17 @@
 		)
 		(uuid "e6316dd5-55ff-42f8-b572-e39e62278b86")
 	)
+	(label "SD_SCK"
+		(at 157.48 45.72 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e783bd50-4464-4474-b635-94be779d898b")
+	)
 	(label "DATA-"
 		(at 551.18 335.28 0)
 		(fields_autoplaced yes)
@@ -14512,17 +14512,6 @@
 		)
 		(uuid "ed736b14-0e32-4e4d-a8a3-dd7a6ea8c1b0")
 	)
-	(label "SD_MISO"
-		(at 157.48 53.34 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "f28fdccd-43e0-4d8c-9538-b56f2a9cadb5")
-	)
 	(label "USBD_P"
 		(at 43.18 246.38 0)
 		(fields_autoplaced yes)
@@ -14534,6 +14523,17 @@
 			(justify left bottom)
 		)
 		(uuid "f4110d04-df7d-4d4f-bc28-131dd47f922b")
+	)
+	(label "SD_MISO"
+		(at 157.48 50.8 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f445275a-0e2a-4cc6-bcce-428a6fd179d3")
 	)
 	(label "COLLISION_DETECT"
 		(at 276.86 365.76 0)
@@ -18005,7 +18005,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 322.2752 40.64 0)
 			(effects
 				(font
@@ -21853,7 +21853,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 322.2752 86.36 0)
 			(effects
 				(font
@@ -22471,7 +22471,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Horizontal"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 322.58 302.26 0)
 			(effects
 				(font
@@ -22874,7 +22874,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Inductor_SMD:L_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
 			(at 57.15 231.648 90)
 			(effects
 				(font
@@ -24699,7 +24699,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Horizontal"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 519.43 280.67 0)
 			(effects
 				(font
@@ -26496,7 +26496,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Horizontal"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 394.97 322.58 0)
 			(effects
 				(font
