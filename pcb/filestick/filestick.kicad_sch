@@ -8255,12 +8255,6 @@
 		(uuid "86e3b883-f86a-4da3-ab92-07b844f42b43")
 	)
 	(junction
-		(at 72.39 133.35)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "89ab255a-7443-4ff2-b411-d998c6bcc033")
-	)
-	(junction
 		(at 317.5 311.15)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -9076,7 +9070,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 53.34) (xy 76.2 53.34)
+			(xy 57.15 53.34) (xy 76.2 53.34)
 		)
 		(stroke
 			(width 0)
@@ -9113,16 +9107,6 @@
 			(type default)
 		)
 		(uuid "1ed31cc4-24bf-42ef-ad4b-06f3c7eef34e")
-	)
-	(wire
-		(pts
-			(xy 77.47 138.43) (xy 72.39 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1eeaaadd-8ea8-4e0b-89f3-9afc884bfc80")
 	)
 	(wire
 		(pts
@@ -9163,16 +9147,6 @@
 			(type default)
 		)
 		(uuid "1fc7d821-371f-45b6-afd0-bffc7115d080")
-	)
-	(wire
-		(pts
-			(xy 72.39 138.43) (xy 72.39 133.35)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "20404dd7-da12-442b-a73b-93430e3c1d33")
 	)
 	(wire
 		(pts
@@ -9496,7 +9470,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 48.26) (xy 76.2 48.26)
+			(xy 57.15 48.26) (xy 76.2 48.26)
 		)
 		(stroke
 			(width 0)
@@ -10906,7 +10880,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 63.5) (xy 76.2 63.5)
+			(xy 57.15 63.5) (xy 76.2 63.5)
 		)
 		(stroke
 			(width 0)
@@ -11476,7 +11450,7 @@
 	)
 	(wire
 		(pts
-			(xy 72.39 133.35) (xy 77.47 133.35)
+			(xy 52.07 133.35) (xy 77.47 133.35)
 		)
 		(stroke
 			(width 0)
@@ -11546,7 +11520,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 43.18) (xy 76.2 43.18)
+			(xy 57.15 43.18) (xy 76.2 43.18)
 		)
 		(stroke
 			(width 0)
@@ -11576,7 +11550,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 55.88) (xy 76.2 55.88)
+			(xy 57.15 55.88) (xy 76.2 55.88)
 		)
 		(stroke
 			(width 0)
@@ -11676,7 +11650,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 48.26) (xy 170.18 48.26)
+			(xy 154.94 48.26) (xy 170.18 48.26)
 		)
 		(stroke
 			(width 0)
@@ -11696,7 +11670,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 58.42) (xy 76.2 58.42)
+			(xy 57.15 58.42) (xy 76.2 58.42)
 		)
 		(stroke
 			(width 0)
@@ -12326,7 +12300,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 50.8) (xy 76.2 50.8)
+			(xy 57.15 50.8) (xy 76.2 50.8)
 		)
 		(stroke
 			(width 0)
@@ -12566,13 +12540,23 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 66.04) (xy 76.2 66.04)
+			(xy 57.15 66.04) (xy 76.2 66.04)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "e8b1c85b-0100-4e3a-8d6e-a437e7944cd5")
+	)
+	(wire
+		(pts
+			(xy 52.07 138.43) (xy 77.47 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e91e40d9-601a-485c-a866-6fcdbdef85e2")
 	)
 	(wire
 		(pts
@@ -12766,7 +12750,7 @@
 	)
 	(wire
 		(pts
-			(xy 58.42 45.72) (xy 76.2 45.72)
+			(xy 57.15 45.72) (xy 76.2 45.72)
 		)
 		(stroke
 			(width 0)
@@ -12893,16 +12877,6 @@
 			(type default)
 		)
 		(uuid "f86d3e3a-68ed-4383-85a5-5cd7f03f44fc")
-	)
-	(wire
-		(pts
-			(xy 52.07 133.35) (xy 72.39 133.35)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f9232207-7ab7-4bda-86da-c72ed2746f11")
 	)
 	(wire
 		(pts
@@ -13064,6 +13038,16 @@
 		)
 		(uuid "ff75a047-1260-4520-b948-e961d748821d")
 	)
+	(text "Note: output"
+		(exclude_from_sim no)
+		(at 41.402 142.494 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "07059915-dc2d-450c-a454-60551428c08d")
+	)
 	(text "GPIO Connector"
 		(exclude_from_sim no)
 		(at 143.002 141.732 0)
@@ -13196,6 +13180,16 @@
 		)
 		(uuid "e783a17f-ed44-4edf-ba55-01b95207b828")
 	)
+	(text "Note: Input"
+		(exclude_from_sim no)
+		(at 145.796 47.752 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "fbf32629-2c45-445e-8f0b-0c10f7860c13")
+	)
 	(label "GPIO_26"
 		(at 52.07 123.19 0)
 		(fields_autoplaced yes)
@@ -13242,8 +13236,8 @@
 		)
 		(uuid "09fc9911-2a0c-4fd9-b57b-ae83dba279b8")
 	)
-	(label "GPIO_6"
-		(at 58.42 43.18 0)
+	(label "GPIO_35"
+		(at 143.51 154.94 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13251,7 +13245,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0ba4d21b-7c2a-4709-ba60-cc8c0d6c7231")
+		(uuid "0be47aab-7d75-4f60-9dcb-5429b8485f95")
 	)
 	(label "ECONET_TERM_EN"
 		(at 226.06 351.79 90)
@@ -13287,17 +13281,6 @@
 		)
 		(uuid "0f3b23d1-2c51-43b8-86df-dfc41cf8b22f")
 	)
-	(label "GPIO_12"
-		(at 58.42 53.34 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "10458408-ed07-4a26-9069-4f0cdabd819d")
-	)
 	(label "SPI_SS2"
 		(at 485.14 115.57 0)
 		(fields_autoplaced yes)
@@ -13309,16 +13292,17 @@
 		)
 		(uuid "126a2049-8c4b-4ecd-a4cf-9825f65796b2")
 	)
-	(label "GPIO_9"
-		(at 180.34 152.4 0)
+	(label "ECONET_CLKIO"
+		(at 154.94 48.26 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
+				(italic yes)
 			)
 			(justify left bottom)
 		)
-		(uuid "12c61509-be54-4cf2-a8a0-5db84521007c")
+		(uuid "128aab2a-7356-4175-b29c-d2a7f9cb029e")
 	)
 	(label "FLASH_SCK"
 		(at 229.87 82.55 0)
@@ -13377,8 +13361,8 @@
 		)
 		(uuid "16a8525d-a80d-45d8-8d5a-841b57be3695")
 	)
-	(label "GPIO_18"
-		(at 143.51 160.02 0)
+	(label "GPIO_36"
+		(at 52.07 140.97 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13386,18 +13370,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "18b3abf0-934a-41af-933e-8ecfad7e9359")
-	)
-	(label "GPIO_44"
-		(at 157.48 48.26 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "1dcad77f-a740-4cd9-a2b4-0e45de56662d")
+		(uuid "1c017672-7a28-44f3-aaff-eccfbac28d30")
 	)
 	(label "CDONE"
 		(at 104.14 35.56 0)
@@ -13409,6 +13382,17 @@
 			(justify left bottom)
 		)
 		(uuid "1faa9bb9-a013-4cbb-a3d6-fbb811e406fc")
+	)
+	(label "GPIO_21"
+		(at 180.34 165.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "20972f1f-deff-4f62-aae3-87e626c01161")
 	)
 	(label "FLASH_SCK"
 		(at 246.38 139.7 0)
@@ -13501,8 +13485,8 @@
 		)
 		(uuid "2b6346a1-ee0b-482a-ae39-0be4f0a02528")
 	)
-	(label "GPIO_12"
-		(at 143.51 157.48 0)
+	(label "GPIO_31"
+		(at 180.34 157.48 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13510,7 +13494,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2e483338-da9f-46e6-b6fd-12e62259e9d0")
+		(uuid "3003ad3e-82fb-46be-b31a-bd09c127c074")
 	)
 	(label "COLLISION_REF_PWM"
 		(at 411.48 245.11 0)
@@ -13559,6 +13543,28 @@
 		)
 		(uuid "3ab2cbed-28d5-4772-b2d9-73249ab19b4a")
 	)
+	(label "GPIO_36"
+		(at 180.34 152.4 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "3c18b1b2-8d2d-42e3-98e2-ff64b4b22cd9")
+	)
+	(label "GPIO_32"
+		(at 52.07 130.81 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "3c81c9bb-d275-4219-bc4a-e02e61d8ba10")
+	)
 	(label "ECONET_TX_ENABLE"
 		(at 180.34 229.87 0)
 		(fields_autoplaced yes)
@@ -13571,17 +13577,6 @@
 		)
 		(uuid "3ca1a58c-5f38-4298-a186-9faf0a9f9fda")
 	)
-	(label "UART_RX"
-		(at 52.07 115.57 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "3cf87f77-22b8-4383-b21f-e4e3df914ee0")
-	)
 	(label "ECONET_CLKEN"
 		(at 185.42 260.35 0)
 		(fields_autoplaced yes)
@@ -13593,6 +13588,29 @@
 			(justify left bottom)
 		)
 		(uuid "405ee0af-354f-4737-ae1a-f53ce72f29e2")
+	)
+	(label "ECONET_TX_ENABLE"
+		(at 57.15 48.26 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "43543732-82bf-4199-b7f7-32df4265c679")
+	)
+	(label "GPIO_23"
+		(at 143.51 165.1 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "45ae80dc-b525-46ea-9417-f14b8531c013")
 	)
 	(label "ECONET_CLKEN"
 		(at 214.63 351.79 90)
@@ -13617,6 +13635,18 @@
 		)
 		(uuid "46288f12-34a6-46a7-85e5-b709faac1357")
 	)
+	(label "ECONET_CLKEN"
+		(at 57.15 43.18 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "47fefd47-6a16-4ad0-b8c4-1879a0f4aa9b")
+	)
 	(label "DATA+"
 		(at 241.3 231.14 0)
 		(fields_autoplaced yes)
@@ -13628,17 +13658,6 @@
 			(justify left bottom)
 		)
 		(uuid "49404980-c42e-45ef-9111-f8580e803707")
-	)
-	(label "GPIO_37"
-		(at 143.51 165.1 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "49827a7a-de97-4e52-8cb6-2db9f57482fc")
 	)
 	(label "CLK-"
 		(at 247.65 259.08 0)
@@ -13710,6 +13729,17 @@
 		)
 		(uuid "5bde5671-dee8-45d9-bab9-0670008e6896")
 	)
+	(label "GPIO_23"
+		(at 52.07 118.11 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "5cacaa8b-01ca-43a9-bbdc-070decd54412")
+	)
 	(label "SPI_SS1"
 		(at 485.14 113.03 0)
 		(fields_autoplaced yes)
@@ -13721,16 +13751,17 @@
 		)
 		(uuid "5df22e6e-3823-4a77-9617-0b3a69acc1b9")
 	)
-	(label "GPIO_6"
-		(at 143.51 152.4 0)
+	(label "ECONET_RECEIVING"
+		(at 57.15 63.5 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
+				(italic yes)
 			)
 			(justify left bottom)
 		)
-		(uuid "5df4c548-2f29-4e58-9113-952a018586b7")
+		(uuid "6001b5be-1d61-4870-9f4b-cf6a5b054cd7")
 	)
 	(label "FLASH_MISO"
 		(at 246.38 134.62 0)
@@ -13755,29 +13786,6 @@
 		)
 		(uuid "63f87429-4d86-46f4-902c-00efa87811ff")
 	)
-	(label "ECONET_TX_ENABLE"
-		(at 52.07 148.59 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "65fb6c1e-fe84-4fd2-b140-10afdea974d7")
-	)
-	(label "GPIO_19"
-		(at 58.42 63.5 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "66b99e43-f50b-4eef-948f-9d00883970f9")
-	)
 	(label "UART_CBUS3"
 		(at 123.19 270.51 0)
 		(fields_autoplaced yes)
@@ -13799,17 +13807,6 @@
 			(justify left bottom)
 		)
 		(uuid "68537804-bda1-49da-bc88-28e8f7dc0603")
-	)
-	(label "GPIO_13"
-		(at 180.34 157.48 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "6b2809f0-68f5-4310-b2fb-2668347130e9")
 	)
 	(label "CLK-"
 		(at 232.41 259.08 0)
@@ -13846,8 +13843,19 @@
 		)
 		(uuid "708fd259-b1f7-4293-907a-bf847577cb3a")
 	)
+	(label "GPIO_27"
+		(at 180.34 160.02 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "70a20fab-f246-4776-8e26-7437949859d2")
+	)
 	(label "GPIO_21"
-		(at 58.42 55.88 0)
+		(at 57.15 55.88 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13903,16 +13911,17 @@
 		)
 		(uuid "793b07e4-7354-4dc9-80f5-e12ef633304f")
 	)
-	(label "GPIO_13"
-		(at 58.42 58.42 0)
+	(label "COLLISION_DETECT"
+		(at 57.15 66.04 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
+				(italic yes)
 			)
 			(justify left bottom)
 		)
-		(uuid "7e41f4fc-e0c5-4f8c-8239-c6bbd22bf996")
+		(uuid "797217c1-ef72-43ac-a4dd-7b13b1add44f")
 	)
 	(label "{slash}SD_DETECT"
 		(at 474.98 68.58 0)
@@ -13926,16 +13935,17 @@
 		)
 		(uuid "7e6bea07-7176-4ed3-89c0-38a921806c3d")
 	)
-	(label "GPIO_9"
-		(at 58.42 45.72 0)
+	(label "COLLISION_REF_PWM"
+		(at 57.15 58.42 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
+				(italic yes)
 			)
 			(justify left bottom)
 		)
-		(uuid "7e881558-87cc-4858-8804-8291f7848ce8")
+		(uuid "7eb93af8-5ee9-4216-9d2a-bd620a107f81")
 	)
 	(label "LED_R"
 		(at 68.58 156.21 0)
@@ -13970,29 +13980,6 @@
 			(justify left bottom)
 		)
 		(uuid "84ab0000-9eec-4996-a3ed-05421af052b5")
-	)
-	(label "GPIO_11"
-		(at 180.34 154.94 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "86e4a284-c05d-46bd-869b-a7bb975db885")
-	)
-	(label "ECONET_CLKEN"
-		(at 52.07 146.05 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "8936f5fe-3240-4d60-a2b2-3d59cd940b88")
 	)
 	(label "{slash}CRESET"
 		(at 58.42 35.56 0)
@@ -14051,6 +14038,17 @@
 		)
 		(uuid "93ea06d3-66f9-4a11-b1b6-8917c7e0bb9b")
 	)
+	(label "GPIO_35"
+		(at 52.07 138.43 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "972ec38c-3a9f-498b-991a-f734c53b10e9")
+	)
 	(label "SPI_SS2"
 		(at 157.48 58.42 0)
 		(fields_autoplaced yes)
@@ -14062,28 +14060,16 @@
 		)
 		(uuid "979a1a76-0d01-4862-93b8-0075a27f93cc")
 	)
-	(label "GPIO_21"
-		(at 143.51 162.56 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9b4053ab-3f11-4853-b9c2-af47bc08cdfb")
-	)
-	(label "ECONET_RECEIVING"
+	(label "GPIO_27"
 		(at 52.07 120.65 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
-				(italic yes)
 			)
 			(justify left bottom)
 		)
-		(uuid "9c2c9856-0eeb-465a-96e8-dcc2ec69b710")
+		(uuid "97d97c57-b992-4786-9ba3-19a924c272ae")
 	)
 	(label "LED_G"
 		(at 377.19 128.27 0)
@@ -14108,30 +14094,6 @@
 		)
 		(uuid "9d94e5f6-9c3a-4c0b-8c6a-5e9748b4bd97")
 	)
-	(label "ECONET_TERM_EN"
-		(at 52.07 125.73 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "9e43e892-7dc8-4b22-8f76-d2fb704d321b")
-	)
-	(label "ECONET_CLKIO"
-		(at 52.07 133.35 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "9e483cdb-fed0-4308-b36d-4a5779c519df")
-	)
 	(label "12MHZ"
 		(at 259.08 40.64 0)
 		(fields_autoplaced yes)
@@ -14143,6 +14105,17 @@
 			(justify left bottom)
 		)
 		(uuid "a11d5e9a-5fbc-484a-a34e-9a5236b9094e")
+	)
+	(label "GPIO_26"
+		(at 143.51 162.56 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "a14ef755-1d85-4c98-b8d9-01e7f15ddbc5")
 	)
 	(label "LED_B"
 		(at 377.19 133.35 0)
@@ -14156,17 +14129,6 @@
 		)
 		(uuid "a1df242b-b78b-4275-b45a-af114ccc02ea")
 	)
-	(label "GPIO_18"
-		(at 58.42 66.04 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a5e34850-d009-4b06-a9bc-cb949c0cd65b")
-	)
 	(label "SD_SCK"
 		(at 474.98 58.42 0)
 		(fields_autoplaced yes)
@@ -14179,8 +14141,8 @@
 		)
 		(uuid "a9ee9003-7446-4743-b828-51bc6c304dfa")
 	)
-	(label "GPIO_10"
-		(at 143.51 154.94 0)
+	(label "GPIO_28"
+		(at 143.51 160.02 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -14188,7 +14150,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "aac74ef4-c818-4cdb-b22e-64bd7ce2f9e2")
+		(uuid "aa757133-5980-4513-8f7d-6400d41620a6")
 	)
 	(label "UART_RX"
 		(at 127 243.84 0)
@@ -14235,6 +14197,28 @@
 		)
 		(uuid "b471b378-2e52-4c0a-b877-9c0bd4b9872b")
 	)
+	(label "GPIO_37"
+		(at 143.51 152.4 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "b4c0e3d5-42b5-4b48-9be8-6a8e98cb9bc6")
+	)
+	(label "GPIO_28"
+		(at 52.07 125.73 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "b60e6c22-3f25-4d35-b22f-2f2533bcb4cc")
+	)
 	(label "UART_CBUS0"
 		(at 120.65 254 0)
 		(fields_autoplaced yes)
@@ -14246,17 +14230,16 @@
 		)
 		(uuid "b7059d55-9c29-437e-a975-363b2d944a0d")
 	)
-	(label "COLLISION_DETECT"
-		(at 52.07 130.81 0)
+	(label "ECONET_CLKIO"
+		(at 52.07 143.51 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
-				(italic yes)
 			)
 			(justify left bottom)
 		)
-		(uuid "ba6e0b44-36ae-4648-987e-9dd033d5aaa7")
+		(uuid "bc1050d7-9c9c-48a4-bb03-0e62139a0a26")
 	)
 	(label "FLASH_MISO"
 		(at 224.79 99.06 0)
@@ -14293,28 +14276,6 @@
 		)
 		(uuid "bfed5fe5-52f2-4585-943b-2ce50f65786c")
 	)
-	(label "UART_TX"
-		(at 52.07 118.11 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c4e236c5-98e0-4240-a602-f13fd0729249")
-	)
-	(label "GPIO_10"
-		(at 58.42 48.26 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c65bcdb2-dff8-464f-b8e6-cb92b6c258c9")
-	)
 	(label "FLASH_MOSI"
 		(at 246.38 137.16 0)
 		(fields_autoplaced yes)
@@ -14337,6 +14298,17 @@
 			(justify left bottom)
 		)
 		(uuid "ca46ed51-dddf-4737-84ed-06ff2a1c63d9")
+	)
+	(label "GPIO_34"
+		(at 52.07 133.35 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ca7939e5-26f0-4aed-8e4e-abee8f8d8e04")
 	)
 	(label "FLASH_MOSI"
 		(at 57.15 68.58 0)
@@ -14385,6 +14357,29 @@
 		)
 		(uuid "cf4aee29-3f1d-478e-8366-149df7314830")
 	)
+	(label "GPIO_31"
+		(at 52.07 128.27 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d339b8b1-89eb-433f-80d9-f0c20fd3d832")
+	)
+	(label "ECONET_TX"
+		(at 57.15 45.72 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "d618f947-5c2c-4cc3-a66d-143bb0bbce7d")
+	)
 	(label "SD_MOSI"
 		(at 485.14 102.87 0)
 		(fields_autoplaced yes)
@@ -14395,17 +14390,6 @@
 			(justify left bottom)
 		)
 		(uuid "d7d08569-dfd6-4e5a-bd4c-42f24436dfeb")
-	)
-	(label "GPIO_44"
-		(at 180.34 165.1 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "d8eec593-17c6-4285-a887-a3bad225a28a")
 	)
 	(label "DATA-"
 		(at 241.3 226.06 0)
@@ -14431,7 +14415,7 @@
 		)
 		(uuid "daaa58ce-9a32-4a6d-9e88-b16c4af7fcd3")
 	)
-	(label "GPIO_26"
+	(label "GPIO_25"
 		(at 180.34 162.56 0)
 		(fields_autoplaced yes)
 		(effects
@@ -14440,30 +14424,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "df5aa9e0-ca79-48d2-b3b7-5f0a29598d40")
-	)
-	(label "GPIO_11"
-		(at 58.42 50.8 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "e285a49f-b0ae-49d5-b5bd-e395762cc27d")
-	)
-	(label "COLLISION_REF_PWM"
-		(at 52.07 128.27 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "e2fac0c0-8474-4332-a645-7600fc9e84ba")
+		(uuid "e461c728-c8d4-4459-80bd-bc752f1ad27a")
 	)
 	(label "ECONET_TERM_EN"
 		(at 417.83 280.67 0)
@@ -14487,6 +14448,28 @@
 			(justify left bottom)
 		)
 		(uuid "e783bd50-4464-4474-b635-94be779d898b")
+	)
+	(label "GPIO_34"
+		(at 180.34 154.94 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e7ace49d-28df-45a8-b8df-bc2327f43edb")
+	)
+	(label "GPIO_32"
+		(at 143.51 157.48 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e9939e64-cac9-4c77-bd71-206e430a761f")
 	)
 	(label "DATA-"
 		(at 551.18 335.28 0)
@@ -14512,6 +14495,40 @@
 		)
 		(uuid "ed736b14-0e32-4e4d-a8a3-dd7a6ea8c1b0")
 	)
+	(label "UART_TX"
+		(at 52.07 148.59 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ef70aea4-ac9f-4dfd-aa07-10e0c2ee65f0")
+	)
+	(label "UART_RX"
+		(at 52.07 146.05 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f00d83a8-bac7-4e66-954a-8ddeb4878106")
+	)
+	(label "ECONET_TERM_EN"
+		(at 57.15 53.34 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "f0900c03-f3e6-4b42-bd34-53ac13f99b40")
+	)
 	(label "USBD_P"
 		(at 43.18 246.38 0)
 		(fields_autoplaced yes)
@@ -14535,6 +14552,18 @@
 		)
 		(uuid "f445275a-0e2a-4cc6-bcce-428a6fd179d3")
 	)
+	(label "ECONET_RX"
+		(at 57.15 50.8 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "f5c67b84-f760-49d8-adf0-bee21d618fe9")
+	)
 	(label "COLLISION_DETECT"
 		(at 276.86 365.76 0)
 		(fields_autoplaced yes)
@@ -14546,8 +14575,8 @@
 		)
 		(uuid "f648e5c7-1f36-40ec-be60-8ee335e5885b")
 	)
-	(label "GPIO_19"
-		(at 180.34 160.02 0)
+	(label "GPIO_25"
+		(at 52.07 115.57 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -14555,7 +14584,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f82ecec2-5e0d-441a-918c-c30bf0fdb330")
+		(uuid "f6d84107-5115-44af-92e8-f60200eb5481")
 	)
 	(label "ECONET_TX_ENABLE"
 		(at 191.77 351.79 90)
@@ -14592,30 +14621,6 @@
 			(justify left bottom)
 		)
 		(uuid "fcf0299d-635b-489e-ba87-c5cc50b19f3c")
-	)
-	(label "ECONET_TX"
-		(at 52.07 140.97 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "fdf20a27-976c-4751-80db-e44d3173c77c")
-	)
-	(label "ECONET_RX"
-		(at 52.07 143.51 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "ff7c805e-a94e-418e-acdc-09f879882ae8")
 	)
 	(symbol
 		(lib_id "power:GND")
