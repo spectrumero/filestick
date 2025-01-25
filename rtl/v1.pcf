@@ -1,0 +1,40 @@
+# Main 12MHz clock
+set_io -nowarn input_clk   20    # G3
+
+# RGB LED
+set_io -nowarn led_green   39
+set_io -nowarn led_red	   41
+set_io -nowarn led_blue	   40
+
+# dedicated SPI port for the flash memory
+set_io -nowarn spi_ss[0]   16   # Connected to SPI flash, drive high unless using SPI flash!
+set_io -nowarn flash_sck   15   # Shared with the flash
+set_io flash_mosi          14   # when FPGA is master
+set_io flash_miso          17   # when FPGA is master
+
+# UART
+set_io -nowarn uart_rx     38
+set_io -nowarn uart_tx     42
+
+# Econet
+set_io -nowarn term_en           12
+set_io -nowarn collision_ref_pwm 13
+set_io -nowarn collision_detect  18
+set_io -nowarn econet_clkio      44    # G6
+set_io -nowarn econet_rx         11
+set_io -nowarn econet_tx         9
+set_io -nowarn econet_tx_enable  10
+set_io -nowarn econet_clken      6
+set_io -nowarn econet_receiving  19
+
+# SPI port/SD card
+set_io -nowarn spi_ss[1]         45    # SD card
+set_io -nowarn spi_ss[2]         3
+set_io -nowarn spi_ss[3]         4
+set_io -nowarn spi_sck           47    # to SDcard and SPI connector
+set_io -nowarn spi_mosi          46
+set_io -nowarn spi_miso          48
+set_io -nowarn sd_present        2
+
+# Add normal GPIO pins below
+
