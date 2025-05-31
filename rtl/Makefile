@@ -6,6 +6,9 @@ ICEPROG=iceprog
 BINTOHEX=./bintohex
 OBJS=bintohex.o
 
+# upduino2.pcf or v1.pcf or v1-altserial.pcf
+PCF=v1-altserial.pcf
+
 VERILOG_SRC=toplevel.v femtorv32_gracilis.v blkram.v uart_picosoc_shrunk.v MappedSPIFlash.v spi.v ice40up5k_spram.v econet_rx_buffered.v econet_rx_phy.v econet_rx.v fcs.v econet_tx_buffered.v econet_tx_phy.v timer.v sdcard.v econet_hwctl.v
 
 all:	bintohex toplevel.bin
@@ -16,8 +19,8 @@ bintohex:	$(OBJS)
 toplevel.bin: toplevel.asc
 	$(ICEPACK) toplevel.asc toplevel.bin
 
-toplevel.asc: toplevel.json upduino2.pcf
-	$(NEXTPNR) --freq 12 --timing-allow-fail --up5k --package sg48 --json toplevel.json --pcf upduino2.pcf --asc toplevel.asc 
+toplevel.asc: toplevel.json $(PCF)
+	$(NEXTPNR) --freq 12 --timing-allow-fail --up5k --package sg48 --json toplevel.json --pcf $(PCF) --asc toplevel.asc 
 
 toplevel.json: $(BINTOHEX) $(VERILOG_SRC)
 	$(BINTOHEX) ../build/boot/filestick-boot.bin filestick-boot.hex
