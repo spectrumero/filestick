@@ -30,7 +30,7 @@ main(int argc, char **argv)
 {
    printf("Econet monitor starting\n");
 
-   int fd = econet_init(175);
+   int fd = econet_init(181);
    if(fd < 0) {
       printf("giving up!\n");
       return -1;

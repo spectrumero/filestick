@@ -29,6 +29,7 @@
 #include <sys/dirent.h>
 
 int _readdir(int dh, struct dirent *d);
+void hexdump(const void *ptr, int size, uint32_t addr);
 
 #endif
 
