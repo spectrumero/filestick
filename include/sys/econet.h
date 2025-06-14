@@ -48,6 +48,7 @@ struct econet_state {
 #define ECONET_SET_RECV_PORT  0x02000000
 #define ECONET_SET_SEND_ADDR  0x03000000
 #define ECONET_SET_MONITOR    0x04000000
+#define ECONET_SET_CLKTERM    0x05000000
 #define ECONET_DBG_BUF        0xF0000000
 
 // Low-level states
@@ -59,6 +60,17 @@ struct econet_state {
 // Bit fields
 #define ECONET_STATUS_TXDONE     1
 #define ECONET_STATUS_TXNETERR   2
+
+#define CLOCK_ENABLE             1
+#define TERM_ENABLE              2
+#define CLOCK_DIV1               0x100
+#define CLOCK_DIV2               0x200
+#define CLOCK_DIV3               0x300
+#define CLOCK_DIV4               0x400
+#define CLOCK_DIV5               0x500
+#define CLOCK_DIV6               0x600
+#define CLOCK_DIV7               0x700
+
 
 #endif
 

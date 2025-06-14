@@ -19,7 +19,7 @@ reg         econet_clken;     // Clock output enable
 reg         econet_termen;    // Terminator enable
 reg [2:0]   clkdiv;           // Clock divider setting
 
-assign      data_out = { 22'b0, clkdiv, 6'b0, econet_termen, econet_clken };
+assign      data_out = { 21'b0, clkdiv, 6'b0, econet_termen, econet_clken };
 
 always @(posedge clk, posedge reset) begin
    if(reset) begin

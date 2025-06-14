@@ -55,6 +55,7 @@ static volatile uint32_t *tx_end_offset   = (uint32_t *)0x800204;
 static volatile uint32_t *tx_flags        = (uint32_t *)0x800208;
 static volatile uint32_t *timer_a_val     = (uint32_t *)0x800304;
 static volatile uint32_t *timer_a_stat    = (uint32_t *)0x800308;
+static volatile uint32_t *econet_clkterm  = (uint32_t *)0x800320;
 
 uint8_t fd_rx_portmap[MAX_FILE_DESCRIPTORS];
 struct econet_addr fd_tx_destmap[MAX_FILE_DESCRIPTORS];
@@ -80,6 +81,7 @@ static int econet_set_rx_port(int fd, uint8_t port);     // sets recvfrom port
 static int econet_set_addr(uint16_t netstation);         // sets our net and station number
 static int econet_set_tx_addr(int fd, struct econet_addr *dest);
 static ssize_t econet_monitor(int fd, void *ptr, size_t count); 
+static int econet_set_clkterm(uint16_t flags); 
 
 static uint32_t *led = (uint32_t *)0x800000;
 
@@ -109,6 +111,8 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
          last_monitor_frames = 0;
          *econet_mon = (uint8_t)(request & 0xFF);
          return 0;
+      case ECONET_SET_CLKTERM:
+         return econet_set_clkterm(request & 0xFFFF);
       case ECONET_DBG_BUF:
          memcpy(ptr, (uint8_t *)&econet_state_val, sizeof(struct econet_state));
          return 0;
@@ -279,3 +283,10 @@ static int econet_set_addr(uint16_t netstation) {
    return 0;
 }
 
+// bits 10-8 set the clock divider
+// bit 1 enables/disables the terminator
+// bit 0 enables/disables the clock
+static int econet_set_clkterm(uint16_t flags) {
+   *econet_clkterm = flags;
+   return 0;
+}
