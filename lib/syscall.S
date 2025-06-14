@@ -28,9 +28,15 @@
 #define SYS_closedir    19
 #define SYS_readdir     20
 #define SYS_mount       40
+#define SYS_hexdump     32
 
 // Syscall wrappers
 .text
+.globl hexdump                // called directly, void return
+hexdump:
+   li       a7, SYS_hexdump   
+   ecall
+   ret
 .globl fd_peek                // called directly
 fd_peek:
    li       a7, SYS_peek
