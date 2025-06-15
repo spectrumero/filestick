@@ -24,15 +24,16 @@
 ;THE SOFTWARE.
 */
 
-// Syscall wrappers
+// Syscall wrappers: non-standard syscalls
 
-#include <sys/dirent.h>
-
-int _readdir(int dh, struct dirent *d);
+// Hexdump a region of memory. addr is what starting address
+// is printed on the left side of the hexdump.
 void hexdump(const void *ptr, int size, uint32_t addr);
-int mount(const char *src, const char *target, const char *fstype,
-      unsigned long mountflags, const void *data);
+
+// Lightweight formatted print to stdout only
 void printk(const char *fmt, ...);
+
+// Peek a file descriptor, returns how much is available to read
 ssize_t fd_peek(int fd);
 
 #endif
