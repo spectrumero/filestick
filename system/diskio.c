@@ -32,12 +32,12 @@
 /*-----------------------------------------------------------------------*/
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
-//#include "flashdisc.h"        // our SPI flash chip
+#include "flashdisc.h"        // our SPI flash chip
 #include "sd.h"               // our SD card interface
 
 /* Definitions of physical drive number for each drive */
-//#define DEV_SPIFLASH    0
-#define DEV_SDCARD      0
+#define DEV_SPIFLASH    0
+#define DEV_SDCARD      1
 
 //#define DEBUG 1
 
@@ -50,8 +50,8 @@ DSTATUS disk_status (
 )
 {
    switch(pdrv) {
-//      case DEV_SPIFLASH:
-//         return 0;
+      case DEV_SPIFLASH:
+         return 0;
       case DEV_SDCARD:
          return sd_status;
    }
@@ -71,8 +71,8 @@ DSTATUS disk_initialize (
 {
    int rc;
    switch(pdrv) {
-//      case DEV_SPIFLASH:
-//         return spiflash_init();
+      case DEV_SPIFLASH:
+         return intflash_init();
       case DEV_SDCARD:
          // Low level init
          if((rc=sd_init()) == SD_SUCCESS) {
@@ -102,8 +102,8 @@ DRESULT disk_read (
    printk("disk_read: pdrv=%d sector=%ld count=%d\n", pdrv, sector, count);
 #endif
    switch(pdrv) {
-//      case DEV_SPIFLASH:
-//         return spiflash_read(buff, sector, count);
+      case DEV_SPIFLASH:
+         return intflash_read(buff, sector, count);
       case DEV_SDCARD:
          return sd_read(buff, sector, count);
    }
@@ -127,8 +127,8 @@ DRESULT disk_write (
 )
 {
    switch(pdrv) {
-//      case DEV_SPIFLASH:
-//         return spiflash_write(buff, sector, count);
+      case DEV_SPIFLASH:
+         return intflash_write(buff, sector, count);
       case DEV_SDCARD:
          return sd_write(buff, sector, count);
    }
@@ -152,8 +152,8 @@ DRESULT disk_ioctl (
    printk("disk_ioctl: pdrv=%d cmd=%d\n", pdrv, cmd);
 #endif
    switch(pdrv) {
-//      case DEV_SPIFLASH:
-//         return spiflash_ioctl(cmd, buff);
+      case DEV_SPIFLASH:
+         return intflash_ioctl(cmd, buff);
       case DEV_SDCARD:
          return sd_ioctl(cmd, buff);
    }

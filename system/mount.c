@@ -32,17 +32,31 @@
 #include "devices.h"
 #include "printk.h"
 
-static FATFS fs;        // FatFS filesystem TODO: array of these
+static FATFS sdfs;         // FatFS filesystem SD card TODO: array of these
+static FATFS flashfs;      // internal flash
 
 // Implements the mount syscall
 int SYS_mount(const char *src, const char *target, const char *fstype,
               unsigned long mountflags, const void *data)
 {
+   FATFS *fs = NULL;
+   TCHAR *drv = NULL;
+   if(!strcmp(src, "sd")) {
+      fs = &sdfs;
+      drv = "1";
+   }
+   else if(!strcmp(src, "flash")) {
+      fs = &flashfs;
+      drv = "0";
+   }
+
    // It's quite likely we'll only ever support fatfs but never say never.
    if(strcmp(fstype, "fatfs"))
       return -EINVAL;
+   if(!fs)
+      return -EINVAL;
 
-   FRESULT res = f_mount(&fs, "", 1);
+   FRESULT res = f_mount(fs, drv, 1);
 
    // convert results to standard errno types
    return fatfs_to_errno(res);
@@ -71,11 +85,15 @@ int fatfs_to_errno(FRESULT res) {
 bool sd_insert_mount()
 {
    volatile uint32_t *sd_slot = (uint32_t *)(DEV_BASE + OFFS_SD_DETECT);
-
+/*
    // SD card present?
-   if(*sd_slot & 2) {
+#ifdef SD_DET_POSITIVE
+  // if(*sd_slot & 2) {
+#else
+  // if(*sd_slot & 2 == false) {
+#endif
       printk("SD card present\n");
-      FRESULT res = f_mount(&fs, "", 1);
+      FRESULT res = f_mount(&sdfs, "1", 1);
 
       if(res == FR_OK) {
          printk("Mounted SD card\n");
@@ -83,7 +101,7 @@ bool sd_insert_mount()
       }
 
       printk("SD mount failed, code=%d\n", res);
-   }
+   //}*/
    return false;
 }
 

@@ -30,6 +30,10 @@
 
 int _readdir(int dh, struct dirent *d);
 void hexdump(const void *ptr, int size, uint32_t addr);
+int mount(const char *src, const char *target, const char *fstype,
+      unsigned long mountflags, const void *data);
+void printk(const char *fmt, ...);
+ssize_t fd_peek(int fd);
 
 #endif
 
