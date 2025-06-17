@@ -48,6 +48,8 @@ init:
    la    t0, super_trap          # initialize the supervisor (ecall) trap
    csrw  stvec, t0
 
+   call  kmalloc_init            # initialize TLSF memory allocator for kmalloc
+
    call  econet_init             # initialize econet
 
    li    a0, 1
