@@ -27,6 +27,7 @@
 #define SYS_opendir     18
 #define SYS_closedir    19
 #define SYS_readdir     20
+#define SYS_umount      39
 #define SYS_mount       40
 #define SYS_hexdump     32
 
@@ -48,6 +49,10 @@ printk:
 .globl mount                  // called directly
 mount:
    li       a7, SYS_mount
+   j        syscall
+.globl umount
+umount:
+   li       a7, SYS_umount
    j        syscall
 .globl opendir                // called directly
 opendir:

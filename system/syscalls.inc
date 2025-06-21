@@ -27,7 +27,7 @@ syscall_table:
 .byte 0           # 36
 .byte 0           # 37
 .byte 0           # 38
-.byte 0           # 39 SYS_umount
+.byte 21          # 39 SYS_umount
 .byte 11          # 40 SYS_mount
 .byte 0           # 41
 .byte 0           # 42
@@ -128,4 +128,5 @@ syscall_address:
 .word SYS_peek    # 18
 .word printk      # 19
 .word elf_run     # 20
+.word SYS_umount  # 21
 

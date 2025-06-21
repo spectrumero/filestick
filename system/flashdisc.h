@@ -20,5 +20,5 @@ DRESULT intflash_read(BYTE *buf, LBA_t sector, UINT count);
 DRESULT intflash_ioctl(BYTE cmd, void *buf);
 DRESULT intflash_write(const BYTE *buf, LBA_t sector, UINT count);
 DRESULT intflash_sync();
-//void intflash_writecurrentpage();
+void intflash_release();
 #endif

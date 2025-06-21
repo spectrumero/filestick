@@ -31,6 +31,7 @@
 #include "cust_errno.h"
 #include "devices.h"
 #include "printk.h"
+#include "flashdisc.h"
 
 static FATFS sdfs;         // FatFS filesystem SD card TODO: array of these
 static FATFS flashfs;      // internal flash
@@ -59,6 +60,18 @@ int SYS_mount(const char *src, const char *target, const char *fstype,
    FRESULT res = f_mount(fs, drv, 1);
 
    // convert results to standard errno types
+   return fatfs_to_errno(res);
+}
+
+// Implements the umount syscall
+int SYS_umount(const char *target)
+{
+   FRESULT res = f_unmount(target);
+
+   // close the flash if drive 0
+   if(!strcmp(target, "0"))
+      intflash_release();
+
    return fatfs_to_errno(res);
 }
 

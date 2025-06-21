@@ -36,6 +36,7 @@ typedef struct {
 
 int SYS_mount(const char *src, const char *target, const char *fstype,
               unsigned long mountflags, const void *data);
+int SYS_umount(const char *target);
 int fatfs_to_errno(FRESULT res);
 
 void init_dirs(void);

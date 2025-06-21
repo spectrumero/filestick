@@ -115,3 +115,10 @@ DRESULT intflash_sync()
    return RES_OK;
 }
 
+void intflash_release()
+{
+   if(flash_fd > 0)
+      SYS_close(flash_fd);
+   flash_fd = -1;
+}
+
