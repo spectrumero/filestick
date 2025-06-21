@@ -7,7 +7,7 @@ BINTOHEX=./bintohex
 OBJS=bintohex.o
 
 # upduino2.pcf or v1.pcf or v1-altserial.pcf
-PCF=v1-altserial.pcf
+PCF=v1.pcf
 
 VERILOG_SRC=toplevel.v femtorv32_gracilis.v blkram.v uart_picosoc_shrunk.v MappedSPIFlash.v spi.v ice40up5k_spram.v econet_rx_buffered.v econet_rx_phy.v econet_rx.v fcs.v econet_tx_buffered.v econet_tx_phy.v timer.v sdcard.v econet_hwctl.v
 

@@ -124,4 +124,4 @@ flash_memcpy:
 .copy_done:
    sb    zero, OFFS_SPI_REG_ACTIVE(t2)    # reset spi_ss    
    ret
- 
+

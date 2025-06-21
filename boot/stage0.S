@@ -20,6 +20,8 @@ booting:
    # global pointer used as IO address space pointer during
    # bootup sequence.
    la       gp, DEV_BASE
+   li       a0, 2
+   sw       a0, 0(gp)
 
    la       a0, flashstring
    li       a1, flashstring_sz

@@ -13,8 +13,8 @@ set_io flash_mosi          14   # when FPGA is master
 set_io flash_miso          17   # when FPGA is master
 
 # UART
-set_io -nowarn uart_rx     42
-set_io -nowarn uart_tx     35
+set_io -nowarn uart_rx     38 
+set_io -nowarn uart_tx     37
 
 # Econet
 set_io -nowarn term_en           12

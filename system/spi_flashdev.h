@@ -33,11 +33,13 @@
 
 int spiflash_open(const char *devname, int flags, mode_t mode, FD *fd);
 ssize_t spiflash_read(int fd, void *buf, size_t count);
+ssize_t spiflash_write(int fd, const void *buf, size_t count);
 int spiflash_fstat(int fd, struct stat *statbuf);
 off_t spiflash_lseek(int fd, off_t offset, int whence);
 int spiflash_close(int fd);
 
 // From spi_flash.s
 void flash_memcpy(uint32_t srcaddr, void *destptr, size_t count);
+uint8_t flash_byte(uint8_t byte);
 
 #endif
