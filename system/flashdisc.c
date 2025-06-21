@@ -9,6 +9,7 @@
 #include "diskio.h"
 #include "flashdisc.h"
 #include "printk.h"
+#include "spi_flashdev.h"  // for spiflash_sync
 
 #include "fd.h"
 //#define FLASH_DEBUG 1
@@ -84,13 +85,33 @@ DRESULT intflash_ioctl(BYTE cmd, void *buf)
 
 DRESULT intflash_write(const BYTE *buf, LBA_t sector, UINT count)
 {
-   // TODO: writes
-   return RES_WRPRT;
+#ifdef FLASH_DEBUG
+   printk("Write sector %d count %d\n", sector, count);
+#endif
+   uint32_t flashaddress;
+   uint32_t bytecount;
+   if(flash_fd < 0) return RES_NOTRDY;
+
+   flashaddress = FS_START + (sector * SECTOR_SIZE);
+   bytecount = count * SECTOR_SIZE;
+
+   off_t rc = SYS_lseek(flash_fd, flashaddress, SEEK_SET);
+#ifdef FLASH_DEBUG
+   printk("seek: offset=%x result=%x\n", flashaddress, rc);
+#endif
+   if(rc < 0) return RES_ERROR;
+
+   int bytes = SYS_write(flash_fd, buf, bytecount);
+#ifdef FLASH_DEBUG
+   printk("write: bytes = %d\n", bytes);
+#endif
+
+   return rc > -1 ? RES_OK : RES_ERROR;
 }
 
 DRESULT intflash_sync()
 {
-   // TODO
+   spiflash_sync();
    return RES_OK;
 }
 

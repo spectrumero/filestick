@@ -38,6 +38,8 @@ int spiflash_fstat(int fd, struct stat *statbuf);
 off_t spiflash_lseek(int fd, off_t offset, int whence);
 int spiflash_close(int fd);
 
+void spiflash_sync(void);
+
 // From spi_flash.s
 void flash_memcpy(uint32_t srcaddr, void *destptr, size_t count);
 uint8_t flash_byte(uint8_t byte);

@@ -179,6 +179,13 @@ static ssize_t spiflash_load_sector(void)
 }
 
 //-------------------------------------------------------------------------
+// Flush write buffer (without any other operations)
+void spiflash_sync(void)
+{
+   if(writebuf) spiflash_writebuffer();
+}
+
+//-------------------------------------------------------------------------
 // write a 4k erase block's worth of data
 static void spiflash_writebuffer(void)
 {
