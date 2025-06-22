@@ -38,6 +38,7 @@ static FDfunction cons_func = {
    .fd_lseek = NULL,
    .fd_fstat = console_fstat,
    .fd_close = NULL,
+   .fd_ioctl = console_ioctl,
    .fd_peek  = console_peek
 };
 
@@ -45,6 +46,7 @@ extern volatile uint32_t bufindex;
 extern volatile uint32_t bufstart;
 extern volatile uint32_t cr_index;
 extern volatile uint32_t cons_rx_count;
+extern volatile uint32_t cons_control;
 
 // This should be able to pick up the symbol, but it doesn't
 uint8_t *cons_buf = (uint8_t *)0xff00; // FIXME system.ld symbol
@@ -119,3 +121,8 @@ int console_fstat(int fd, struct stat *statbuf) {
    return 0;
 }
 
+//------------------------------------------------------------------
+// console ioctl
+int console_ioctl(int fd, unsigned long request, void *ptr) {
+   return 0;
+}
