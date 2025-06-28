@@ -72,8 +72,8 @@ console_rx:
    sw    a2, OFFS_BUFINDEX(a1)      # store new buffer index
    sb    s1, 0(a0)                  # store byte in the console buffer
 
-   la    a0, DEV_BASE               #
-   sw    s1, OFFS_UART(a0)          # echo character
+   mv    a0, s1
+   call  raw_putc                   # echo character
 
 .cons_rx_done:
    lw    a1, 0(sp)
