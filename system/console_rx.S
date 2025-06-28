@@ -50,12 +50,11 @@ console_rx:
    la    a0, __cons_buff
    la    a1, bufindex
    lw    a2, OFFS_BUFINDEX(a1)      # get current buffer index
-
-   lw    t0, OFFS_CONS_CONTROL(a1)  # get control word
-   andi  t0, t0, CONSOLE_RAW        # raw set?
-   bnez  t0, .console_raw    
-
    andi  t0, a2, 0xFF               # get wrapped ringbuffer index
+
+   lw    t1, OFFS_CONS_CONTROL(a1)  # get control word
+   andi  t1, t1, CONSOLE_RAW        # raw set?
+   bnez  t1, .console_raw    
 
    li    a3, 127                    # backspace?
    beq   a3, s1, .bkspc
