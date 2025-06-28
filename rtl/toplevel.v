@@ -328,9 +328,10 @@ reg [1:0] uart_wr_busy_state;
 wire [31:0] uart_rdata = { 20'b0, uart_wr_busy_state, uart_wr_busy, uart_valid, uart_rx_data };
 wire [31:0] uart_rstate = { 28'b0, uart_wr_busy_state, uart_wr_busy, uart_valid };
 
+// reminder, baud 230400
 buart #(
    .FREQ_HZ(CLOCK_HZ),
-   .BAUDS(230400)
+   .BAUDS(115200)
    ) uart (
    .clk(clk),
    .resetq(!reset),

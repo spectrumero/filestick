@@ -106,7 +106,7 @@ console_rx:
 
 .bell:
    li    a0, 7                      # ctrl-G
-   call  serial_putc
+   call  raw_putc
    j     .cons_rx_done
 
 .console_raw:
@@ -133,7 +133,7 @@ console_rx:
 
 .xoff:
    li    a0, FLOW_XOFF
-   call  serial_putc
+   call  raw_putc
    j     .cons_rx_done
    
 

@@ -30,32 +30,38 @@
 .globl serial_putc
 serial_putc:
    li    t0, '\n'                # newline?
-   bne   t0, a0, .write_byte     # no
+   bne   t0, a0, raw_putc        # no
 
    addi  sp, sp, -16             # Send \r\n
    sw    ra, 12(sp)
    li    a0, '\r'
-   call  .write_byte
+   call  raw_putc
    li    a0, '\n'
-   call  .write_byte
+   call  raw_putc
    lw    ra, 12(sp)
    addi  sp, sp, 16
    ret
-   
+
+.globl raw_putc
+raw_putc:   
 .write_byte:
 
-.busy:
    la t0, DEV_BASE         
+   lw t1, OFFS_UARTSTATE(t0)  # uart state
+   andi t1, t1, 2             # apply write busy mask
+   beq t1, zero, .send        # assume no delay needed
+.busy:
    lw t1, OFFS_UARTSTATE(t0)  # uart state
    andi t1, t1, 2             # apply write busy mask
    bne t1, zero, .busy        # wait until uart is free
 
-//   li t1, 100                 # delay - there's a bug in the UART that means it prematurely
+   li t1, 100                 # delay - there's a bug in the UART that means it prematurely
                               # is not busy!
-//.delay:
-//   addi t1, t1, -1
-//   bnez t1, .delay
+.delay:
+   addi t1, t1, -1
+   bnez t1, .delay
    
+.send:
    sw a0, OFFS_UART(t0)       # send data 
    ret
 

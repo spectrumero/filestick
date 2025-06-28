@@ -148,7 +148,10 @@ ssize_t console_write(int fd, const void *buf, size_t count) {
    char *bufptr = (char *)buf;
 
    while(count--) {
-      serial_putc(*bufptr++);
+      if(cons_control & CONSOLE_RAW)
+         raw_putc(*bufptr++);
+      else
+         serial_putc(*bufptr++);
    }
 
    return rc;
