@@ -60,6 +60,7 @@ raw_putc:
    nop                        # at 115200 baud this many nops 
    nop                        # will be enough
    nop
+   nop
    
 .send:
    sw a0, OFFS_UART(t0)       # send data 

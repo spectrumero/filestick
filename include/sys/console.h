@@ -36,6 +36,7 @@
 #define CONSOLE_SET_RAW       0x02000000
 #define CONSOLE_SET_INTERACTIVE 0x03000000
 #define CONSOLE_SET_FLOW_XOFF 0x04000000
+#define CONSOLE_DISCARD_RXBUF 0x10000000
 
 #define FLOW_XOFF             0x13  // Ctrl-S
 #define FLOW_XON              0x11  // Ctrl-Q

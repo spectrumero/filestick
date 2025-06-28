@@ -181,6 +181,9 @@ int console_ioctl(int fd, unsigned long request, void *ptr) {
       case CONSOLE_SET_INTERACTIVE:
          cons_control &= CONSOLE_CLR_RAW;
          break;
+      case CONSOLE_DISCARD_RXBUF:
+         bufstart = bufindex;
+         break;
       default:
          return -EINVAL;
    }

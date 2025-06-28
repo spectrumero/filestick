@@ -63,6 +63,7 @@ void super_shell()
    printk("Supervisor\n");
 
    // Make sure we're in interactive mode
+   SYS_ioctl(0, CONSOLE_DISCARD_RXBUF, NULL);
    SYS_ioctl(0, CONSOLE_SET_INTERACTIVE, NULL);
 
    while(true) {
@@ -70,6 +71,9 @@ void super_shell()
 
       memset(cmdbuf, 0, sizeof(cmdbuf));
       bytes = SYS_read(0, cmdbuf, sizeof(cmdbuf) - 1);
+
+      // discard anything beyond the bytes we read
+      SYS_ioctl(0, CONSOLE_DISCARD_RXBUF, NULL);
 
       if(bytes) {
          argc = 0;
