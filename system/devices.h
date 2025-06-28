@@ -47,5 +47,6 @@
 
 #define ECONET_MACHTYPE       0x00012F42  // version 1.0, machine 0x42 make 0x2F
 
+
 #endif
 

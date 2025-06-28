@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "sys/console.h"
 #include "super_shell.h"
 #include "elfload.h"
 #include "console.h"
@@ -60,6 +61,9 @@ void super_shell()
    int argc;
 
    printk("Supervisor\n");
+
+   // Make sure we're in interactive mode
+   SYS_ioctl(0, CONSOLE_SET_INTERACTIVE, NULL);
 
    while(true) {
       SYS_write(1, "S> ", 3);

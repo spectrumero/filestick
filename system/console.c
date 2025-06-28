@@ -27,10 +27,13 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <sys/errno.h>
 
+#include "sys/console.h"
 #include "console.h"
 #include "fd.h"
 #include "sysdefs.h"
+#include "devices.h"
 
 static FDfunction cons_func = {
    .fd_read  = console_read,
@@ -51,6 +54,9 @@ extern volatile uint32_t cons_control;
 // This should be able to pick up the symbol, but it doesn't
 uint8_t *cons_buf = (uint8_t *)0xff00; // FIXME system.ld symbol
 
+static ssize_t console_read_interactive(int fd, void *buf, size_t count);
+static ssize_t console_read_raw(int fd, void *buf, size_t count);
+
 //------------------------------------------------------------------
 // Open the console
 int open_console(const char *devname, int flags, mode_t mode, FD *fd) {
@@ -61,6 +67,48 @@ int open_console(const char *devname, int flags, mode_t mode, FD *fd) {
 //-----------------------------------------------------------------
 // Read the console
 ssize_t console_read(int fd, void *buf, size_t count) {
+   if(cons_control & CONSOLE_RAW) 
+      return console_read_raw(fd, buf, count);
+   else 
+      return console_read_interactive(fd, buf, count);
+}
+
+//-----------------------------------------------------------------
+// Read the console in raw mode
+static ssize_t console_read_raw(int fd, void *buf, size_t count)
+{
+   size_t bytes_remain = count;
+   uint8_t *bufptr = (uint8_t *)buf;
+   bool do_flow_control = false;
+
+   if(!count) return 0;
+
+   while(bytes_remain) {
+      while(bufstart != bufindex) {
+         uint8_t byte = *(cons_buf + (bufstart & 0xFF));
+         *bufptr++ = byte;
+
+         bufstart++;
+         bytes_remain--;
+         do_flow_control = true;
+      }
+
+      if(do_flow_control) {
+         if(cons_control & CONSOLE_FLOW_XOFF)
+            serial_putc(FLOW_XON);
+
+         do_flow_control = false;
+      }
+   }
+
+   return count;
+}
+
+//-----------------------------------------------------------------
+// Read the console in interactive mode (characters echoed, CR = end
+// of transmission)
+static ssize_t console_read_interactive(int fd, void *buf, size_t count)
+{
    size_t bytes_read = 0;
    uint8_t *bufptr = (uint8_t *)buf;
 
@@ -74,20 +122,14 @@ ssize_t console_read(int fd, void *buf, size_t count) {
    ENABLE_INTERRUPTS
 
    while(count && bufstart != bufindex) {
-      uint8_t byte = *(cons_buf + bufstart);
+      // add the wrapped value of bufstart to get the buffer index
+      uint8_t byte = *(cons_buf + (bufstart & 0xFF));
       *bufptr++ = byte;
 
       bufstart++;
-      bufstart &= 0xFF;
       count--;
       bytes_read++;
 
-      // FIXME console driver should do this echo back
-      if(byte == 0x0d) {
-         serial_putc(0x0d);
-         serial_putc(0x0a);
-         break;
-      }
    }
 
    return bytes_read;
@@ -124,5 +166,20 @@ int console_fstat(int fd, struct stat *statbuf) {
 //------------------------------------------------------------------
 // console ioctl
 int console_ioctl(int fd, unsigned long request, void *ptr) {
+   uint32_t req_id = request & 0xFF000000;
+
+   switch(req_id) {
+      case CONSOLE_SET_CONTROL:
+         cons_control = request & 0xFFFF;
+         break;
+      case CONSOLE_SET_RAW:
+         cons_control |= CONSOLE_RAW;
+         break;
+      case CONSOLE_SET_INTERACTIVE:
+         cons_control &= CONSOLE_CLR_RAW;
+         break;
+      default:
+         return -EINVAL;
+   }
    return 0;
 }
