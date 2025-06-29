@@ -84,7 +84,7 @@ static ssize_t console_read_raw(int fd, void *buf, size_t count)
    if(!count) return 0;
 
    while(bytes_remain) {
-      while(bufstart != bufindex) {
+      while(bufstart != bufindex && bytes_remain) {
          uint8_t byte = *(cons_buf + (bufstart & 0xFF));
          *bufptr++ = byte;
 
