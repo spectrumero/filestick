@@ -175,6 +175,9 @@ static ssize_t econet_monitor(int fd, void *ptr, size_t count) {
 
 ssize_t econet_peek(int fd)
 {
+   // monitoring mode: how many bytes in buffer
+   if(*econet_mon) return econet_buf_len;
+
    uint8_t port = fd_rx_portmap[fd];
    if(!port)
       return -EINVAL;
