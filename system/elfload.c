@@ -37,16 +37,66 @@
 #include "printk.h"
 #include "init.h"
 
-int elf_run(const char *filename)
+// FIXME
+#define USER_SP 0x20800
+
+int elf_run(const char *args)
 {
+   uint8_t *user_sp = (uint8_t *)USER_SP;
+   char *filename;
    int status;
+
+   user_sp = setup_stack_args(args, user_sp, &filename);
+
    start_addr s = elf_load(filename, 0, &status);
    if(s) 
-      init_user(s);
+      init_user_with_sp(user_sp, s);
    else
       printk("Unable to run %s\n", filename);
 
    return status;
+}
+
+// MAXARGS should be multiples of 4 minus 1 to keep stack 16-byte
+// aligned.
+#define MAXARGS 7
+//-------------------------------------------------------------------
+// Sets up argc, argv on the userland stack.
+void *setup_stack_args(const char *unparsed_args, void *sp, char **filename)
+{
+   uint8_t *stackptr = sp;
+   uint32_t argc;
+   char *args[MAXARGS];
+   memset(args, 0, sizeof(args));
+   
+   uint16_t argbytes = strlen(unparsed_args) + 1;
+
+   // 16 byte align
+   if(argbytes & 0xFFF0 != argbytes) argbytes = (argbytes & 0xFFF0) + 16;
+   stackptr -= argbytes;
+   memcpy(stackptr, unparsed_args, strlen(unparsed_args));
+
+   if(filename) filename[0] = stackptr;
+
+   // tokenise the args on the user stack
+   argc = 0;
+   char *ptr = strtok(stackptr, " ");
+   while(ptr && argc < MAXARGS) {
+      args[argc] = ptr;
+      argc++;
+
+      ptr = strtok(NULL, " ");
+   }
+
+   // push the arg pointers onto the user stack
+   stackptr -= sizeof(args);
+   memcpy(stackptr, args, sizeof(args));
+
+   // push argc onto the stack
+   stackptr -= 4;
+   memcpy(stackptr, &argc, 4);
+
+   return stackptr;
 }
 
 //-------------------------------------------------------------------

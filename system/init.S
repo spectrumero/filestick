@@ -28,6 +28,8 @@
 initstr:
 .ascii "Loading initial program\r\n"
 .set initstr_sz, .-initstr
+fake_boot_file:
+.asciz "init"
 
 #define USER_SP      0x20800     # end of RAM
 
@@ -71,8 +73,18 @@ init:
 
 .globl init_user
 init_user:
-   li    sp, USER_SP             # set user stack pointer
-   jr    a0                      # start initial program
+   mv    s0, a0                  # preserve start address
+   la    a0, fake_boot_file      # pointer to the fake boot filename
+   li    a1, USER_SP             # The user stack pointer
+   li    a2, 0                   # null
+   call  setup_stack_args
+   mv    sp, a0                  # set up stack pointer
+   jr    s0                      # start initial program
+
+.globl init_user_with_sp
+init_user_with_sp:
+   mv    sp, a0                  # sp passed as arg1
+   jr    a1                      # start address as arg2
 
 .badboot:
    call  super_shell

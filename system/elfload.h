@@ -36,8 +36,14 @@ typedef void (*start_addr)(void);
 // Loads boot file from flash. Returns entry address or 0 on failure.
 start_addr elf_boot();
 
-// Runs the named elf file.
-int elf_run(const char *filename);
+// Runs an elf file. args should be a string starting with the filename
+// of the elf file to run. Arguments are space separated.
+int elf_run(const char *args);
+
+// Sets up the stack with the arguments in the unparsed arg string.
+// The address of the first argument (the filename) is passed back if 
+// filename is not null.
+void *setup_stack_args(const char *unparsed_args, void *stackptr, char **filename);
 
 // Loads the named file, returning the start address.
 start_addr elf_load(const char *filename, uint32_t offset, int *status);

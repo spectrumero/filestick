@@ -32,5 +32,6 @@ void init();
 // Set up the user stack and run the user space program from the specified
 // address.
 void init_user(start_addr addr);
+void init_user_with_sp(void *stackptr, start_addr addr);
 
 #endif
