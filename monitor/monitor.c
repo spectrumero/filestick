@@ -3,10 +3,12 @@
 #include <stdint.h>
 #include <sys/econet.h>
 #include <sys/ioctl.h>
+#include <sys/console.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include "decoder.h"
+#include "syscall.h"
 
 // FIXME remove later
 // Hardware registers
@@ -28,7 +30,7 @@ static uint8_t buf[2048];
 int 
 main(int argc, char **argv)
 {
-   printf("Econet monitor starting\n");
+   printf("Econet monitor starting. Press 'q' to quit\n");
 
    int fd = econet_init(181);
    if(fd < 0) {
@@ -36,18 +38,28 @@ main(int argc, char **argv)
       return -1;
    }
 
+   ioctl(0, CONSOLE_SET_RAW);
    while(1) {
-      ssize_t bytes = read(fd, buf, sizeof(buf));
-      if(bytes < 0) {
-         perror("read");
-         return -1;
+      if(fd_peek(fd) > 0) {
+         ssize_t bytes = read(fd, buf, sizeof(buf));
+         if(bytes < 0) {
+            perror("read");
+            return -1;
+         }
+         if(bytes > 5)
+            decode_frame(buf, bytes);
+         else
+            printf("weird %d byte frame\n", bytes);
       }
-      if(bytes > 5)
-         decode_frame(buf, bytes);
-      else
-         printf("weird %d byte frame\n", bytes);
+      if(fd_peek(0) > 0) {
+         ssize_t bytes = read(0, buf, 1);
+         if(buf[0] == 'q') break;
+      }
    }
 
+   // clear monitor flag
+   ioctl(fd, ECONET_SET_MONITOR);
+   close(fd);
    return 0;
 }
 
@@ -91,7 +103,6 @@ econet_init(uint8_t station)
    // FIXME!
    uint32_t *sr = (uint32_t *)0x80011c;
    *sr = 0xFFFFFFFF;
-   printf("sr = %x\n", *sr);
 
    return econet_fd; 
 }

@@ -46,6 +46,8 @@ typedef struct cmdtable {
 
 CmdTable commands[] = {
    {  .cmd = "ebreak",     .cmdfunc = i_ebreak },
+   {  .cmd = "rx",         .cmdfunc = i_receive_xmodem },
+   {  .cmd = "hexdump",    .cmdfunc = i_hexdump },
    {  .cmd = NULL }
 };
 
