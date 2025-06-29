@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.18.1)
 
-set(ARCH    "rv32imc")
-set(ABI     "ilp32")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=${ARCH} -mabi=${ABI} -Wall -Werror")
-set(CMAKE_C_COMPILER "riscv-none-elf-gcc")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 
 project(init)

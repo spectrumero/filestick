@@ -1,7 +1,7 @@
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2025 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -132,9 +132,10 @@ static CmdTable *internal_command(const char *cmdbuf)
    CmdTable *tptr = commands;
    while(tptr->cmd) {
       int clen = strlen(tptr->cmd);
-      if(cmdbuf[clen] != ' ' && cmdbuf[clen] != 0) continue;
+      if(cmdbuf[clen] == ' ' || cmdbuf[clen] == 0) {
+         if(!strncmp(tptr->cmd, cmdbuf, clen)) return tptr;
+      }
 
-      if(!strncmp(tptr->cmd, cmdbuf, clen)) return tptr;
       tptr++;
    }
 
