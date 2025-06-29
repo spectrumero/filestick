@@ -29,7 +29,7 @@ initstr:
 .ascii "Loading initial program\r\n"
 .set initstr_sz, .-initstr
 fake_boot_file:
-.asciz "init"
+.asciz "init cold"
 
 #define USER_SP      0x20800     # end of RAM
 

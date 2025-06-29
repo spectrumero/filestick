@@ -37,5 +37,8 @@ void printk(const char *fmt, ...);
 // Peek a file descriptor, returns how much is available to read
 ssize_t fd_peek(int fd);
 
+// Run an ELF file
+int exec_elf(const char *cmdline);
+
 #endif
 

@@ -72,7 +72,7 @@ void *setup_stack_args(const char *unparsed_args, void *sp, char **filename)
    uint16_t argbytes = strlen(unparsed_args) + 1;
 
    // 16 byte align
-   if(argbytes & 0xFFF0 != argbytes) argbytes = (argbytes & 0xFFF0) + 16;
+   if((argbytes & 0xFFF0) != argbytes) argbytes = (argbytes & 0xFFF0) + 16;
    stackptr -= argbytes;
    memcpy(stackptr, unparsed_args, strlen(unparsed_args));
 

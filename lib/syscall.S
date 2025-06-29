@@ -30,6 +30,7 @@
 #define SYS_umount      39
 #define SYS_mount       40
 #define SYS_hexdump     32
+#define SYS_exec_elf    24
 
 // Syscall wrappers
 .text
@@ -38,6 +39,10 @@ hexdump:
    li       a7, SYS_hexdump   
    ecall
    ret
+.globl exec_elf
+exec_elf:
+   li       a7, SYS_exec_elf
+   j        syscall
 .globl fd_peek                // called directly
 fd_peek:
    li       a7, SYS_peek
