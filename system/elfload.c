@@ -36,19 +36,33 @@
 #include "brk.h"
 #include "printk.h"
 #include "init.h"
-
-// FIXME
-#define USER_SP 0x20800
+#include "sysdefs.h"
+#include "kmalloc.h"
 
 int elf_run(const char *args)
 {
    uint8_t *user_sp = (uint8_t *)USER_SP;
+   char *tmpargs;
    char *filename;
    int status;
 
-   user_sp = setup_stack_args(args, user_sp, &filename);
+   // make sure we're not going to overwrite the args
+   // (e.g. new args are sufficiently large to overlap new user
+   // stack)
+   if(NOT_IN_KERNEL_SPACE(args)) {
+      tmpargs = (char *)kmalloc(strlen(args) + 1);
+      if(!tmpargs) return -ENOMEM;
 
-   start_addr s = elf_load(filename, 0, &status);
+      memcpy(tmpargs, args, strlen(args) + 1);
+      user_sp = setup_stack_args(tmpargs, user_sp, &filename);
+
+      kfree(tmpargs);
+   }
+   else {
+      user_sp = setup_stack_args(args, user_sp, &filename);
+   }
+
+   start_addr s = elf_load(filename, 0, &status, user_sp);
    if(s) 
       init_user_with_sp(user_sp, s);
    else
@@ -74,6 +88,7 @@ void *setup_stack_args(const char *unparsed_args, void *sp, char **filename)
    // 16 byte align
    if((argbytes & 0xFFF0) != argbytes) argbytes = (argbytes & 0xFFF0) + 16;
    stackptr -= argbytes;
+   memset(stackptr, 0, argbytes);
    memcpy(stackptr, unparsed_args, strlen(unparsed_args));
 
    if(filename) filename[0] = stackptr;
@@ -103,21 +118,13 @@ void *setup_stack_args(const char *unparsed_args, void *sp, char **filename)
 // Loads the boot file from SPI flash. Returns the start address.
 start_addr elf_boot() 
 {
-   // first try the root filesystem for a boot file
    int status;
-   printk("trying !boot...\n");
-   start_addr s = elf_load("/!boot", 0, &status);
-   if(s)
-      return s;
-   else {
-      printk("!boot not available, trying serial flash...\n");
-      return elf_load("/dev/spiflash", FLASH_OFFSET, &status);
-   }
+   return elf_load("/dev/spiflash", FLASH_OFFSET, &status, (uint8_t *)USER_SP);
 }
 
 //------------------------------------------------------------------
 // Loads an ELF program, returning the start address
-start_addr elf_load(const char *filename, uint32_t offset, int *status) 
+start_addr elf_load(const char *filename, uint32_t offset, int *status, void *stack_ptr) 
 {
    int fd;
    start_addr s;
@@ -128,7 +135,7 @@ start_addr elf_load(const char *filename, uint32_t offset, int *status)
       return 0;
    }
 
-   s = elf_load_fd(fd, offset, status);
+   s = elf_load_fd(fd, offset, status, stack_ptr);
    SYS_close(fd);
    return s;
 }
@@ -196,7 +203,7 @@ int elf_validate_phdr(int fd, uint32_t offset, Elf32_Ehdr *header)
 // Loads an ELF executable from the specified file descriptor.
 // Returns a start address or 0 on failure.
 // Status returned via *status
-start_addr elf_load_fd(int fd, uint32_t offset, int *status) 
+start_addr elf_load_fd(int fd, uint32_t offset, int *status, void *stack_ptr) 
 {
    Elf32_Ehdr header;
    Elf32_Phdr phdr;
@@ -206,7 +213,12 @@ start_addr elf_load_fd(int fd, uint32_t offset, int *status)
 
    if((*status = elf_validate_phdr(fd, offset, &header)) == 0) {
       // Clear user memory
-      memset((uint8_t *)USRMEM_START, 0, USRMEM_SIZE);
+      int32_t memsz = (uint8_t *)stack_ptr - (uint8_t *)USRMEM_START;
+      if(memsz < 1) {
+         printk("elf_load_fd: Invalid memory size\n");
+         asm("ebreak");
+      }
+      memset((uint8_t *)USRMEM_START, 0, memsz);
 
       SYS_lseek(fd, offset + header.e_phoff, SEEK_SET);
       for(int i = 0; i < header.e_phnum; i++) {
@@ -240,8 +252,14 @@ start_addr elf_load_fd(int fd, uint32_t offset, int *status)
 // Supervisor cmdlet
 void super_elf(int argc, char **argv)
 {
-   if(!strcmp(argv[0], "boot"))
-      init_user(elf_boot());
+   if(!strcmp(argv[0], "boot")) {
+      int status;
+      void *user_sp = setup_stack_args("init warm", (uint8_t *)USER_SP, NULL);
+      start_addr s = elf_load("/dev/spiflash", FLASH_OFFSET, &status, user_sp);
+
+      if(s) init_user_with_sp(user_sp, s);
+      else printk("Boot failed: status = %d\n", status);
+   }
    else {
       if(argc != 2) 
          printk("usage: run <filename>\n");

@@ -10,6 +10,8 @@
        "csrwi mstatus, 8");
 #endif
 
+#define NOT_IN_KERNEL_SPACE(x) (uint32_t)x > 10000
+
 // Timer definitions
 #define  TIMER_TEN_MS         120000
 #define  TIMER_HUNDRED_MS     1200000

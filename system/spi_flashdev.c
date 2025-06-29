@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "printk.h"
 #include "spi_flashdev.h"
@@ -76,7 +77,7 @@ static void spiflash_writebuffer(void);
 // Open the SPI flash
 // FIXME: limitation - open is exclusive
 int spiflash_open(const char *devname, int flags, mode_t mode, FD *fd) {
-   if(is_open) 
+   if(is_open && flags != O_RDONLY) 
       return -EBUSY;
 
    fd->fdfunc = &spiflash_func;

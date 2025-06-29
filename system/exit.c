@@ -25,16 +25,24 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include "elfload.h"
 #include "exit.h"
 #include "printk.h"
 #include "super_shell.h"
+#include "init.h"
 
 //---------------------------------------------------------------
-// TODO: reload initial program
+// Reload init from flash
 void SYS_exit(int status) {
-   printk("Exit called: status = %d\n", status);
-   while(true) {
-      super_shell();
+   int load_status;
+
+   void *user_sp = setup_stack_args("init warm", (uint8_t *)USER_SP, NULL);
+   start_addr s = elf_load("/dev/spiflash", FLASH_OFFSET, &load_status, user_sp);
+
+   if(s) init_user_with_sp(user_sp, s);
+   else {
+      printk("unable to return to init, status = %d\n", load_status);
+      while(1) super_shell();
    }
 }
 

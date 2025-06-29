@@ -30,6 +30,7 @@
 #define FLASH_OFFSET    0x30000        // Where in flash the startup is
 #define USRMEM_START    0x10000
 #define USRMEM_SIZE     0x10800
+#define USER_SP         0x20800
 
 typedef void (*start_addr)(void);
 
@@ -46,12 +47,12 @@ int elf_run(const char *args);
 void *setup_stack_args(const char *unparsed_args, void *stackptr, char **filename);
 
 // Loads the named file, returning the start address.
-start_addr elf_load(const char *filename, uint32_t offset, int *status);
+start_addr elf_load(const char *filename, uint32_t offset, int *status, void *stack_ptr);
 
 // Loads from a file descriptor. The offset is how many bytes into the
 // open file the ELF data starts (normally 0). Returns the entry address
 // or 0 on failure. Returns status (0 = success) in status ptr.
-start_addr elf_load_fd(int fd, uint32_t offset, int *status);
+start_addr elf_load_fd(int fd, uint32_t offset, int *status, void *stack_ptr);
 
 int elf_read_ehdr(int fd, uint32_t offset, Elf32_Ehdr *header);
 int elf_validate_phdr(int fd, uint32_t offset, Elf32_Ehdr *header);
