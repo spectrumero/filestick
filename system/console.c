@@ -138,7 +138,7 @@ static ssize_t console_read_interactive(int fd, void *buf, size_t count)
 //------------------------------------------------------------------
 // Return the number of bytes available
 ssize_t console_peek(int fd) {
-   return cons_rx_count;
+   return bufindex - bufstart;
 }
 
 //------------------------------------------------------------------
