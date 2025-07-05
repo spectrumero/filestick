@@ -45,6 +45,7 @@ static FDfunction cons_func = {
    .fd_peek  = console_peek
 };
 
+#ifdef SOFTWARE_FIFO
 extern volatile uint32_t bufindex;
 extern volatile uint32_t bufstart;
 extern volatile uint32_t cr_index;
@@ -53,6 +54,9 @@ extern volatile uint32_t cons_control;
 
 // This should be able to pick up the symbol, but it doesn't
 uint8_t *cons_buf = (uint8_t *)0xff00; // FIXME system.ld symbol
+#else
+uint32_t       cons_control;
+#endif
 
 static ssize_t console_read_interactive(int fd, void *buf, size_t count);
 static ssize_t console_read_raw(int fd, void *buf, size_t count);
@@ -211,7 +215,12 @@ static ssize_t console_read_interactive(int fd, void *buf, size_t count)
 //------------------------------------------------------------------
 // Return the number of bytes available
 ssize_t console_peek(int fd) {
+#ifdef SOFTWARE_FIFO
    return bufindex - bufstart;
+#else
+   // TODO: get fifo bytes
+   return (*uart_state & 1) ? 1 : 0;
+#endif
 }
 
 //------------------------------------------------------------------
@@ -254,9 +263,11 @@ int console_ioctl(int fd, unsigned long request, void *ptr) {
       case CONSOLE_SET_INTERACTIVE:
          cons_control &= CONSOLE_CLR_RAW;
          break;
+#ifdef SOFTWARE_FIFO
       case CONSOLE_DISCARD_RXBUF:
          bufstart = bufindex;
          break;
+#endif
       default:
          return -EINVAL;
    }
