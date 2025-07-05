@@ -40,5 +40,8 @@ ssize_t fd_peek(int fd);
 // Run an ELF file
 int exec_elf(const char *cmdline);
 
+// Init malloc with a user-defined memory pool
+bool setup_malloc_pool(void *mem, size_t size);
+
 #endif
 

@@ -22,10 +22,10 @@ syscall_table:
 .byte 0           # 31
 .byte 8           # 32 hexdump  -- (nonstd)
 .byte 9           # 33 super_shell  -- (nonstd)
-.byte 0           # 34
-.byte 0           # 35
-.byte 0           # 36
-.byte 0           # 37
+.byte 22          # 34 SYS_malloc_init -- nonstd
+.byte 23          # 35 SYS_malloc -- nonstd
+.byte 24          # 36 SYS_realloc -- nonstd
+.byte 25          # 37 SYS_free -- nonstd
 .byte 0           # 38
 .byte 21          # 39 SYS_umount
 .byte 11          # 40 SYS_mount
@@ -129,4 +129,8 @@ syscall_address:
 .word printk      # 19
 .word elf_run     # 20
 .word SYS_umount  # 21
+.word tlsf_create_with_pool # 22
+.word tlsf_malloc # 23
+.word tlsf_realloc # 24
+.word tlsf_free   # 25
 

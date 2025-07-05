@@ -16,7 +16,7 @@
 
 // How many errors during the transfer before we just fail
 // TODO: Could this be configurable
-#define XMODEM_MAX_ERRORS 10
+#define XMODEM_MAX_ERRORS 100
 
 static const char *state_name(xmodem_server_state state) {
 	#define XDMSTAT(a) case XMODEM_STATE_ ##a: return #a

@@ -31,9 +31,39 @@
 #define SYS_mount       40
 #define SYS_hexdump     32
 #define SYS_exec_elf    24
+#define SYS_malloc_init 34
+#define SYS_malloc      35
+#define SYS_realloc     36
+#define SYS_free        37
+#define SYS_brk         214
 
 // Syscall wrappers
 .text
+.globl sys_brk
+sys_brk:
+   li    a7, SYS_brk
+   ecall
+   ret
+.globl sys_malloc_init
+sys_malloc_init:
+   li    a7, SYS_malloc_init
+   ecall
+   ret
+.globl sys_malloc
+sys_malloc:
+   li    a7, SYS_malloc
+   ecall
+   ret
+.globl sys_realloc
+sys_realloc:
+   li    a7, SYS_realloc
+   ecall
+   ret
+.globl sys_free
+sys_free:
+   li    a7, SYS_free
+   ecall
+   ret
 .globl hexdump                // called directly, void return
 hexdump:
    li       a7, SYS_hexdump   

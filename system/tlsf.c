@@ -1101,6 +1101,7 @@ tlsf_t tlsf_create_with_pool(void* mem, size_t bytes)
 {
 	tlsf_t tlsf = tlsf_create(mem);
 	tlsf_add_pool(tlsf, (char*)mem + tlsf_size(), bytes - tlsf_size());
+//        printk("create_w_pool: mem=%x tlsf=%x bytes=%x\n", mem, tlsf, bytes);
 	return tlsf;
 }
 
