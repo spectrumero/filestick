@@ -55,12 +55,13 @@ raw_putc:
    andi t1, t1, 2             # apply write busy mask
    bne t1, zero, .busy        # wait until uart is free
 
-//  nop                        # delay due to UART signalling ready
-//  nop                        # before it really is
-//  nop                        # at 115200 baud this many nops 
-//  nop                        # will be enough
-//  nop
-//  nop
+   nop                        # delay due to UART signalling ready
+   nop                        # before it really is
+   nop                        # at 115200 baud this many nops 
+   nop                        # will be enough
+   nop
+   nop
+   nop
    
 .send:
    sw a0, OFFS_UART(t0)       # send data 

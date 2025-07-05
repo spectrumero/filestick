@@ -27,9 +27,6 @@ wire        uart_rx_valid;
 reg         uart_rx_fifo_write;
 reg         uart_read_state;
 reg         uart_rd;
-wire        fifo_full;
-
-assign cts = ~fifo_full;
 
 // Receive a byte into the FIFO
 always @(posedge clk, posedge reset) begin
@@ -42,7 +39,7 @@ always @(posedge clk, posedge reset) begin
    else begin
       case(uart_read_state)
          0: begin
-            if(uart_rx_valid && cts) begin
+            if(uart_rx_valid && !cts) begin
                uart_rx_fifo_write <= 1;
                uart_rd <= 1;
                uart_read_state <= 1;
@@ -68,7 +65,7 @@ fifo uart_rx_fifo (
    .rd(rd),
    .wr(uart_rx_fifo_write),
    .data_ready(data_ready),
-   .full(fifo_full),
+   .full(cts),
    .bytes_avail(bytes_avail)
 );
 

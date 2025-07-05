@@ -356,7 +356,7 @@ assign uart_rstate[0]    = uart_valid;
 //   .valid(uart_valid));
 fifo_uart #(
    .FREQ_HZ(CLOCK_HZ),
-   .BAUDS(230400)
+   .BAUDS(115200)
 ) uart (
    .clk(clk),
    .reset(reset),

@@ -33,6 +33,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/console.h>
+#include <sys/dirent.h>
 #include <syscall.h>
 
 #include "init.h"
@@ -69,6 +70,25 @@ void i_hexdump(int argc, char **argv)
       bytecount += bytes;
    } while(bytes > 0);
    close(fd);
+}
+
+// ----------------------------------------------------------------------------
+// List files
+void i_ls(int argc, char **argv)
+{
+   struct dirent entry;
+   int dhnd = opendir("");
+   if(dhnd < 0) {
+      perror("opendir");
+      return;
+   }
+
+   while(_readdir(dhnd, &entry) >= 0) {
+      if(strlen(entry.d_name) == 0) break;
+      printf("%s\t%ld\t%s\n", entry.d_isdir ? "d" : "f", entry.d_size, entry.d_name);
+   }
+
+   closedir(dhnd);
 }
 
 // ----------------------------------------------------------------------------
