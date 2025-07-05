@@ -22,7 +22,7 @@ set_io -nowarn uart_brn 23
 set_io -nowarn uart_3v3 25
 set_io -nowarn uart_rx 26
 set_io -nowarn uart_tx 27
-set_io -nowarn uart_grn 32
+set_io -nowarn uart_cts 2
 set_io -nowarn term_en 35
 set_io -nowarn collision_ref_pwm 31
 set_io -nowarn collision_detect  32

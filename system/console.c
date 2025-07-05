@@ -73,6 +73,7 @@ ssize_t console_read(int fd, void *buf, size_t count) {
       return console_read_interactive(fd, buf, count);
 }
 
+#ifdef SOFTWARE_FIFO
 //-----------------------------------------------------------------
 // Read the console in raw mode
 static ssize_t console_read_raw(int fd, void *buf, size_t count)
@@ -134,6 +135,78 @@ static ssize_t console_read_interactive(int fd, void *buf, size_t count)
 
    return bytes_read;
 }
+#else // SOFTWARE_FIFO
+
+// Using the hardware FIFO
+volatile uint8_t  *uart_byte  = (uint8_t *)(DEV_BASE + OFFS_UART);
+volatile uint8_t  *uart_state = (uint8_t *)(DEV_BASE + OFFS_UARTSTATE);
+
+//-----------------------------------------------------------------
+// Read the console in raw mode
+static ssize_t console_read_raw(int fd, void *buf, size_t count)
+{
+   uint8_t *bufptr = buf;
+   ssize_t bytes_read = 0;
+
+   while(count) {
+      // wait for data
+      while((*uart_state & 1) == 0);
+
+      uint8_t byte = *uart_byte;
+      *bufptr++ = byte;
+      count--;
+      bytes_read++;
+   }
+      
+   return bytes_read;
+}
+
+//-----------------------------------------------------------------
+// Read the console in interactive mode (characters echoed, CR = end
+// of transmission)
+static ssize_t console_read_interactive(int fd, void *buf, size_t count)
+{
+   size_t bytes_read = 0;
+   uint8_t *bufptr = buf;
+   if(count == 0) return 0;
+
+   while(count) {
+      // wait for data
+      while((*uart_state & 1) == 0);
+
+      uint8_t byte = *uart_byte;
+
+      // CR
+      if(byte == 0x0d) {
+         serial_putc(0x0a);
+         serial_putc(0x0d);
+         break;
+      }
+      // backspace
+      else if(byte == 127) {
+         if(bufptr > (uint8_t *)buf) {
+            bufptr--;
+            *bufptr = 0;
+            bytes_read--;
+            count++;
+            serial_putc(8);
+         }
+         else {
+            // bell
+            serial_putc(7);
+         }
+      }
+      else {
+         serial_putc(byte);
+         count--;
+         bytes_read++;
+         *bufptr++ = byte;
+      }
+   }
+
+   return bytes_read;
+}
+#endif
 
 //------------------------------------------------------------------
 // Return the number of bytes available

@@ -17,6 +17,7 @@ module toplevel (
 
    input wire     uart_rx,
    output wire    uart_tx,
+   output wire    uart_cts,
 
    output [3:0]   spi_ss,
    output         flash_sck,     // spi_ss 0
@@ -329,15 +330,33 @@ wire [31:0] uart_rdata = { 20'b0, uart_wr_busy_state, uart_wr_busy, uart_valid, 
 wire [31:0] uart_rstate = { 28'b0, uart_wr_busy_state, uart_wr_busy, uart_valid };
 
 // reminder, baud 230400
-buart #(
+//buart #(
+//   .FREQ_HZ(CLOCK_HZ),
+//   .BAUDS(115200)
+//   ) uart (
+//   .clk(clk),
+//   .resetq(!reset),
+//
+//   .tx(uart_tx),
+//   .rx_raw(uart_rx),
+//
+//   .wr(uart_wr),
+//   .rd(uart_rd),
+//
+//   .tx_data(mem_wdata[7:0]),
+//   .rx_data(uart_rx_data),
+//
+//   .busy(uart_wr_busy),
+//   .valid(uart_valid));
+fifo_uart #(
    .FREQ_HZ(CLOCK_HZ),
-   .BAUDS(115200)
-   ) uart (
+   .BAUDS(230400)
+) uart (
    .clk(clk),
-   .resetq(!reset),
+   .reset(reset),
 
    .tx(uart_tx),
-   .rx_raw(uart_rx),
+   .rx(uart_rx),
 
    .wr(uart_wr),
    .rd(uart_rd),
@@ -346,7 +365,8 @@ buart #(
    .rx_data(uart_rx_data),
 
    .busy(uart_wr_busy),
-   .valid(uart_valid));
+   .data_ready(uart_valid),
+   .cts(uart_cts));
 
 always @(posedge clk)
    if(reset | uart_rd)
@@ -427,9 +447,9 @@ assign collision_ref_pwm = pwm_ctr[7];
 
 // ------- Interrupts ------------
 `ifdef GP_TIMER
-assign int = timer_intr | uart_valid | econet_rx_valid | econet_timer_a_intr | sdcard_intr;
+assign int = timer_intr | econet_rx_valid | econet_timer_a_intr | sdcard_intr;
 `else
-assign int = uart_valid | econet_rx_valid | econet_timer_a_intr | sdcard_intr;
+assign int = econet_rx_valid | econet_timer_a_intr | sdcard_intr;
 `endif
 
 endmodule

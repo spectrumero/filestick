@@ -43,9 +43,9 @@ isr_trap:
    lw       a1, OFFS_RXSTATUS(a0)      # econet receive status offset
    andi     a1, a1, 1                  # frame valid waiting bit
    bnez     a1, econet_rx
-   lw       a1, OFFS_UARTSTATE(a0)     # console uart state
-   andi     a1, a1, 1                  # uart_valid bit
-   bnez     a1, console_rx
+//   lw       a1, OFFS_UARTSTATE(a0)     # console uart state
+//   andi     a1, a1, 1                  # uart_valid bit
+//   bnez     a1, console_rx
 
    lw       a1, OFFS_TMR_A_STATUS(a0)  # econet timer A status
    andi     a1, a1, 1
