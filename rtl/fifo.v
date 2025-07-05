@@ -14,7 +14,8 @@ module fifo #(
    input    wr,
    input    rd,
    output   data_ready, 
-   output   full
+   output   full,
+   output   [15:0] bytes_avail
 );
    // Register width for the FIFO pointers.
    parameter fifo_width = $clog2(FIFO_SIZE);
@@ -23,9 +24,12 @@ module fifo #(
    reg [7:0]               data_out;
    reg [fifo_width-1:0]    fifo_in_ptr;
    reg [fifo_width-1:0]    fifo_out_ptr;
+   wire [fifo_width-1:0]   avail;
 
-   assign full       = (fifo_out_ptr + 1) == fifo_in_ptr;
+   assign full       = (fifo_in_ptr + 1) == fifo_out_ptr;
    assign data_ready = fifo_in_ptr != fifo_out_ptr;
+   assign avail      = fifo_in_ptr - fifo_out_ptr;
+   assign bytes_avail = avail;
 
    initial begin
       fifo_in_ptr <= 0;

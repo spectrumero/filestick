@@ -143,7 +143,7 @@ static ssize_t console_read_interactive(int fd, void *buf, size_t count)
 
 // Using the hardware FIFO
 volatile uint8_t  *uart_byte  = (uint8_t *)(DEV_BASE + OFFS_UART);
-volatile uint8_t  *uart_state = (uint8_t *)(DEV_BASE + OFFS_UARTSTATE);
+volatile uint32_t *uart_state = (uint32_t *)(DEV_BASE + OFFS_UARTSTATE);
 
 //-----------------------------------------------------------------
 // Read the console in raw mode
@@ -218,8 +218,9 @@ ssize_t console_peek(int fd) {
 #ifdef SOFTWARE_FIFO
    return bufindex - bufstart;
 #else
-   // TODO: get fifo bytes
-   return (*uart_state & 1) ? 1 : 0;
+   // FIFO remaining bytes are in the upper 16 bits of the state
+   // register
+   return (*uart_state) >> 16;
 #endif
 }
 

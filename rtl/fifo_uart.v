@@ -18,6 +18,7 @@ module fifo_uart #(
 
    output busy,
    output data_ready,
+   output [15:0] bytes_avail,
    output cts
 );
 
@@ -67,7 +68,8 @@ fifo uart_rx_fifo (
    .rd(rd),
    .wr(uart_rx_fifo_write),
    .data_ready(data_ready),
-   .full(fifo_full)
+   .full(fifo_full),
+   .bytes_avail(bytes_avail)
 );
 
 // The UART

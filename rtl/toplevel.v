@@ -320,6 +320,7 @@ wire uart_valid;
 wire uart_rd = uart_sel & cpu_rd;
 wire uart_wr = uart_sel & cpu_we[0];
 wire [7:0] uart_rx_data;
+wire [15:0] uart_bytes_avail;
 
 parameter WR_UART_IDLE=0;
 parameter WR_UART_WRITING=1;
@@ -327,7 +328,10 @@ parameter WR_UART_DONE_WRITING=2;
 reg [1:0] uart_wr_busy_state;
 
 wire [31:0] uart_rdata = { 20'b0, uart_wr_busy_state, uart_wr_busy, uart_valid, uart_rx_data };
-wire [31:0] uart_rstate = { 28'b0, uart_wr_busy_state, uart_wr_busy, uart_valid };
+wire [31:0] uart_rstate;
+assign uart_rstate[31:16] = uart_bytes_avail;
+assign uart_rstate[15:4] = 12'b0;
+assign uart_rstate[3:0]  = { uart_cts, uart_wr_busy_state, uart_wr_busy, uart_valid };
 
 // reminder, baud 230400
 //buart #(
@@ -366,6 +370,7 @@ fifo_uart #(
 
    .busy(uart_wr_busy),
    .data_ready(uart_valid),
+   .bytes_avail(uart_bytes_avail),
    .cts(uart_cts));
 
 always @(posedge clk)
