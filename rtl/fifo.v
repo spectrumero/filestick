@@ -26,9 +26,9 @@ module fifo #(
    reg [fifo_width-1:0]    fifo_out_ptr;
    wire [fifo_width-1:0]   avail;
 
-   assign full       = (fifo_in_ptr + 1) == fifo_out_ptr;
    assign data_ready = fifo_in_ptr != fifo_out_ptr;
    assign avail      = fifo_in_ptr - fifo_out_ptr;
+   assign full       = (avail == FIFO_SIZE - 1);
    assign bytes_avail = avail;
 
    initial begin

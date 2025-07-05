@@ -325,13 +325,15 @@ wire [15:0] uart_bytes_avail;
 parameter WR_UART_IDLE=0;
 parameter WR_UART_WRITING=1;
 parameter WR_UART_DONE_WRITING=2;
-reg [1:0] uart_wr_busy_state;
+//reg [1:0] uart_wr_busy_state;
 
-wire [31:0] uart_rdata = { 20'b0, uart_wr_busy_state, uart_wr_busy, uart_valid, uart_rx_data };
+wire [31:0] uart_rdata = { 24'b0, uart_rx_data };
 wire [31:0] uart_rstate;
 assign uart_rstate[31:16] = uart_bytes_avail;
-assign uart_rstate[15:4] = 12'b0;
-assign uart_rstate[3:0]  = { uart_cts, uart_wr_busy_state, uart_wr_busy, uart_valid };
+assign uart_rstate[15:3] = 13'b0;
+assign uart_rstate[2]    = uart_cts;
+assign uart_rstate[1]    = uart_wr_busy;
+assign uart_rstate[0]    = uart_valid;
 
 // reminder, baud 230400
 //buart #(
@@ -373,16 +375,16 @@ fifo_uart #(
    .bytes_avail(uart_bytes_avail),
    .cts(uart_cts));
 
-always @(posedge clk)
-   if(reset | uart_rd)
-      uart_wr_busy_state <= 0;
-   else
-      case(uart_wr_busy_state) 
-         WR_UART_IDLE:
-            if(uart_wr_busy) uart_wr_busy_state <= WR_UART_WRITING;
-         WR_UART_WRITING:
-            if(!uart_wr_busy) uart_wr_busy_state <= WR_UART_DONE_WRITING;
-      endcase
+//always @(posedge clk)
+//   if(reset | uart_rd)
+//      uart_wr_busy_state <= 0;
+//   else
+//      case(uart_wr_busy_state) 
+//         WR_UART_IDLE:
+//            if(uart_wr_busy) uart_wr_busy_state <= WR_UART_WRITING;
+//         WR_UART_WRITING:
+//            if(!uart_wr_busy) uart_wr_busy_state <= WR_UART_DONE_WRITING;
+//      endcase
          
 
 //-------end-uart-------------
