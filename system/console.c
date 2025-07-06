@@ -187,12 +187,14 @@ static ssize_t console_read_interactive(int fd, void *buf, size_t count)
          break;
       }
       // backspace
-      else if(byte == 127) {
+      else if(byte == 127 || byte == 8) {
          if(bufptr > (uint8_t *)buf) {
             bufptr--;
             *bufptr = 0;
             bytes_read--;
             count++;
+            serial_putc(8);
+            serial_putc(' ');
             serial_putc(8);
          }
          else {
