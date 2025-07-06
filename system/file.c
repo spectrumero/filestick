@@ -73,7 +73,7 @@ int fileio_open(const char *path, int flags, mode_t mode)
    if((flags + 1) & _FREAD)   fatfs_flags |= FA_READ;
    if((flags + 1) & _FWRITE)  fatfs_flags |= FA_WRITE;
    if(flags & _FAPPEND)       fatfs_flags |= FA_OPEN_APPEND;
-   if(flags & _FCREAT)        fatfs_flags |= FA_CREATE_NEW;
+   if(flags & _FCREAT)        fatfs_flags |= FA_CREATE_ALWAYS;
    if(flags & _FTRUNC)        fatfs_flags |= FA_CREATE_ALWAYS;
 
    FRESULT res = f_open(fp, path, fatfs_flags);
