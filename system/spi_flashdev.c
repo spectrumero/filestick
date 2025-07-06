@@ -38,7 +38,7 @@
 #include "kmalloc.h"
 #include "devices.h"
 
-//#define DEBUG_FLASHWRITE
+// #define DEBUG_FLASHWRITE
 
 static FDfunction spiflash_func = {
    .fd_read    = spiflash_read,
@@ -92,6 +92,9 @@ int spiflash_open(const char *devname, int flags, mode_t mode, FD *fd) {
 ssize_t spiflash_read(int fd, void *buf, size_t count) {
    if(writebuf != NULL) spiflash_writebuffer();
 
+#ifdef DEBUG_FLASHWRITE
+   printk("reading %d bytes at %x\n", count, fileptr);
+#endif
    flash_memcpy(fileptr, buf, count);
    fileptr += count;
    return count;
@@ -105,7 +108,7 @@ ssize_t spiflash_write(int fd, const void *buf, size_t count) {
    size_t remain = count;
 
 #ifdef DEBUG_FLASHWRITE
-   printk("writing %d bytes\n", count);
+   printk("writing %d bytes at %x\n", count, fileptr);
 #endif 
    do {
       ssize_t bytes = spiflash_write_to_sector(buf, remain);
@@ -132,7 +135,7 @@ static ssize_t spiflash_write_to_sector(const uint8_t *buf, size_t count) {
       int rc = spiflash_load_sector();
       if(rc < 0) return rc;
    }
-   else if(end_addr >= write_blk_end) {
+   else if(end_addr > write_blk_end || fileptr < write_blk_offset) {
 #ifdef DEBUG_FLASHWRITE
       printk("flush prev sector and load new sector, fileptr = %x end_addr = %x, count = %x\n",
             fileptr, end_addr, count);
@@ -143,10 +146,13 @@ static ssize_t spiflash_write_to_sector(const uint8_t *buf, size_t count) {
    }
 
    uint32_t fileptr_in_blk = fileptr & WRITE_FILEPTR_OFFSET_MASK;
-   if(end_addr >= write_blk_end) {
+   if(end_addr > write_blk_end) {
+#ifdef DEBUG_FLASHWRITE
+      printk("reducing count from %d ", count);
+#endif
       count = write_blk_end - fileptr;
 #ifdef DEBUG_FLASHWRITE
-      printk("reducing count to %d: write_blk_end = %x fileptr = %x\n",
+      printk("to %d: write_blk_end = %x fileptr = %x\n",
             count, write_blk_end, fileptr);
 #endif
    }
@@ -156,9 +162,6 @@ static ssize_t spiflash_write_to_sector(const uint8_t *buf, size_t count) {
 
    // if the block end was hit, write it out
    if(end_addr >= write_blk_end) {
-#ifdef DEBUG_FLASHWRITE
-      printk("write out sector\n");
-#endif
       spiflash_writebuffer();
    }
 
@@ -176,6 +179,9 @@ static ssize_t spiflash_load_sector(void)
 
    // get what's currently in the erase sector block
    flash_memcpy(write_blk_offset, writebuf, WRITE_SECTOR_SIZE);
+#ifdef DEBUG_FLASHWRITE
+   printk("Loaded flash sector at %x\n", write_blk_offset);
+#endif
    return 0;
 }
 
@@ -190,6 +196,9 @@ void spiflash_sync(void)
 // write a 4k erase block's worth of data
 static void spiflash_writebuffer(void)
 {
+#ifdef DEBUG_FLASHWRITE
+   printk("Writing out to flash at %x\n", write_blk_offset);
+#endif
    uint8_t *pageptr = writebuf;
    uint8_t status;
 
