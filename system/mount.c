@@ -79,6 +79,8 @@ int fatfs_to_errno(FRESULT res) {
    switch(res) {
       case FR_OK:
          return 0;
+      case FR_DISK_ERR:
+         return -EIO;
       case FR_NO_FILE:
          return -ENOENT;
       case FR_NO_PATH:
@@ -86,7 +88,11 @@ int fatfs_to_errno(FRESULT res) {
       case FR_NOT_ENOUGH_CORE:
          return -ENOMEM;
       case FR_TOO_MANY_OPEN_FILES:
-         return -ENFILE;
+         return -EMFILE;
+      case FR_EXIST:
+         return -EEXIST;
+      case FR_WRITE_PROTECTED:
+         return -EROFS;
       default:
          return -(res + EFATFS_START);
    }

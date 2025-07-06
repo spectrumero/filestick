@@ -122,7 +122,9 @@ void i_receive_xmodem(int argc, char **argv)
 
    int fd = open(argv[1], O_CREAT|O_WRONLY);
    if(fd < 0) {
+      int e = errno;
       perror("open");
+      printf("errno = %d\n", e);
       return;
    }
 
