@@ -30,7 +30,6 @@ BSD 3-clause license. See https://github.com/BrunoLevy/learn-fpga/tree/master/Fe
 
 From OpenBSD. 
 
-*-
  * Copyright (c) 1990 The Regents of the University of California.
  * All rights reserved.
  *
@@ -60,10 +59,12 @@ From OpenBSD.
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
 
 
 ## Kernel multiply/divide support
+
+/NOTE this is only included for rv32ic, in other words, without the
+harware multiply and divide support/
 
 GNU GPL version 3 (muldi3.S and div.S) from libgcc.a
 
@@ -92,25 +93,21 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 
 ## FatFS
 
-/*----------------------------------------------------------------------------/
-/  FatFs - Generic FAT Filesystem Module  R0.15 w/patch1                      /
-/-----------------------------------------------------------------------------/
-/
-/ Copyright (C) 2022, ChaN, all right reserved.
-/
-/ FatFs module is an open source software. Redistribution and use of FatFs in
-/ source and binary forms, with or without modification, are permitted provided
-/ that the following condition is met:
-/
-/ 1. Redistributions of source code must retain the above copyright notice,
-/    this condition and the following disclaimer.
-/
-/ This software is provided by the copyright holder and contributors "AS IS"
-/ and any warranties related to this software are DISCLAIMED.
-/ The copyright owner or contributors be NOT LIABLE for any damages caused
-/ by use of this software.
-/
-/----------------------------------------------------------------------------*/
+  FatFs - Generic FAT Filesystem Module  R0.15 w/patch1                      
+
+ Copyright (C) 2022, ChaN, all right reserved.
+
+ FatFs module is an open source software. Redistribution and use of FatFs in
+ source and binary forms, with or without modification, are permitted provided
+ that the following condition is met:
+
+ 1. Redistributions of source code must retain the above copyright notice,
+    this condition and the following disclaimer.
+
+ This software is provided by the copyright holder and contributors "AS IS"
+ and any warranties related to this software are DISCLAIMED.
+ The copyright owner or contributors be NOT LIABLE for any damages caused
+ by use of this software.
 
 ## Kernel printk (npf_printf)
 
@@ -155,7 +152,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org>
 
-================================ 0BSD =================================
+================================ BSD =================================
 
 Copyright (C) 2019 by Charles Nicholson <charles.nicholson+nanoprintf@gmail.com>
 
@@ -170,3 +167,22 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+## Memory allocator
+
+TLSF malloc, provides kmalloc, kfree et al.
+
+https://github.com/mattconte/tlsf
+
+Released under the BSD licence.
+
+Copyright 2016 Matt Conte et al.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
