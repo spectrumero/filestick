@@ -37,6 +37,7 @@ static uint8_t **user_sp = (uint8_t **)0xFEFC;  // FIXME export linker symbol
 // Set when loading an ELF file from memory size information
 void set_min_brk(void *addr) {
    min_brk = addr;
+   program_brk = addr;
 }
 
 //--------------------------------------------------------------------------

@@ -51,12 +51,16 @@ static bool setup_malloc(void)
    mempool = sys_brk(0);
    uint8_t *actual_brk = sys_brk(requested_brk);
    size_t bytes = actual_brk - mempool;
+#ifdef DEBUG_MALLOC
+   printk("setting brk: requested_brk = %x mempool = %x actual_brk = %x bytes = %d\n",
+         requested_brk, mempool, actual_brk, bytes);
+#endif
 
    if(actual_brk > mempool) {
       void *pool = sys_malloc_init(mempool, bytes);
       if(pool) {
 #ifdef DEBUG_MALLOC
-         printk("mempool: %x brk=%x size=%d bytes, init=%x\n", mempool, actual_brk, bytes, pool);
+         printk("mempool is set up: %x brk=%x size=%d bytes, init=%x\n", mempool, actual_brk, bytes, pool);
 #endif
          return true;
       }
