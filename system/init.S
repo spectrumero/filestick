@@ -42,10 +42,12 @@ init:
    call  init_dirs               # initialize directory handles
    call  init_fileio             # initialize file io
 
+#ifdef SOFTWARE_FIFO
    la    a0, __cons_buff         # clear down the console buffer
    mv    a1, zero
    li    a2, 256
    call  memset
+#endif
    
    la    t0, super_trap          # initialize the supervisor (ecall) trap
    csrw  stvec, t0
