@@ -30,6 +30,8 @@ extensions).
 system. System functions via `ecall` interface.
 * Fully buffered econet implementation, with econet exposed via standard
 open/read/write/close/ioctl operations.
+* Switchable econet clock generation and termination, so that you don't
+need a separate clock and terminators for a small Econet.
 * Programmable timers.
 * USB serial interface with hardware FIFO and hardware CTS/RTS flow control.
 Has an interactive mode for use as the system console and raw mode for
