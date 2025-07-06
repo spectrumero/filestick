@@ -35,6 +35,7 @@
 #include <sys/console.h>
 #include <sys/dirent.h>
 #include <syscall.h>
+#include <errno.h>
 
 #include "init.h"
 #include "icommands.h"
@@ -65,6 +66,11 @@ void i_hexdump(int argc, char **argv)
    ssize_t bytes;
    do {
       bytes = read(fd, buf, sizeof(buf));
+      if(bytes < 0) {
+         int e = errno;
+         perror("read");
+         printf("read errno = %d\n", e);
+      }
       if(bytes > 0)
          hexdump(buf, bytes, bytecount);
       bytecount += bytes;
