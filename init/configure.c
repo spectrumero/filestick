@@ -192,7 +192,7 @@ static void cfg_netterminate(int argc, char **argv)
          clkterm |= TERM_ENABLE;
       }
       else {
-         clkterm &= (0xFFFF & TERM_ENABLE);
+         clkterm &= (0xFFFF ^ TERM_ENABLE);
       }
 
       int rc = ioctl(fd, ECONET_SET_CLKTERM | clkterm);
