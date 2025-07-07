@@ -49,6 +49,7 @@ CmdTable commands[] = {
    {  .cmd = "rx",         .cmdfunc = i_receive_xmodem },
    {  .cmd = "hexdump",    .cmdfunc = i_hexdump },
    {  .cmd = "ls",         .cmdfunc = i_ls },
+   {  .cmd = "configure",  .cmdfunc = i_configure },
    {  .cmd = NULL }
 };
 

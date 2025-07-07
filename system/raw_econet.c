@@ -113,6 +113,19 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
          return 0;
       case ECONET_SET_CLKTERM:
          return econet_set_clkterm(request & 0xFFFF);
+      case ECONET_GET_ADDR:
+         {
+            uint8_t *nsta = (uint8_t *)ptr;
+            *nsta = econet_address;
+            return 0;
+         }
+      case ECONET_GET_CLKTERM:
+         {
+            uint16_t *clkt = (uint16_t *)ptr;
+            *clkt = *econet_clkterm;
+            return 0;
+         }
+
       case ECONET_DBG_BUF:
          memcpy(ptr, (uint8_t *)&econet_state_val, sizeof(struct econet_state));
          return 0;
