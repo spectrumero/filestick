@@ -25,42 +25,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <sys/econet.h>
-#include <sys/ioctl.h>
-#include <sys/dirent.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
-
-#include <sys/mount.h>
+#include <fcntl.h>
 
 #include "init.h"
 
-// ----------------------------------------------------------------------
-// On startup, argv[1] if present indicates whether this is a cold
-// or warm start, or potentially any other useful information.
-int
-main(int argc, char **argv)
+int run_script(const char *filename)
 {
-   if(argc > 1) {
-      if(!strcmp(argv[1], "cold")) {
-         printf("Cold boot, initializing flash file system\n");
-         int rc = mount("flash", "", "fatfs", 0, NULL);
-         if(rc < 0) {
-            int e = errno;
-            perror("mount");
-            printf("errno = %d\n", e);
-         }
+   char buf[256];
+   FILE *stream = fopen(filename, "r");
+   if(!stream) return -1;
 
-         if(run_script("boot.rc") == -1) {
-            printf("No boot.rc file\n");
-         }
-      }
+   while(fgets(buf, sizeof(buf), stream)) {
+      parse_cmd(buf);
    }
 
-   // Run CLI on stdin
-   cli(0);
+   fclose(stream);
    return 0;
 }
-

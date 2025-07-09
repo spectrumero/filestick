@@ -62,7 +62,6 @@ static void run_internal_command(const CmdTable *entry, char *cmdbuf);
 int cli(int fd)
 {
    char raw_cmdbuf[256];
-   char cmdbuf[256];
 
    // Make sure stdin is in interactive mode
    if(fd == 0) ioctl(fd, CONSOLE_SET_INTERACTIVE);
@@ -71,25 +70,35 @@ int cli(int fd)
       write(1, "*> ", 3);
      
       memset(raw_cmdbuf, 0, sizeof(raw_cmdbuf));
-      memset(cmdbuf, 0, sizeof(cmdbuf)); 
       ssize_t bytes = read(fd, raw_cmdbuf, sizeof(raw_cmdbuf) - 1);
       if(bytes < 0) {
          printf("Unable to read from fd %d\n", fd);
          return -1;
       }
 
-      bytes = clean_cmdbuf(cmdbuf, raw_cmdbuf, sizeof(raw_cmdbuf));
+      parse_cmd(raw_cmdbuf);
+   }
+   return 0;
+}
 
-      if(bytes && !comment(cmdbuf)) {
-         CmdTable *entry = internal_command(cmdbuf);
-         if(entry) {
-            run_internal_command(entry, cmdbuf);
-         }
-         else {
-            int rc = exec_elf(cmdbuf);
-            if(rc < 0) {
-               perror("exec_elf");
-            }
+// --------------------------------------------------------------
+// Clean up and parse the command
+int parse_cmd(const char *raw_cmdbuf)
+{
+   char cmdbuf[256];
+
+   memset(cmdbuf, 0, sizeof(cmdbuf)); 
+   ssize_t bytes = clean_cmdbuf(cmdbuf, raw_cmdbuf, sizeof(raw_cmdbuf));
+
+   if(bytes && !comment(cmdbuf)) {
+      CmdTable *entry = internal_command(cmdbuf);
+      if(entry) {
+         run_internal_command(entry, cmdbuf);
+      }
+      else {
+         int rc = exec_elf(cmdbuf);
+         if(rc < 0) {
+            perror("exec_elf");
          }
       }
    }
@@ -119,14 +128,17 @@ static ssize_t clean_cmdbuf(char *dest, const char *src, int size)
    if(i == size) return 0;
 
    strcpy(dest, src + i);
+   int len = strlen(dest);
 
-   // remove trailing spaces
-   for(i = strlen(dest); i > 0; i--) {
-      if(dest[i] != ' ') break;
+   // remove trailing newlines/ctrl chars and spaces
+   for(i = len - 1; i >= 0; i--) {
+      if(dest[i] > 32) break;
 
       dest[i] = 0;
+      len--;
    }
-   return strlen(dest);
+
+   return len;
 }
 
 // -----------------------------------------------------------
