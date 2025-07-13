@@ -39,6 +39,7 @@ init:
    la    sp, __stack_top         # initialize system stack
 
    call  fd_init                 # initialize file descriptors
+   call  spiflash_init           # initialize spi flash
    call  init_dirs               # initialize directory handles
    call  init_fileio             # initialize file io
 

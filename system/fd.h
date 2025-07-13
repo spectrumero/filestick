@@ -51,6 +51,7 @@ typedef struct _FD {
    uint32_t       flags;
    FDfunction     *fdfunc;
    void           *data;
+   int            fd;
 } FD;
 
 // File descriptor table management

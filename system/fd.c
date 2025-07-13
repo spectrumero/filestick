@@ -190,6 +190,7 @@ FD *fd_alloc(int *fdnum) {
       if(!fdtable[i].flags) {
          fdtable[i].flags = FLAG_ALLOCATED;
          *fdnum = i;
+         fdtable[i].fd = i;
          return &fdtable[i];
       }
    }
