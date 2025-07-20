@@ -24,7 +24,7 @@ static volatile uint32_t *rx_end          = (uint32_t *)0x800104;
 static volatile uint32_t *rx_sz           = (uint32_t *)0x800108;
 
 
-static int econet_init(uint8_t station);
+static int econet_init();
 static uint8_t buf[2048];
 
 int 
@@ -67,7 +67,7 @@ main(int argc, char **argv)
 volatile uint32_t *econet_hwctl = (uint32_t *)0x800320;
 
 static int
-econet_init(uint8_t station)
+econet_init()
 {
    int rc;
    int econet_fd;
@@ -81,11 +81,11 @@ econet_init(uint8_t station)
       return -1;
    }
 
-   rc = ioctl(econet_fd, ECONET_SET_ADDR|station, NULL);
+/*   rc = ioctl(econet_fd, ECONET_SET_ADDR|station, NULL);
    if(rc < 0) {
       perror("setting station");
       return -1;
-   }
+   }*/
 
    // test
    /*

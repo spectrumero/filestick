@@ -24,6 +24,7 @@
 ;THE SOFTWARE.
 */
 #include <sys/types.h>
+#include <stdbool.h>
 
 // Syscall wrappers: non-standard syscalls
 
