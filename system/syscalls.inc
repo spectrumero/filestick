@@ -37,7 +37,7 @@ syscall_table:
 .byte 0           # 46
 .byte 0           # 47
 .byte 0           # 48 SYS_faccessat
-.byte 0           # 49 SYS_chdir
+.byte 26          # 49 SYS_chdir
 .byte 0           # 50
 .byte 0           # 51
 .byte 0           # 52
@@ -133,4 +133,5 @@ syscall_address:
 .word tlsf_malloc # 23
 .word tlsf_realloc # 24
 .word tlsf_free   # 25
+.word SYS_chdir   # 26
 

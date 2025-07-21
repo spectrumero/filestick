@@ -49,6 +49,12 @@ int SYS_mkdir(const char *pathname, mode_t mode)
    return fatfs_to_errno(res);
 }
 
+int SYS_chdir(const char *pathname)
+{
+   FRESULT res = f_chdir(pathname);
+   return fatfs_to_errno(res);
+}
+
 int SYS_stat(const char *pathname, struct stat *statbuf)
 {
    FILINFO fno;

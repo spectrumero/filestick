@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include <sys/console.h>
 #include <sys/dirent.h>
+#include <sys/stat.h>
 #include <syscall.h>
 #include <errno.h>
 
@@ -154,3 +155,48 @@ void i_receive_xmodem(int argc, char **argv)
       printf("xmodem transfer failed\n");
    }
 }
+
+// -------------------------------------------------------
+// Directories
+void i_mkdir(int argc, char **argv)
+{
+   if(argc != 2) {
+      printf("usage: mkdir <dir>\n");
+      return;
+   }
+
+   int rc = mkdir(argv[1], 0777);
+   if(rc < 0) {
+      perror("mkdir");
+   }
+}
+
+void i_chdir(int argc, char **argv)
+{
+   if(argc != 2) {
+      printf("usage: cd <dir>\n");
+      return;
+   }
+
+   int rc = chdir(argv[1]);
+   if(rc < 0) {
+      perror("chdir");
+   }
+}
+
+// -------------------------------------------------------
+// Files
+void i_rm(int argc, char **argv)
+{
+   if(argc != 2) {
+      printf("usage: rm <file>\n");
+      return;
+   }
+
+   int rc = unlink(argv[1]);
+   if(rc < 0) {
+      perror("unlink");
+   }
+}
+
+

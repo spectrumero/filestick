@@ -37,8 +37,20 @@
 #define SYS_free        37
 #define SYS_brk         214
 
+// FS ops
+#define SYS_mkdir       1030
+#define SYS_chdir       49
+
 // Syscall wrappers
 .text
+.globl mkdir
+mkdir:
+   li    a7, SYS_mkdir
+   j     syscall
+.globl chdir
+chdir:
+   li    a7, SYS_chdir
+   j     syscall
 .globl sys_brk
 sys_brk:
    li    a7, SYS_brk

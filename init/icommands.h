@@ -6,6 +6,9 @@ void i_hexdump(int argc, char **argv);
 void i_receive_xmodem(int argc, char **argv);
 void i_ls(int argc, char **argv);
 void i_configure(int argc, char **argv);
+void i_mkdir(int argc, char **argv);
+void i_chdir(int argc, char **argv);
+void i_rm(int argc, char **argv);
 
 #endif
 

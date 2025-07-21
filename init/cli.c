@@ -50,6 +50,9 @@ CmdTable commands[] = {
    {  .cmd = "hexdump",    .cmdfunc = i_hexdump },
    {  .cmd = "ls",         .cmdfunc = i_ls },
    {  .cmd = "configure",  .cmdfunc = i_configure },
+   {  .cmd = "mkdir",      .cmdfunc = i_mkdir },
+   {  .cmd = "cd",         .cmdfunc = i_chdir },
+   {  .cmd = "rm",         .cmdfunc = i_rm },
    {  .cmd = NULL }
 };
 
