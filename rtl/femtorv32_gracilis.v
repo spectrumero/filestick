@@ -29,12 +29,13 @@
 /******************************************************************************/
 
 // Firmware generation flags for this processor
-`define NRV_ARCH     "rv32ic"
+`define NRV_ARCH     "rv32imc"
 `define NRV_ABI      "ilp32"
 `define NRV_OPTIMIZE "-O3"
 `define NRV_INTERRUPTS
 `define EXTRABANK 
 `define ENABLE_MULDIV
+`define ENABLE_PRIVMEM
 
 module FemtoRV32(
    input          clk,
@@ -380,6 +381,9 @@ module FemtoRV32(
 
    wire sel_regbank  = (instr[31:20] == 12'h5C0);
 `endif
+`ifdef ENABLE_PRIVMEM
+   wire sel_priv     = (instr[31:20] == 12'h5C1);
+`endif
 
    // Read CSRs
    /* verilator lint_off WIDTH */
@@ -557,6 +561,47 @@ module FemtoRV32(
             state[WAIT_ALU_OR_MEM_SKIP_bit]
    );
 
+`ifdef ENABLE_PRIVMEM
+   // Simple memory protection
+   reg priv_violation;
+   reg priv_mode;
+   wire priv_clear;
+   wire priv_set;
+   wire csr_priv_clear;
+   wire priv_required;
+
+   // CSR write to 0x5c1 to explicitly clear privmode
+   assign csr_priv_clear = (isSYSTEM & (instr[14:12] != 0) & state[EXECUTE_bit] & sel_priv);
+
+   // Conditions that set priv mode: these all have caused a trap
+   assign priv_set = state[EXECUTE_bit] & (interrupt | ecall | ebreak | isILLEGAL | priv_violation);
+
+   // Conditions that clear priv mode
+   assign priv_clear = state[EXECUTE_bit] & (interrupt_return | supervisor_return | csr_priv_clear);
+
+   // Stores/loads below 64k need priv mode
+   assign priv_required = (isLoad | isStore) & mem_addr < 65536;
+
+   always @(posedge clk) begin
+       if(priv_clear)
+           priv_mode <= 0;
+       else if(priv_set | !reset)
+           priv_mode <= 1;
+   end
+
+   always @(posedge clk) begin
+        if(!reset) begin
+            priv_violation <= 0;
+        end
+        else begin
+            if(priv_mode)
+                priv_violation <= 0;
+            else if(priv_required)
+                priv_violation <= 1;
+        end
+   end
+`endif
+
    // The memory-read signal.
    assign mem_rstrb = state[EXECUTE_bit] & isLoad | state[FETCH_INSTR_bit];
 
@@ -636,11 +681,18 @@ module FemtoRV32(
 		 state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
 
               end 
+`ifdef ENABLE_PRIVMEM
+              else if(ecall | ebreak | isILLEGAL | priv_violation) begin
+`else
               else if(ecall | ebreak | isILLEGAL) begin
+`endif
                  PC     <= stvec;
                  sepc   <= PC_new;
                  scause <= ecall    ? 4'h8 :
                            ebreak   ? 4'h3 :
+`ifdef ENABLE_PRIVMEM
+                           priv_violation ? 4'h5 :
+`endif
                            4'h2;
                  state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
               end else begin
@@ -648,7 +700,9 @@ module FemtoRV32(
                  if (interrupt_return) begin
                     mcause <= 0;
                  end
-                 if (supervisor_return) scause <= 0;
+                 if (supervisor_return) begin
+                     scause <= 0;
+                 end
 
 		 state <= next_cache_hit & ~next_unaligned_long
   		        ? (needToWait ? WAIT_ALU_OR_MEM_SKIP : WAIT_INSTR)

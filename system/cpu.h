@@ -66,6 +66,7 @@
 #define CSR_T6       CSR_R_BASE + 31   
 
 #define CSR_REGBANK  0x5c0
+#define CSR_PRIVMODE 0x5c1
 
 #endif
 

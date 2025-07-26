@@ -82,12 +82,14 @@ init_user:
    li    a2, 0                   # null
    call  setup_stack_args
    mv    sp, a0                  # set up stack pointer
-   jr    s0                      # start initial program
+   csrwi CSR_PRIVMODE, 0         # reset mem priv mode
+   jr    s0                      # start program
 
 .globl init_user_with_sp
 init_user_with_sp:
    mv    sp, a0                  # sp passed as arg1
-   jr    a1                      # start address as arg2
+   csrwi CSR_PRIVMODE, 0         # reset mem priv mode 
+   jr    a1                      # start program
 
 .badboot:
    call  super_shell
