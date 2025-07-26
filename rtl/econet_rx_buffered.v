@@ -183,7 +183,11 @@ module buffered_econet
       sys_reg_addr == REG_OUR_ADDRESS     ? { 16'b0, econet_address } :
       sys_reg_addr == REG_REPLY_ADDRESS   ? { valid_address[15:8], valid_address[7:0], valid_address[31:24], valid_address[23:16] } :
       sys_reg_addr == REG_SCOUT_DATA      ? { 16'b0, valid_scout } :
+`ifdef ECONECT_CLOCKDETECT
       sys_reg_addr == REG_STATUS          ? { period, 7'b0, monitor_mode, 5'b0, clk_detected, receiving, sys_frame_valid } :
+`else
+      sys_reg_addr == REG_STATUS          ? { 23'b0, monitor_mode, 6'b0, receiving, sys_frame_valid } :
+`endif
       32'h55555555;
 
    //reg valid_rst;
@@ -212,6 +216,7 @@ module buffered_econet
       //else valid_rst <= 0;
    end
 
+`ifdef ECONECT_CLOCKDETECT
    // Measure the econet clock period
    reg [15:0] period_cnt;
    reg [15:0] period;
@@ -256,6 +261,7 @@ module buffered_econet
       else
          if(period_cnt == 16'hFFFF) clk_detected <= 0;
    end
+`endif      // ECONECT_CLOCKDETECT
          
 
    econet   econet_receiver(
