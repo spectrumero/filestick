@@ -42,3 +42,9 @@ void illegal_handler(uint32_t *registers)
    super_shell();
 }
 
+void memaccess_handler(uint32_t *registers)
+{
+   printk("ERROR: Invalid memory access\n");
+   dump_registers(registers);
+   super_shell();
+}

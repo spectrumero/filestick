@@ -27,6 +27,7 @@
 .include "syscalls.inc"
 
 .set SCAUSE_ECALL, 0x8
+.set SCAUSE_MEMACCESS, 0x5
 .set SCAUSE_EBREAK, 0x3
 .set SCAUSE_ILLEGAL, 0x2
 
@@ -99,6 +100,8 @@ super_trap:
 
    li       s2, SCAUSE_EBREAK
    beq      s1, s2, ebreak_handler
+   li       s2, SCAUSE_MEMACCESS
+   beq      s1, s2, memaccess_handler
    call     illegal_handler
 .restore_stack:
    addi     sp, sp, 128

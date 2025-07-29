@@ -22,6 +22,8 @@
 #THE SOFTWARE.
 #
 
+#include "cpu.h"
+
 .option arch, +zicsr
 
 .data

@@ -53,6 +53,8 @@ CmdTable commands[] = {
    {  .cmd = "mkdir",      .cmdfunc = i_mkdir },
    {  .cmd = "cd",         .cmdfunc = i_chdir },
    {  .cmd = "rm",         .cmdfunc = i_rm },
+   {  .cmd = "poke",       .cmdfunc = i_poke },
+   {  .cmd = "peek",       .cmdfunc = i_peek },
    {  .cmd = NULL }
 };
 
