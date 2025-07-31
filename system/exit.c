@@ -34,6 +34,7 @@
 //---------------------------------------------------------------
 // Reload init from flash
 void SYS_exit(int status) {
+   if(status != 0) printk("Abnormal exit: %d\n", status);
    int load_status;
 
    void *user_sp = setup_stack_args("init warm", (uint8_t *)USER_SP, NULL);
