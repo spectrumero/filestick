@@ -564,29 +564,51 @@ module FemtoRV32(
 `ifdef ENABLE_PRIVMEM
    // Simple memory protection
    reg priv_violation;
-   reg priv_mode;
-   wire priv_clear;
-   wire priv_set;
-   wire csr_priv_clear;
-   wire priv_required;
+   reg s_mode;
+   reg m_mode;
+   wire s_set;
+   wire s_clear;
+   wire m_set;
+   wire m_clear;
+   wire csr_s_clear;
 
-   // CSR write to 0x5c1 to explicitly clear privmode
-   assign csr_priv_clear = (isSYSTEM & (instr[14:12] != 0) & state[EXECUTE_bit] & sel_priv);
+   wire priv_required;
+   wire priv_mode;
+
+   // Privileged if in S or M
+   assign priv_mode = s_mode | m_mode;
+
+   // CSR write to 0x5c1 to explicitly clear S mode - this is used when launching
+   // a user program.
+   assign csr_s_clear = (isSYSTEM & (instr[14:12] != 0) & state[EXECUTE_bit] & sel_priv);
 
    // Conditions that set priv mode: these all have caused a trap
-   assign priv_set = state[EXECUTE_bit] & (interrupt | ecall | ebreak | isILLEGAL | priv_violation);
+   assign s_set = state[EXECUTE_bit] & (ecall | ebreak | isILLEGAL | priv_violation);
+   assign m_set = state[EXECUTE_bit] & interrupt;
 
-   // Conditions that clear priv mode
-   assign priv_clear = state[EXECUTE_bit] & (interrupt_return | supervisor_return | csr_priv_clear);
+   // Conditions that clear S mode and M mode
+   assign s_clear = state[EXECUTE_bit] & (supervisor_return | csr_s_clear);
+   assign m_clear = state[EXECUTE_bit] & interrupt_return;
 
    // Stores/loads below 64k need priv mode
    assign priv_required = (isLoad | isStore) & mem_addr < 65536;
 
+   // This is a bit non-standard: on reset we start in S mode rather than M mode, this
+   // is because this is all rather simple, and if we get an interrupt before we've done
+   // the initial loading of the userland boot program, we don't want the interrupt
+   // return to drop out of 'priv' mode.
    always @(posedge clk) begin
-       if(priv_clear)
-           priv_mode <= 0;
-       else if(priv_set | !reset)
-           priv_mode <= 1;
+       if(s_clear)
+           s_mode <= 0;
+       else if(s_set | !reset)
+           s_mode <= 1;
+   end
+
+   always @(posedge clk) begin
+      if(m_clear)
+         m_mode <= 0;
+      else if(m_set)
+         m_mode <= 1;
    end
 
    always @(posedge clk) begin
