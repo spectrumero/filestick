@@ -27,6 +27,7 @@
 #include "regdump.h"
 #include "printk.h"
 #include "super_shell.h"
+#include "cpu.h"
 
 void ebreak_handler(uint32_t *registers)
 {
@@ -44,7 +45,9 @@ void illegal_handler(uint32_t *registers)
 
 void memaccess_handler(uint32_t *registers)
 {
+   uint32_t invalid_addr = get_stval();
    printk("ERROR: Invalid memory access\n");
    dump_registers(registers);
+   printk("Failed address: %08x\n", invalid_addr);
    super_shell();
 }

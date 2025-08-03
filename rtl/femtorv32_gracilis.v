@@ -383,6 +383,7 @@ module FemtoRV32(
 `endif
 `ifdef ENABLE_PRIVMEM
    wire sel_priv     = (instr[31:20] == 12'h5C1);
+   wire sel_stval    = (instr[31:20] == 12'h143);
 `endif
 
    // Read CSRs
@@ -398,6 +399,9 @@ module FemtoRV32(
      (sel_stvec   ? stvec                  : 32'b0) |
      (sel_sscratch? sscratch               : 32'b0) |
      (sel_sepc    ? sepc                   : 32'b0) |
+`ifdef ENABLE_PRIVMEM
+     (sel_stval   ? {8'b0, stval}          : 32'b0) |    // FIXME ADDR_WIDTH
+`endif
 `ifdef EXTRABANK
      (sel_regbank ? {31'b0, bankSelect}    : 32'b0) |
      (sel_scause  ? {28'b0, scause}        : 32'b0) |
@@ -561,8 +565,11 @@ module FemtoRV32(
             state[WAIT_ALU_OR_MEM_SKIP_bit]
    );
 
+   // -------------------------------------------------------------------------------
+   // Memory protection
 `ifdef ENABLE_PRIVMEM
-   // Simple memory protection
+   reg [ADDR_WIDTH-1:0] stval;   // CSR containing bad address
+
    reg priv_violation;
    reg s_mode;
    reg m_mode;
@@ -596,7 +603,7 @@ module FemtoRV32(
    // This is a bit non-standard: on reset we start in S mode rather than M mode, this
    // is because this is all rather simple, and if we get an interrupt before we've done
    // the initial loading of the userland boot program, we don't want the interrupt
-   // return to drop out of 'priv' mode.
+   // return to drop out of 'priv' mode by clearing the M mode bit.
    always @(posedge clk) begin
        if(s_clear)
            s_mode <= 0;
@@ -614,12 +621,15 @@ module FemtoRV32(
    always @(posedge clk) begin
         if(!reset) begin
             priv_violation <= 0;
+            stval <= 0;
         end
         else begin
             if(priv_mode)
                 priv_violation <= 0;
-            else if(priv_required)
+            else if(priv_required) begin
                 priv_violation <= 1;
+                stval <= mem_addr;
+            end
         end
    end
 `endif

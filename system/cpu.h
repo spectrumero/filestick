@@ -68,5 +68,10 @@
 #define CSR_REGBANK  0x5c0
 #define CSR_PRIVMODE 0x5c1
 
+#ifndef __ASSEMBLER__
+// CSR functions
+uint32_t get_stval(void);
+#endif
+
 #endif
 
