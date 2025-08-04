@@ -30,7 +30,7 @@
 #include "super_shell.h"
 
 // kmalloc memory pool
-uint8_t mem[12288];
+uint8_t mem[8192];
 
 void
 kmalloc_init(void)
