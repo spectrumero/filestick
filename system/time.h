@@ -1,7 +1,9 @@
+#ifndef TIME_H
+#define TIME_H
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2025 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -22,21 +24,8 @@
 ;THE SOFTWARE.
 */
 
-// Functions for accessing various CSRs.
+#include <stdint.h>
 
-.option arch, +zicsr
+uint64_t get_ms(void);
 
-// stval - get bad address value
-.globl get_stval
-get_stval:
-   csrr  a0, stval
-   ret
-
-.globl get_cycle
-get_cycle:
-   csrr  a1, cycleh
-   csrr  a0, cycle
-   csrr  t0, cycleh
-   bne   t0, a1, get_cycle    # upper 64 bits changed on us, try again
-   ret
-
+#endif

@@ -71,6 +71,7 @@
 #ifndef __ASSEMBLER__
 // CSR functions
 uint32_t get_stval(void);
+uint64_t get_cycle(void);
 #endif
 
 #endif

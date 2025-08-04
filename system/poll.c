@@ -1,7 +1,7 @@
 /*
 ;The MIT License
 ;
-;Copyright (c) 2023 Dylan Smith
+;Copyright (c) 2025 Dylan Smith
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining a copy
 ;of this software and associated documentation files (the "Software"), to deal
@@ -22,21 +22,49 @@
 ;THE SOFTWARE.
 */
 
-// Functions for accessing various CSRs.
+#include <stdint.h>
+#include <poll.h>
 
-.option arch, +zicsr
+#include "time.h"
+#include "cpu.h"
+#include "fd.h"
 
-// stval - get bad address value
-.globl get_stval
-get_stval:
-   csrr  a0, stval
-   ret
+// -------------------------------------------------------------------
+// Poll a list of file descriptors until at least one is ready or there
+// is a timeout.
+int 
+SYS_poll(struct pollfd *fds, int nfds, int timeout)
+{
+   uint64_t current_time;
+   uint64_t end_time;
+   if(timeout) {
+      current_time = get_ms();
+      end_time = current_time + timeout;
+   }
 
-.globl get_cycle
-get_cycle:
-   csrr  a1, cycleh
-   csrr  a0, cycle
-   csrr  t0, cycleh
-   bne   t0, a1, get_cycle    # upper 64 bits changed on us, try again
-   ret
+   int ready = 0;
 
+   do {
+      for(int i = 0; i < nfds; i++) {
+         struct pollfd *ptr = &fds[i];
+         if(ptr->fd < 0) continue;
+
+         ptr->revents = 0;
+         ssize_t bytes = SYS_peek(ptr->fd);
+
+         if(bytes < 0) {
+            ptr->revents = POLLERR;
+            ready++;
+         }
+         else if(bytes > 0) {
+            ptr->revents = POLLIN;
+            ready++;
+         }
+      }
+
+      if(ready) return ready;
+
+   } while(timeout && get_ms() < end_time);
+
+   return 0;
+}
