@@ -64,7 +64,7 @@ SYS_poll(struct pollfd *fds, int nfds, int timeout)
 
       if(ready) return ready;
 
-   } while(timeout && get_ms() < end_time);
+   } while(timeout == 0 || get_ms() < end_time);
 
    return 0;
 }

@@ -32,5 +32,5 @@ uint64_t
 get_ms(void)
 {
    uint64_t cyc = get_cycle();
-   return cyc >> 10;
+   return cyc >> 13;
 }

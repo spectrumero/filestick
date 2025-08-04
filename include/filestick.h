@@ -25,6 +25,9 @@
 */
 
 // Filestick special functions
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Peek a file descriptor to see if any data is ready to
 // read. Returns the number of bytes available.
@@ -32,6 +35,10 @@ ssize_t fd_peek(int fd);
 
 // Alternative to printf
 void printk(const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

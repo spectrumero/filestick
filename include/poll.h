@@ -36,6 +36,14 @@ struct pollfd {
 #define POLLERR      4
 #define POLLHUP      8
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int poll(struct pollfd *fds, int nfds, int timeout);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
