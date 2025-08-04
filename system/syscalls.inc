@@ -63,7 +63,7 @@ syscall_table:
 .byte 0           # 72
 .byte 0           # 73
 .byte 0           # 74
-.byte 0           # 75
+.byte 27          # 75 SYS_poll (nonstd)
 .byte 0           # 76
 .byte 0           # 77
 .byte 0           # 78
@@ -134,4 +134,5 @@ syscall_address:
 .word tlsf_realloc # 24
 .word tlsf_free   # 25
 .word SYS_chdir   # 26
+.word SYS_poll    # 27
 

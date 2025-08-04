@@ -36,6 +36,7 @@
 #define SYS_realloc     36
 #define SYS_free        37
 #define SYS_brk         214
+#define SYS_poll        75
 
 // FS ops
 #define SYS_mkdir       1030
@@ -43,6 +44,11 @@
 
 // Syscall wrappers
 .text
+.globl poll
+poll:
+   li    a7, SYS_poll
+   ecall
+   ret
 .globl mkdir
 mkdir:
    li    a7, SYS_mkdir
