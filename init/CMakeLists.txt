@@ -9,6 +9,6 @@ set(EXECUTABLE_NAME "${PROJECT_NAME}.elf")
 
 enable_language(C)
 include_directories(BEFORE ../include ../lib)
-#link_directories(lib)
+link_directories(${FS_LIB_BINARY_PATH})
 add_executable(${EXECUTABLE_NAME} main.c cli.c icommands.c xmodem_server.c configure.c conffile.c peekpoke.c)
-target_link_options(${EXECUTABLE_NAME} BEFORE PUBLIC -L../../build/lib -specs=../../build/lib/filestick.specs )
+target_link_options(${EXECUTABLE_NAME} BEFORE PUBLIC -specs=${FS_LIB_SPECS_PATH}/filestick.specs )
