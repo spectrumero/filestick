@@ -74,6 +74,57 @@ https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases
 The build system uses cmake. If you're running Linux, your distro almost
 certainly has cmake. Otherwise see: https://cmake.org/
 
+## Building
+
+To build the gateware, you will need yosys, nextpnr and icestorm tools installed.
+Run:
+
+```
+$ cd rtl
+$ make PCF=<pcf version of your board>
+```
+
+If the PCF variable is left unset, the default will be picked which will be for the
+latest version of the hardware.
+
+To build the software, assuming a suitable rv32 compiler (e.g. the xpack one suggested):
+
+```
+$ cmake -B build
+$ cd build
+$ make
+```
+
+Outputs will be `build/system/filestick-system.bin`, `build/boot/filestick-boot.bin`,
+`build/lib/libfilestick.a`, `build/init/init.elf`.
+
+## Installing
+
+To install the gateware, in the `rtl` directory run `make flash` which will use a
+suitable FTDI FT232H programmer to write the flash. This also installs the bootloader
+as part of the gateware file.
+
+To install the system image with the FTDI programmer:
+
+```
+iceprog -d i:0x0403:0x6014 -X -o 0x020000 build/system/filestick-system.bin
+```
+
+To install init with the FTDI programmer:
+
+```
+iceprog -d i:0x0403:0x6014 -o 0x030000 build/init/init.elf
+```
+
+To install the in-built filesystem:
+
+```
+iceprog -d i:0x0403:0x6014 -o 0x040000 256kfs.img
+```
+
+(256kfs.img is a blank 256k fat12 filesystem, used for storing system settings
+and some basic software).
+
 ## TODO
 
 There's much to do. More to come later, including how to write programs
