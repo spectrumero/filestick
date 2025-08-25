@@ -13,6 +13,5 @@ project(filestick)
 add_subdirectory(lib)
 add_subdirectory(boot)
 add_subdirectory(system)
-add_subdirectory(init_test)
 add_subdirectory(init)
 
