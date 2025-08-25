@@ -15,7 +15,6 @@ add_custom_target(bin ALL DEPENDS ${PROJECT_NAME}.bin)
 add_custom_command(
    OUTPUT ${PROJECT_NAME}.bin
    DEPENDS ${EXECUTABLE_NAME}
-   POST_BUILD
    COMMAND "${CMAKE_OBJCOPY}"
    ARGS ${EXECUTABLE_NAME} -O binary ${PROJECT_NAME}.bin
    )
