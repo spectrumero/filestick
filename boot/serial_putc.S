@@ -9,11 +9,6 @@ serial_putc:
    andi  t1, t1, 2               # apply write busy mask
    bne   t1, zero, .busy         # wait until uart is free
 
-   li    t1, 100                 # delay
-.delay:
-   addi  t1, t1, -1
-   bnez  t1, .delay
-   
    sw a0, OFFS_UART(gp)          # send data 
 
    ret
