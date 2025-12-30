@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #include "syscall.h"
 
-#define MEMTOP       0x20800
+#define MEMTOP       0x21C00
 #define DEFAULT_BRK  MEMTOP - 2048
 
 // Internal malloc functions

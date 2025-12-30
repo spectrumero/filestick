@@ -23,14 +23,15 @@
 ;OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ;THE SOFTWARE.
 */
-#include <stdint.h>
-#include <elf.h>
-
 #define ELF_MAGIC       0x464c457f     // 0x7f,E,L,F
 #define FLASH_OFFSET    0x30000        // Where in flash the startup is
 #define USRMEM_START    0x10000
-#define USRMEM_SIZE     0x10800
-#define USER_SP         0x20800
+#define USRMEM_SIZE     0x11C00
+#define USER_SP         0x21C00
+
+#ifndef ASM
+#include <stdint.h>
+#include <elf.h>
 
 typedef void (*start_addr)(void);
 
@@ -59,6 +60,7 @@ int elf_validate_phdr(int fd, uint32_t offset, Elf32_Ehdr *header);
 
 // Supervisor cmdlet
 void super_elf(int argc, char **argv);
+#endif // __ASM__
 
 #endif
 

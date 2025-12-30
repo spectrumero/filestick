@@ -21,8 +21,9 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #
-
+#define ASM
 #include "cpu.h"
+#include "elfload.h"
 
 .option arch, +zicsr
 
@@ -32,8 +33,6 @@ initstr:
 .set initstr_sz, .-initstr
 fake_boot_file:
 .asciz "init cold"
-
-#define USER_SP      0x20800     # end of RAM
 
 .text
 .globl init

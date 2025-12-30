@@ -1,4 +1,6 @@
-module blkram (
+module blkram #(
+   parameter NUM_BLKRAM = 14
+) (
    input          clk,
    input          select,
    input [3:0]    we,
@@ -8,7 +10,8 @@ module blkram (
    output [31:0]  data_out
 );
 
-reg [31:0]  mem[512];
+// each up5k block ram is 128 x 32 bit words.
+reg [31:0]  mem[128 * NUM_BLKRAM];
 
 reg [31:0]  d_reg;
 
