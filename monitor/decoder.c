@@ -42,7 +42,7 @@ decode_frame(uint8_t *buf, size_t length)
    if(length != ACK_LEN && ack_count) {
       if(ack_count > 1) {
          decode_address(lastack);
-         printf("%d acks received\n", ack_count);
+         printf("%d acks received\r\n", ack_count);
       }
       ack_count = 0;
       memset(lastack, 0, sizeof(lastack));
@@ -62,7 +62,7 @@ decode_frame(uint8_t *buf, size_t length)
 
          else {
             decode_address(buf);
-            printf("ack %02x %02x\n", buf[4], buf[5]);
+            printf("ack %02x %02x\r\n", buf[4], buf[5]);
             memcpy(lastack, buf, 4);
             ack_count = 0;
          }
@@ -92,21 +92,23 @@ decode_address(uint8_t *buf)
 static void
 decode_scout(uint8_t *buf)
 {
-   printf("SCOUT: ctl %02x port %02x\n", buf[0], buf[1]);
+   printf("SCOUT: ctl %02x port %02x\r\n", buf[0], buf[1]);
 }
 
 static void
 decode_immscout(uint8_t *buf)
 {
+   uint8_t idx = *buf - FIRST_IMM;
    char *type = (*buf >= FIRST_IMM && * buf <= LAST_IMM) ?
-      imm_ops[*buf] : "Unknown";
-   printf("IMM: %02x %s\n", *buf, type);
+      imm_ops[idx] : "Unknown";
+
+   printf("IMM: %02x %s\r\n", *buf, type);
 }
 
 static void
 decode_data(uint8_t *buf, size_t length)
 {
-   printf("DATA: len %d\n", length);
+   printf("DATA: len %d\r\n", length);
 
    int dumplen = length > 256 ? 256 : length;
    hexdump(buf, dumplen, 0);
