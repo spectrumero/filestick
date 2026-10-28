@@ -11,6 +11,10 @@
  *  - Interrupts: mstatus bit 3 enables, mcause is a lock that is set when an
  *    interrupt is taken and cleared by mret. The instruction executing when
  *    the interrupt is taken completes, mepc is the address of the next one.
+ *    A trap takes priority over an interrupt on the same instruction; the
+ *    interrupt is then taken at the first instruction of the trap handler.
+ *    An interrupt isn't taken on a load or store that causes a privilege
+ *    violation either, so the violation trap is taken on the next one.
  *  - Traps (ecall, ebreak, illegal opcode, privilege violation) go to stvec
  *    with sepc = next instruction and the cause in scause.
  *  - Only the RV32IMC opcodes are decoded; anything else (including FENCE)
@@ -274,13 +278,14 @@ static void cpu_step(void)
 
    bool illegal = false, ecall = false, ebreak = false;
    bool mret = false, sret = false, csr_s_clear = false;
+   bool new_violation = false;
    int new_bank = -1;
 
    switch(BITS(instr, 6, 2)) {
       case OP_LOAD: {
          uint32_t addr = (rs1 + iimm) & ADDR_MASK;
          if(!priv && addr < 0x10000) {
-            cpu.priv_violation = true;
+            cpu.priv_violation = new_violation = true;
             cpu.stval = addr;
          }
          bus_wait = 1;
@@ -300,7 +305,7 @@ static void cpu_step(void)
          uint32_t simm = sext((BITS(instr, 31, 25) << 5) | BITS(instr, 11, 7), 12);
          uint32_t addr = (rs1 + simm) & ADDR_MASK;
          if(!priv && addr < 0x10000) {
-            cpu.priv_violation = true;
+            cpu.priv_violation = new_violation = true;
             cpu.stval = addr;
          }
 
@@ -465,14 +470,21 @@ static void cpu_step(void)
       cpu.bank = new_bank;
 
    bool trap = ecall || ebreak || illegal || old_violation;
-   if(interrupt) {
-      cpu.pc = cpu.mtvec;
-      cpu.mepc = pc_new;
-      cpu.mcause = true;
-   } else if(trap) {
+   // A trap wins over an interrupt, which stays pending (the interrupt line
+   // is held until acknowledged) and is taken at the trap handler's first
+   // instruction. An interrupt is also held off for an access that causes a
+   // privilege violation, so the violation trap is taken first.
+   if(trap || new_violation)
+      interrupt = false;
+
+   if(trap) {
       cpu.pc = cpu.stvec;
       cpu.sepc = pc_new;
       cpu.scause = ecall ? 8 : ebreak ? 3 : old_violation ? 5 : 2;
+   } else if(interrupt) {
+      cpu.pc = cpu.mtvec;
+      cpu.mepc = pc_new;
+      cpu.mcause = true;
    } else {
       cpu.pc = pc_new;
       if(mret) cpu.mcause = false;
