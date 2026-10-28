@@ -24,7 +24,7 @@ toplevel.asc: toplevel.json $(PCF)
 
 toplevel.json: $(BINTOHEX) $(VERILOG_SRC)
 	$(BINTOHEX) ../build/boot/filestick-boot.bin filestick-boot.hex
-	$(YOSYS) -q -p "synth_ice40 -dsp -json toplevel.json -top toplevel" $(VERILOG_SRC)
+	$(YOSYS) -q -p "synth_ice40 -dsp -top toplevel; delete t:\$$scopeinfo; write_json toplevel.json" $(VERILOG_SRC)
 
 .PHONY: flash
 flash:

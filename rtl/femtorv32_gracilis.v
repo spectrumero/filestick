@@ -565,6 +565,8 @@ module FemtoRV32(
             state[WAIT_ALU_OR_MEM_SKIP_bit]
    );
 
+   wire trap;
+
    // -------------------------------------------------------------------------------
    // Memory protection
 `ifdef ENABLE_PRIVMEM
@@ -582,6 +584,8 @@ module FemtoRV32(
    wire priv_required;
    wire priv_mode;
 
+   wire new_violation = priv_required & ~priv_mode;
+
    // Privileged if in S or M
    assign priv_mode = s_mode | m_mode;
 
@@ -590,8 +594,8 @@ module FemtoRV32(
    assign csr_s_clear = (isSYSTEM & (instr[14:12] != 0) & state[EXECUTE_bit] & sel_priv);
 
    // Conditions that set priv mode: these all have caused a trap
-   assign s_set = state[EXECUTE_bit] & (ecall | ebreak | isILLEGAL | priv_violation);
-   assign m_set = state[EXECUTE_bit] & interrupt;
+   assign s_set = state[EXECUTE_bit] & trap;
+   assign m_set = state[EXECUTE_bit] & interrupt & ~trap;
 
    // Conditions that clear S mode and M mode
    assign s_clear = state[EXECUTE_bit] & (supervisor_return | csr_s_clear);
@@ -632,6 +636,13 @@ module FemtoRV32(
             end
         end
    end
+`endif
+
+    // Handle trap instructions and conditions.
+`ifdef ENABLE_PRIVMEM
+    assign trap = ecall | ebreak | isILLEGAL | priv_violation;
+`else
+    assign trap = ecall | ebreak | isILLEGAL;
 `endif
 
    // The memory-read signal.
@@ -706,18 +717,7 @@ module FemtoRV32(
            end
 
            state[EXECUTE_bit]: begin
-              if (interrupt) begin
-		 PC     <= mtvec;
-		 mepc   <= PC_new;
-		 mcause <= 1;
-		 state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
-
-              end 
-`ifdef ENABLE_PRIVMEM
-              else if(ecall | ebreak | isILLEGAL | priv_violation) begin
-`else
-              else if(ecall | ebreak | isILLEGAL) begin
-`endif
+              if(trap) begin
                  PC     <= stvec;
                  sepc   <= PC_new;
                  scause <= ecall    ? 4'h8 :
@@ -727,7 +727,18 @@ module FemtoRV32(
 `endif
                            4'h2;
                  state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
-              end else begin
+              end
+`ifdef ENABLE_PRIVMEM
+              else if (interrupt & ~new_violation) begin
+`else 
+              else if (interrupt) begin
+`endif
+		 PC     <= mtvec;
+		 mepc   <= PC_new;
+		 mcause <= 1;
+		 state  <= needToWait ? WAIT_ALU_OR_MEM : FETCH_INSTR;
+              end 
+              else begin
 		 PC <= PC_new;
                  if (interrupt_return) begin
                     mcause <= 0;
