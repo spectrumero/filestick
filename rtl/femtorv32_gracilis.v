@@ -595,7 +595,7 @@ module FemtoRV32(
 
    // Conditions that set priv mode: these all have caused a trap
    assign s_set = state[EXECUTE_bit] & trap;
-   assign m_set = state[EXECUTE_bit] & interrupt & ~trap;
+   assign m_set = state[EXECUTE_bit] & interrupt & ~trap & ~new_violation;
 
    // Conditions that clear S mode and M mode
    assign s_clear = state[EXECUTE_bit] & (supervisor_return | csr_s_clear);
