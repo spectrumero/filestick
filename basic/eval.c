@@ -802,8 +802,7 @@ int factor(void)
          return num_factor();
    }
    LV lv;
-   int r = get_lv(&lv, false);
-   if(!r) err(E_MISTAKE);
-   if(r < 0) err(E_NOVAR);
+   // as in BASIC II, anything else is "No such variable"
+   if(get_lv(&lv, false) <= 0) err(E_NOVAR);
    return lv_load(&lv);
 }

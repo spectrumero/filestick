@@ -289,9 +289,10 @@ int read_line(char *buf, int max)
       last_cr = c == 13;
       if(c == 13 || c == 10) break;
       if(c == 8 || c == 127 || c == 21) {
+         // a UTF-8 character (e.g. from a pound key) is several bytes
          do {
             if(!n) break;
-            n--;
+            while(n && (buf[--n] & 0xC0) == 0x80);
             vdu(8); vdu(' '); vdu(8);
          } while(c == 21);
       } else if(c >= 32 && n < max) {
