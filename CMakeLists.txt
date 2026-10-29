@@ -14,4 +14,5 @@ add_subdirectory(lib)
 add_subdirectory(boot)
 add_subdirectory(system)
 add_subdirectory(init)
+add_subdirectory(basic)
 
