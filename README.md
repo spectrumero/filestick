@@ -59,6 +59,26 @@ overwrite kernel memory or device address space.
 as at the very least it provides the sbrk implementation needed to properly
 support libc's malloc.
 
+## Other programs
+
+(Full disclosure: the emulator and BASIC interpreter below was done with the
+full assistance of Claude Code, much as it would be an interesting
+project to do them from scratch, it would take me far too long, I had
+already been putting off writing the emulator for 2 years :-) )
+
+* emulator: An emulator. See the README file for how to use it. The
+emulator is based off the Verilog code and should match it closely.
+At the moment it only supports an OS with pseudottys (e.g. Linux) but
+it's probably not too hard to do a version for Windows for anyone so
+inclined. By default, tries to match the running speed of the real hardware.
+
+* basic: A small BBC BASIC implementation. Implements most of BASIC II
+as you would find on a BBC Micro and should be compatible with a saved
+BBC BASIC file. Graphics/sound/screen modes not implemented because 
+there aren't any. Nor is there an assembler (if you want to write rv32
+asm, I suggest using xpack's gnu as). The code segment is around 28k, 
+and when running on the board, there's about 33k available for BASIC programs.
+
 ## Toolchain
 
 The xPack GNU RISC-V embedded GCC project is used to build all source

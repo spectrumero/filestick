@@ -15,6 +15,25 @@ BBC BASIC for FileStick
 `basic.elf prog` starts BASIC and CHAINs `prog`. `*BYE` (or `*QUIT`)
 returns to init.
 
+## Rationale
+
+I wanted a straightforward way of just writing programs on the
+hardware with the hardware as-is, with the convenience that the BBC Micro
+had back in the day.
+
+In particular having a BBC BASIC interpreter is very useful when poking around
+with hardware registers, given BASIC II's indirection operators (which include
+the 32 bit ! operator). (The hardware quite deliberately doesn't try to
+hide device address space from user programs).
+
+Unfortunately I've not found a suitably small BASIC interpreter; the hardware
+only has 70k of memory available for user programs. The smallest open source
+BBC BASIC interpreter I've found to date is bbasic, which when compiled has
+a code segment of about 110k - while this is tiny for a desktop computer or
+an ARM SoC like a Raspberry Pi, it's too big for an embedded platform like
+this one. Given the original BASIC II fit in a 16k ROM, I wanted an interpreter
+of a similar capability and size, but written in C.
+
 ## Building
 
 It's built with the rest of the software (`cmake -B build; cd build; make`),
