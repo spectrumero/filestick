@@ -40,6 +40,7 @@
 #include "emu.h"
 
 bool cpu_trace;
+bool cpu_irq_mask;
 
 static struct {
    uint32_t regs[64];      // two banks of 32
@@ -225,7 +226,7 @@ static uint32_t csr_read(unsigned csr)
 
 //--------------------------------------------------------------------------
 // Execute one instruction, including the cycles it takes.
-static void cpu_step(void)
+void cpu_step(void)
 {
    uint32_t pc = cpu.pc;
    uint32_t lo = bus_fetch16(pc);
@@ -260,7 +261,7 @@ static void cpu_step(void)
       devices_update(emu_now);
 
    // the interrupt is sampled before this instruction's own bus access
-   bool interrupt = irq_line && cpu.mstatus && !cpu.mcause;
+   bool interrupt = irq_line && cpu.mstatus && !cpu.mcause && !cpu_irq_mask;
    bool priv = cpu.s_mode || cpu.m_mode;
    bool old_violation = cpu.priv_violation;
 
@@ -522,6 +523,115 @@ void cpu_run(uint64_t until)
 {
    while(cycles < until)
       cpu_step();
+}
+
+//--------------------------------------------------------------------------
+// Debugger access (gdbstub.c). Registers are numbered 0-63 across both
+// banks; the current bank is cpu_bank().
+uint32_t cpu_get_pc(void)
+{
+   return cpu.pc;
+}
+
+void cpu_set_pc(uint32_t pc)
+{
+   cpu.pc = pc & ADDR_MASK & ~1u;
+   cpu.next_skip = cpu.next_second_half = false;
+}
+
+unsigned cpu_bank(void)
+{
+   return cpu.bank;
+}
+
+uint32_t cpu_get_reg(unsigned n)
+{
+   return cpu.regs[n & 63];
+}
+
+void cpu_set_reg(unsigned n, uint32_t v)
+{
+   if(n & 31)
+      cpu.regs[n & 63] = v;
+}
+
+// Privilege state as bits: 0 = S mode, 1 = M mode, 2 = pending privilege
+// violation trap.
+uint32_t cpu_get_mode(void)
+{
+   return cpu.s_mode | (cpu.m_mode << 1) | (cpu.priv_violation << 2);
+}
+
+void cpu_set_mode(uint32_t v)
+{
+   cpu.s_mode = BIT(v, 0);
+   cpu.m_mode = BIT(v, 1);
+   cpu.priv_violation = BIT(v, 2);
+}
+
+// The debugger can read and write the CSRs, including ones that are read
+// only to software. Returns false for a CSR the core doesn't have.
+bool cpu_get_csr(unsigned csr, uint32_t *v)
+{
+   switch(csr) {
+      case CSR_MSTATUS: case CSR_MTVEC: case CSR_MSCRATCH: case CSR_MEPC:
+      case CSR_MCAUSE: case CSR_STVEC: case CSR_SSCRATCH: case CSR_SEPC:
+      case CSR_SCAUSE: case CSR_STVAL: case CSR_REGBANK:
+         *v = csr_read(csr);
+         return true;
+      case CSR_CYCLE:  *v = (uint32_t)cycles; return true;
+      case CSR_CYCLEH: *v = (uint32_t)(cycles >> 32); return true;
+   }
+   return false;
+}
+
+bool cpu_set_csr(unsigned csr, uint32_t v)
+{
+   switch(csr) {
+      case CSR_MSTATUS:    cpu.mstatus = BIT(v, 3); break;
+      case CSR_MTVEC:      cpu.mtvec = v & ADDR_MASK; break;
+      case CSR_MSCRATCH:   cpu.mscratch = v; break;
+      case CSR_MEPC:       cpu.mepc = v & ADDR_MASK; break;
+      case CSR_MCAUSE:     cpu.mcause = BIT(v, 31); break;
+      case CSR_STVEC:      cpu.stvec = v & ADDR_MASK; break;
+      case CSR_SSCRATCH:   cpu.sscratch = v; break;
+      case CSR_SEPC:       cpu.sepc = v & ADDR_MASK; break;
+      case CSR_SCAUSE:     cpu.scause = v; break;
+      case CSR_STVAL:      cpu.stval = v; break;
+      case CSR_REGBANK:    cpu.bank = v & 1; break;
+      case CSR_CYCLE:
+      case CSR_CYCLEH:     break;      // can't turn back time
+      default:             return false;
+   }
+   return true;
+}
+
+// If the next instruction is a load or store, return the bytes it will
+// access (as the bus sees them: words and halfwords are aligned down).
+bool cpu_next_access(uint32_t *addr, unsigned *size, bool *store)
+{
+   uint32_t lo = bus_fetch16(cpu.pc);
+   uint32_t instr = (lo & 3) == 3 ? lo | ((uint32_t)bus_fetch16(cpu.pc + 2) << 16)
+                                  : decomp_table[lo];
+   unsigned op = BITS(instr, 6, 2);
+   uint32_t imm;
+
+   if(op == OP_LOAD)
+      imm = sext(instr >> 20, 12);
+   else if(op == OP_STORE)
+      imm = sext((BITS(instr, 31, 25) << 5) | BITS(instr, 11, 7), 12);
+   else
+      return false;
+
+   uint32_t a = (cpu.regs[(cpu.bank ? 32 : 0) + BITS(instr, 19, 15)] + imm) & ADDR_MASK;
+   switch(BITS(instr, 13, 12)) {
+      case 0:  *size = 1; break;
+      case 1:  *size = 2; a &= ~1u; break;
+      default: *size = 4; a &= ~3u;
+   }
+   *addr = a;
+   *store = op == OP_STORE;
+   return true;
 }
 
 //--------------------------------------------------------------------------

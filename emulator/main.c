@@ -58,6 +58,20 @@ static void sleep_until(int64_t t)
       if(quit_signal) break;
 }
 
+// Power on reset of the CPU and devices. Memory and the flash and SD card
+// contents are left alone.
+void emu_reset(void)
+{
+   cpu_reset();
+   timer_reset();
+   timera_reset();
+   uart_reset();
+   spi_reset();
+   sd_detect_reset();
+   econet_reset();
+   devices_update(cycles);
+}
+
 static void usage(const char *prog)
 {
    fprintf(stderr,
@@ -73,6 +87,11 @@ static void usage(const char *prog)
       "  -u, --uart-link PATH   make a symlink at PATH to the UART's pty\n"
       "      --stdio            use this terminal as the UART instead of a pty\n"
       "                         (ctrl-] quits)\n"
+      "  -g, --gdb [HOST:]PORT  listen for gdb on PORT (localhost unless HOST is\n"
+      "                         given), with the CPU stopped at reset until gdb\n"
+      "                         connects and continues it\n"
+      "      --gdb-nowait       with --gdb, start running straight away; gdb\n"
+      "                         can attach at any time\n"
       "  -t, --turbo            run as fast as possible, not at 10MHz\n"
       "  -c, --cycles N         stop after N cycles\n"
       "  -v, --verbose          log device activity to stderr\n"
@@ -92,6 +111,8 @@ int main(int argc, char **argv)
       { "load",      required_argument, NULL, 'l' },
       { "uart-link", required_argument, NULL, 'u' },
       { "stdio",     no_argument,       NULL, 'S' },
+      { "gdb",       required_argument, NULL, 'g' },
+      { "gdb-nowait", no_argument,      NULL, 'N' },
       { "turbo",     no_argument,       NULL, 't' },
       { "cycles",    required_argument, NULL, 'c' },
       { "verbose",   no_argument,       NULL, 'v' },
@@ -101,14 +122,15 @@ int main(int argc, char **argv)
    };
 
    const char *boot_path = NULL, *flash_path = NULL, *sd_path = NULL;
-   const char *uart_link = NULL;
+   const char *uart_link = NULL, *gdb_spec = NULL;
+   bool gdb_wait = true;
    char **loads = calloc(argc, sizeof(char *));
    int nloads = 0;
    bool use_stdio = false, turbo = false;
    uint64_t max_cycles = 0;
    int c;
 
-   while((c = getopt_long(argc, argv, "b:f:s:l:u:tc:vh", opts, NULL)) != -1) {
+   while((c = getopt_long(argc, argv, "b:f:s:l:u:g:tc:vh", opts, NULL)) != -1) {
       switch(c) {
          case 'b': boot_path = optarg; break;
          case 'f': flash_path = optarg; break;
@@ -116,6 +138,8 @@ int main(int argc, char **argv)
          case 'l': loads[nloads++] = optarg; break;
          case 'u': uart_link = optarg; break;
          case 'S': use_stdio = true; break;
+         case 'g': gdb_spec = optarg; break;
+         case 'N': gdb_wait = false; break;
          case 't': turbo = true; break;
          case 'c': max_cycles = strtoull(optarg, NULL, 0); break;
          case 'v': verbose++; break;
@@ -155,24 +179,34 @@ int main(int argc, char **argv)
    sigaction(SIGHUP, &sa, NULL);
    sigaction(SIGUSR1, &sa, NULL);
 
-   cpu_reset();
-   timer_reset();
-   timera_reset();
-   uart_reset();
-   spi_reset();
-   sd_detect_reset();
-   econet_reset();
-   devices_update(0);
+   emu_reset();
+   if(gdb_spec && gdb_listen(gdb_spec, gdb_wait) < 0) {
+      uart_close();
+      return 1;
+   }
 
    int64_t start_ns = now_ns();
    int64_t base_ns = start_ns;
    uint64_t base_cycles = 0;
 
-   while(!quit_signal && !uart_quit_requested) {
+   while(!quit_signal && !uart_quit_requested && !gdb_quit_requested) {
+      if(gdb_halted()) {
+         // stopped in the debugger: emulated time stands still
+         gdb_poll(100);
+         uart_poll_host();
+         base_ns = now_ns();
+         base_cycles = cycles;
+         continue;
+      }
+
       uint64_t target = cycles + SLICE_CYCLES;
       if(max_cycles && target > max_cycles) target = max_cycles;
 
-      cpu_run(target);
+      if(gdb_enabled()) {
+         gdb_run(target);
+         gdb_poll(0);
+      } else
+         cpu_run(target);
       uart_poll_host();
 
       if(dump_signal) {

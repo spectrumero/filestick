@@ -6,7 +6,7 @@ CFLAGS  += -Wall -Wextra -std=c11 -D_DEFAULT_SOURCE
 LDFLAGS ?=
 
 PROG    = filestick-emu
-SRCS    = main.c cpu.c bus.c timer.c uart.c spi.c flash.c sdcard.c econet.c
+SRCS    = main.c cpu.c bus.c timer.c uart.c spi.c flash.c sdcard.c econet.c gdbstub.c
 OBJS    = $(SRCS:.c=.o)
 
 all: $(PROG)

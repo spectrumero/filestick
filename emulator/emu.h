@@ -53,9 +53,33 @@ void emu_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
 // cpu.c
 void cpu_reset(void);
+void cpu_step(void);
 void cpu_run(uint64_t until);
 void cpu_dump(void);
 extern bool cpu_trace;
+extern bool cpu_irq_mask;          // don't take interrupts (while stepping)
+
+uint32_t cpu_get_pc(void);
+void cpu_set_pc(uint32_t pc);
+unsigned cpu_bank(void);
+uint32_t cpu_get_reg(unsigned n);
+void cpu_set_reg(unsigned n, uint32_t v);
+uint32_t cpu_get_mode(void);
+void cpu_set_mode(uint32_t v);
+bool cpu_get_csr(unsigned csr, uint32_t *v);
+bool cpu_set_csr(unsigned csr, uint32_t v);
+bool cpu_next_access(uint32_t *addr, unsigned *size, bool *store);
+
+// gdbstub.c - GDB remote protocol server
+int gdb_listen(const char *spec, bool wait);
+bool gdb_enabled(void);
+bool gdb_halted(void);
+void gdb_run(uint64_t until);
+void gdb_poll(int timeout_ms);
+extern bool gdb_quit_requested;
+
+// main.c
+void emu_reset(void);
 
 // bus.c
 extern uint8_t spram[SPRAM_SIZE];

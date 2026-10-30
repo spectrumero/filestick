@@ -35,6 +35,8 @@ emulator's own terminal instead (ctrl-] quits).
 | `-s FILE` | SD card image. Without it, no card is inserted. |
 | `-u PATH` | Create a symlink to the UART's pty at PATH. |
 | `--stdio` | Use stdin/stdout as the UART. |
+| `-g [HOST:]PORT` | Listen for gdb on PORT, see below. The CPU waits at the reset address until gdb connects and continues it. Only local connections are accepted unless HOST is given. |
+| `--gdb-nowait` | With `-g`, start running immediately; gdb can attach at any time. |
 | `-t` | Turbo: run as fast as the host allows instead of at 10MHz. |
 | `-c N` | Stop after N cycles, then print the CPU registers. |
 | `-v` | Log device activity (LED, flash erase/program, SD commands). |
@@ -56,6 +58,51 @@ holding whatever the flash contains after `filestick-system.bin`. On erased
 flash that is 0xFF, not zero, and FatFS then can't mount the flash
 filesystem. Padding the image with zeros avoids this:
 `truncate -s 64K system.bin` before loading it.
+
+## Debugging with gdb
+
+Start the emulator with `-g PORT`, then connect `riscv-none-elf-gdb`:
+
+```
+$ ./filestick-emu -b ../build/boot/filestick-boot.bin -f flash.img -g 3333 ...
+$ riscv-none-elf-gdb ../build/system/filestick-system.elf
+(gdb) target remote :3333
+(gdb) break disk_initialize
+(gdb) continue
+```
+
+All the usual commands work: breakpoints, `step`/`next`/`stepi`,
+`finish`, backtraces, reading and writing registers and memory,
+`watch`/`rwatch`/`awatch`, ctrl-C to stop the running system, and `load`
+to put an ELF file straight into RAM (it sets the pc to the entry point).
+Build with `-g` for source level debugging; the normal builds have no
+debug information.
+
+* While gdb has the CPU stopped, emulated time stops too: timers don't
+  advance and no interrupts arrive. Input typed at the UART is held until
+  the CPU runs again.
+* Breakpoints are kept by the emulator rather than written into memory,
+  so there is no limit on how many, and they can be set anywhere,
+  including in the boot ROM or in a program that hasn't been loaded yet.
+  `break` and `hbreak` behave the same.
+* Watchpoints (up to 16) stop the CPU before the load or store that
+  touches the watched memory, as RISC-V hardware triggers do. Watching a
+  device register works, e.g. `rwatch *(int *)0x80000c` stops on every
+  UART read.
+* Interrupts are masked while single stepping, so `stepi` doesn't land
+  in the interrupt handler. A pending interrupt is taken on the next
+  `continue`. `monitor maskisr off` changes this.
+* Memory reads by gdb outside RAM go to the devices, with the same side
+  effects a load would have (reading 0x80000C pops the UART FIFO).
+* `x0`-`x31` are the registers of the current bank. `info registers
+  bank0` and `info registers bank1` show both banks, which can also be
+  read and written as `$bank0_a0`, `$bank1_sp` and so on. `info registers
+  csr` shows the CSRs, `$regbank` (CSR 0x5C0) and `$privmode` (bit 0 S
+  mode, bit 1 M mode, bit 2 privilege violation trap pending).
+* `monitor reset` resets the CPU and devices (memory, flash and SD card
+  contents are kept). `monitor cycles` shows the cycle count. `monitor
+  quit` and gdb's `kill` exit the emulator. Quitting gdb or `detach`
+  leaves the system running, and another gdb can attach later.
 
 ## What is emulated
 
@@ -95,3 +142,4 @@ filesystem. Padding the image with zeros avoids this:
 | `flash.c` | SPI flash |
 | `sdcard.c` | SD card and card detect |
 | `econet.c` | econet stub |
+| `gdbstub.c` | gdb remote protocol server |
