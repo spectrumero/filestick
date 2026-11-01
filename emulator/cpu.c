@@ -26,7 +26,6 @@
  *    following instruction executes (the violation flag is registered).
  *    S mode is set on reset and on traps, cleared by sret or any CSR
  *    operation on 0x5C1. M mode is set on interrupt, cleared by mret.
- *  - MULHSU treats rs1 as unsigned and rs2 as signed (the RTL's sign logic).
  *
  * Timing is modelled from the state machine: FETCH_INSTR, WAIT_INSTR,
  * EXECUTE then WAIT_ALU_OR_MEM for loads, stores and divides. The single
@@ -340,8 +339,8 @@ void cpu_step(void)
          if(isreg && BIT(instr, 25)) {
             // M extension
             if(f3 < 4) {
-               bool sign1 = (f3 == 1) && (a >> 31);
-               bool sign2 = (f3 == 1 || f3 == 2) && (b >> 31);
+               bool sign1 = (f3 == 1 || f3 == 2) && (a >> 31);
+               bool sign2 = (f3 == 1) && (b >> 31);
                int64_t sa = sign1 ? (int64_t)(int32_t)a : (int64_t)a;
                int64_t sb = sign2 ? (int64_t)(int32_t)b : (int64_t)b;
                uint64_t prod = (uint64_t)(sa * sb);
