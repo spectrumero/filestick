@@ -79,6 +79,9 @@ there aren't any. Nor is there an assembler (if you want to write rv32
 asm, I suggest using xpack's gnu as). The code segment is around 28k, 
 and when running on the board, there's about 33k available for BASIC programs.
 
+* cputest: A test suite for the CPU, checking each unprivileged RV32IMC
+instruction against the RISC-V specification. See the README file.
+
 ## Toolchain
 
 The xPack GNU RISC-V embedded GCC project is used to build all source
@@ -149,4 +152,3 @@ and some basic software).
 
 There's much to do. More to come later, including how to write programs
 for the FileStick.
-
