@@ -186,8 +186,8 @@ module FemtoRV32(
    wire isMULH   = funct3Is[1];
    wire isMULHSU = funct3Is[2];
 
-   wire sign1 = aluIn1[31] &  isMULH;
-   wire sign2 = aluIn2[31] & (isMULH | isMULHSU);
+   wire sign1 = aluIn1[31] & (isMULH | isMULHSU);
+   wire sign2 = aluIn2[31] & (isMULH);
 
    wire signed [32:0] signed1 = {sign1, aluIn1};
    wire signed [32:0] signed2 = {sign2, aluIn2};
