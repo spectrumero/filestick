@@ -37,6 +37,9 @@ emulator's own terminal instead (ctrl-] quits).
 | `--stdio` | Use stdin/stdout as the UART. |
 | `-g [HOST:]PORT` | Listen for gdb on PORT, see below. The CPU waits at the reset address until gdb connects and continues it. Only local connections are accepted unless HOST is given. |
 | `--gdb-nowait` | With `-g`, start running immediately; gdb can attach at any time. |
+| `-e FILE` | Connect the Econet interface to the emulated network described by FILE, see below. |
+| `--econet-station [NET.]STN` | With `-e`, be this station from startup instead of waiting for the software to set the station number. |
+| `--econet-bitrate N` | Econet line speed in bits/s used for frame timing (default 250000). |
 | `-t` | Turbo: run as fast as the host allows instead of at 10MHz. |
 | `-c N` | Stop after N cycles, then print the CPU registers. |
 | `-v` | Log device activity (LED, flash erase/program, SD commands). |
@@ -58,6 +61,46 @@ holding whatever the flash contains after `filestick-system.bin`. On erased
 flash that is 0xFF, not zero, and FatFS then can't mount the flash
 filesystem. Padding the image with zeros avoids this:
 `truncate -s 64K system.bin` before loading it.
+
+## Econet
+
+Econet is emulated the way BeebEm does it, so the FileStick can share a
+network with BeebEm, b-em (`sf/econet` branches, with `aunmode` off) and
+aund (with `beebem` in `aund.conf`). Every Econet frame (scout, ack, data,
+immediate) goes out as one UDP datagram holding the frame from the
+destination address onwards, without the FCS. The system software does
+the four way handshake frame by frame, just as it does on a real network.
+
+`-e` takes the same `econet.cfg` file as BeebEm, b-em and aund, which maps
+each station to an IP address and UDP port:
+
+```
+# net stn ip port
+0 254 127.0.0.1 10254
+0 101 127.0.0.1 10101
+```
+
+b-em's option lines (`aunmode`, `learn` and so on) are accepted but
+ignored. AUN mode is not supported, so you get a warning if `aunmode` is on.
+
+* The emulator becomes whichever station the software programs into the
+  receiver (`configure netstation`, or the fileserver's station 254). It
+  binds the UDP port listed for that station. Until then it can send but
+  not receive. `--econet-station` binds a station at startup instead.
+* Econet is a broadcast medium, so (as aund does) each frame goes to every
+  station in the file except this one. The receiver filters on the
+  destination address as the hardware does, so monitor mode sees all
+  traffic, including frames between other stations.
+* Frames take time on the emulated line at `--econet-bitrate`. Receiving
+  shows in the status register, the transmitter is busy while it sends,
+  received frames wait while we transmit, and the transmitter waits 15
+  bit times of idle line unless turnaround is set. Received frames land
+  in the circular buffer with their FCS, as on the hardware.
+* There is no real line, so enabling the clock output or the termination,
+  or changing the clock divider, does nothing. Each change is logged, and
+  the hardware control register reads back what was written.
+
+`-v` logs every frame sent and received.
 
 ## Debugging with gdb
 
@@ -126,8 +169,10 @@ debug information.
   read and write, plus the card detect register and its interrupt.
 * **Timers**: the general purpose timer and the econet "timer A".
 * **RGB LED**: changes are logged with `-v`.
-* **Econet**: a stub. The registers and buffers exist, but no frames are
-  received and transmitted frames are dropped.
+* **Econet**: receiver, transmitter and hardware control registers and
+  buffers, networked over UDP like BeebEm (see above). Without `-e`,
+  transmitted frames take their time on the line and are then dropped,
+  and nothing is received.
 
 ## Source files
 
@@ -141,5 +186,5 @@ debug information.
 | `spi.c` | SPI controller |
 | `flash.c` | SPI flash |
 | `sdcard.c` | SD card and card detect |
-| `econet.c` | econet stub |
+| `econet.c` | Econet interface and BeebEm style UDP network |
 | `gdbstub.c` | gdb remote protocol server |

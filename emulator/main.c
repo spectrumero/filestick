@@ -92,6 +92,12 @@ static void usage(const char *prog)
       "                         connects and continues it\n"
       "      --gdb-nowait       with --gdb, start running straight away; gdb\n"
       "                         can attach at any time\n"
+      "  -e, --econet FILE      connect the Econet interface to a BeebEm style\n"
+      "                         network described by FILE (econet.cfg format)\n"
+      "      --econet-station [NET.]STN\n"
+      "                         be this station from the start, rather than\n"
+      "                         once the software sets its address\n"
+      "      --econet-bitrate N Econet line speed in bits/s (default %u)\n"
       "  -t, --turbo            run as fast as possible, not at 10MHz\n"
       "  -c, --cycles N         stop after N cycles\n"
       "  -v, --verbose          log device activity to stderr\n"
@@ -99,7 +105,7 @@ static void usage(const char *prog)
       "  -h, --help             this help\n"
       "\n"
       "Send SIGUSR1 to dump the CPU registers.\n",
-      prog);
+      prog, ECONET_DEFAULT_BITRATE);
 }
 
 int main(int argc, char **argv)
@@ -113,6 +119,9 @@ int main(int argc, char **argv)
       { "stdio",     no_argument,       NULL, 'S' },
       { "gdb",       required_argument, NULL, 'g' },
       { "gdb-nowait", no_argument,      NULL, 'N' },
+      { "econet",    required_argument, NULL, 'e' },
+      { "econet-station", required_argument, NULL, 'E' },
+      { "econet-bitrate", required_argument, NULL, 'R' },
       { "turbo",     no_argument,       NULL, 't' },
       { "cycles",    required_argument, NULL, 'c' },
       { "verbose",   no_argument,       NULL, 'v' },
@@ -123,6 +132,8 @@ int main(int argc, char **argv)
 
    const char *boot_path = NULL, *flash_path = NULL, *sd_path = NULL;
    const char *uart_link = NULL, *gdb_spec = NULL;
+   const char *econet_cfg = NULL, *econet_station = NULL;
+   unsigned econet_bitrate = 0;
    bool gdb_wait = true;
    char **loads = calloc(argc, sizeof(char *));
    int nloads = 0;
@@ -130,7 +141,7 @@ int main(int argc, char **argv)
    uint64_t max_cycles = 0;
    int c;
 
-   while((c = getopt_long(argc, argv, "b:f:s:l:u:g:tc:vh", opts, NULL)) != -1) {
+   while((c = getopt_long(argc, argv, "b:f:s:l:u:g:e:tc:vh", opts, NULL)) != -1) {
       switch(c) {
          case 'b': boot_path = optarg; break;
          case 'f': flash_path = optarg; break;
@@ -140,6 +151,15 @@ int main(int argc, char **argv)
          case 'S': use_stdio = true; break;
          case 'g': gdb_spec = optarg; break;
          case 'N': gdb_wait = false; break;
+         case 'e': econet_cfg = optarg; break;
+         case 'E': econet_station = optarg; break;
+         case 'R':
+            econet_bitrate = strtoul(optarg, NULL, 0);
+            if(econet_bitrate == 0) {
+               emu_log("--econet-bitrate needs a positive number");
+               return 1;
+            }
+            break;
          case 't': turbo = true; break;
          case 'c': max_cycles = strtoull(optarg, NULL, 0); break;
          case 'v': verbose++; break;
@@ -167,6 +187,12 @@ int main(int argc, char **argv)
    }
    free(loads);
    if(sd_path && sd_open(sd_path) < 0) return 1;
+   if(econet_station && !econet_cfg) {
+      emu_log("--econet-station needs --econet");
+      return 1;
+   }
+   if(econet_cfg && econet_open(econet_cfg, econet_station, econet_bitrate) < 0)
+      return 1;
 
    if((use_stdio ? uart_open_stdio() : uart_open_pty(uart_link)) < 0)
       return 1;
@@ -208,6 +234,7 @@ int main(int argc, char **argv)
       } else
          cpu_run(target);
       uart_poll_host();
+      econet_poll_host();
 
       if(dump_signal) {
          dump_signal = 0;
@@ -232,6 +259,7 @@ int main(int argc, char **argv)
    uart_close();
    flash_close();
    sd_close();
+   econet_close();
 
    if(verbose || max_cycles)
       emu_log("emulator: %" PRIu64 " cycles (%.3fs emulated) in %.3fs",

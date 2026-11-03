@@ -146,8 +146,14 @@ bool sd_detect_irq(void);
 uint32_t sd_detect_read(void);
 void sd_detect_write(uint32_t wdata, unsigned wmask);
 
-// econet.c - stub
+// econet.c - Econet interface, networked over UDP like BeebEm
+#define ECONET_DEFAULT_BITRATE 250000
+int econet_open(const char *cfg_path, const char *station, unsigned bitrate);
+void econet_close(void);
+void econet_poll_host(void);
 void econet_reset(void);
+void econet_update(uint64_t now);
+uint64_t econet_next_event(void);
 bool econet_irq(void);
 uint32_t econet_read(uint32_t addr);
 void econet_write(uint32_t addr, uint32_t wdata, unsigned wmask);

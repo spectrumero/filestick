@@ -153,6 +153,7 @@ void devices_update(uint64_t now)
 {
    timer_update(now);
    uart_update(now);
+   econet_update(now);
 
    irq_line = timer_irq() || timera_irq(now) || sd_detect_irq() || econet_irq();
 
@@ -160,6 +161,8 @@ void devices_update(uint64_t now)
    uint64_t t = timera_next_event();
    if(t < n) n = t;
    t = uart_next_event();
+   if(t < n) n = t;
+   t = econet_next_event();
    if(t < n) n = t;
    next_event = n;
 }
