@@ -76,6 +76,7 @@ static const char keywords[] =
    "ERR" "\x9F\x01"
    "EXP" "\xA1\x00"
    "EXT" "\xA2\x01"
+   "ECALL(" "\xCE\x00"
    "FOR" "\xE3\x02"
    "FALSE" "\xA3\x01"
    "FN" "\xA4\x08"

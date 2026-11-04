@@ -562,6 +562,31 @@ void call_code(u32 addr, i32 *regs)
 #endif
 }
 
+// ECALL(): environment call with a7 = n and regs[] in a0..a6,
+// returning a0
+i32 ecall(u32 n, i32 *regs)
+{
+#ifdef __riscv
+   register i32 a0 asm("a0") = regs[0];
+   register i32 a1 asm("a1") = regs[1];
+   register i32 a2 asm("a2") = regs[2];
+   register i32 a3 asm("a3") = regs[3];
+   register i32 a4 asm("a4") = regs[4];
+   register i32 a5 asm("a5") = regs[5];
+   register i32 a6 asm("a6") = regs[6];
+   register u32 a7 asm("a7") = n;
+   asm volatile("ecall"
+         : "+r"(a0), "+r"(a1)
+         : "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(a6), "r"(a7)
+         : "memory");
+   return a0;
+#else
+   (void)n;
+   (void)regs;
+   err(E_BADCMD);
+#endif
+}
+
 #ifndef __riscv
 void run_on_stack(void (*fn)(void), void *sp)
 {

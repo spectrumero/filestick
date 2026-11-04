@@ -111,6 +111,25 @@ code%!4 = &00008067 : REM ret
 A% = 40 : X% = 2 : PRINT USR(code%)
 ```
 
+## ECALL
+
+`ECALL(n[,a0[,a1...]])` makes a system call with the RISC-V `ecall`
+instruction and returns a0. n goes in a7 and the up to seven optional
+arguments in a0-a6; registers without an argument are 0. For example,
+to write a string to stdout (system call 64, `write`):
+
+```
+DIM buf% 10 : $buf% = "HELLO"
+n% = ECALL(64, 1, buf%, 5)
+```
+
+[SYSCALLS.md](SYSCALLS.md) lists the system calls and their arguments.
+
+Memory reserved with `DIM name% size` is always word aligned.
+
+ECALL is not in BASIC II. It uses token &CE, which BASIC II leaves unused
+(BASIC IV uses it for EDIT).
+
 ## Files and * commands
 
 OPENIN, OPENOUT, OPENUP, BGET#, BPUT#, PRINT#, INPUT#, PTR#, EXT#, EOF#

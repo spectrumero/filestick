@@ -82,7 +82,7 @@ enum {
    TK_POINT, TK_POS, TK_RAD, TK_RND, TK_SGN, TK_SIN, TK_SQR, TK_TAN,
    TK_TO, TK_TRUE, TK_USR, TK_VAL, TK_VPOS, TK_CHRS, TK_GETS, TK_INKEYS,
    TK_LEFTS, TK_MIDS, TK_RIGHTS, TK_STRS, TK_STRINGS, TK_EOF, TK_AUTO, TK_DELETE,
-   TK_LOAD, TK_LIST, TK_NEW, TK_OLD, TK_RENUMBER, TK_SAVE, TK_CE, TK_PTR2,
+   TK_LOAD, TK_LIST, TK_NEW, TK_OLD, TK_RENUMBER, TK_SAVE, TK_ECALL, TK_PTR2,
    TK_PAGE2, TK_TIME2, TK_LOMEM2, TK_HIMEM2, TK_SOUND, TK_BPUT, TK_CALL, TK_CHAIN,
    TK_CLEAR, TK_CLOSE, TK_CLG, TK_CLS, TK_DATA, TK_DEF, TK_DIM, TK_DRAW,
    TK_END, TK_ENDPROC, TK_ENVELOPE, TK_FOR, TK_GOSUB, TK_GOTO, TK_GCOL, TK_IF,
@@ -240,6 +240,7 @@ void print_file(void);
 void input_file(void);
 void oscli(const char *cmd, int len);
 void call_code(u32 addr, i32 *regs);
+i32 ecall(u32 n, i32 *regs);
 
 // platform
 void run_on_stack(void (*fn)(void), void *sp);

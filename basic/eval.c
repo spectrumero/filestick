@@ -731,6 +731,19 @@ static int func(u8 tok)
          acc_i = regs[0];
          return T_INT;
       }
+      case TK_ECALL: {
+         // ECALL(n[,a0[,a1...[,a6]]]): unused argument registers are 0
+         i32 regs[7] = { 0 };
+         n = expr_int();
+         for(int i = 0; skipsp() == ','; i++) {
+            if(i == 7) err(E_ARGS);
+            tp++;
+            regs[i] = expr_int();
+         }
+         need(')', E_BRACKET);
+         acc_i = ecall(n, regs);
+         return T_INT;
+      }
       case TK_OPENIN:
       case TK_OPENOUT:
       case TK_OPENUP:
