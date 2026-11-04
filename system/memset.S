@@ -27,10 +27,13 @@
 .globl memset
 memset:
    mv       t1, a0
+   beqz     a2, .Ldone      # guard against n = 0
+.Lloop:
    sb       a1, 0(a0)
    addi     a0, a0, 1
    addi     a2, a2, -1
-   bnez     a2, memset
+   bnez     a2, .Lloop
+.Ldone:
    mv       a0, t1
    ret
 
