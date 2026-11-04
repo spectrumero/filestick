@@ -40,19 +40,19 @@ static void econet_handle_message(NetFSMsg *msg);
 //------------------------------------------------------------
 // Initialize econet.
 int
-econet_init(uint8_t station)
+econet_init()
 {
    econet_fd = open("/dev/econet", O_RDWR);
    if(econet_fd < 0) return econet_fd;
 
-   // set station number
-   int rc = ioctl(econet_fd, ECONET_SET_ADDR | station);
+   int rc = ioctl(econet_fd, ECONET_SET_RECV_PORT | NETFS_PORT);
    if(rc < 0) return rc;
 
-   rc = ioctl(econet_fd, ECONET_SET_RECV_PORT | NETFS_PORT);
+   uint8_t station;
+   rc = ioctl(econet_fd, ECONET_GET_ADDR, &station);
    if(rc < 0) return rc;
 
-   printf("Econet initialized, station: %d\n", station);
+   printf("Econet initialized on station %d\n", station);
    return 0;
 }
 

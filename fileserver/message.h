@@ -53,7 +53,7 @@ typedef struct {
    uint8_t        *payload;
 } NetFSMsg;
 
-int   econet_init(uint8_t station);
+int   econet_init();
 void  econet_msgloop();
 void  econet_send(NetFSMsg *origin, uint8_t *msg, size_t msgsize);
 
