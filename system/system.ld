@@ -18,5 +18,13 @@ SECTIONS
    PROVIDE(__cons_buff = __stack_top); */
 
    PROVIDE(__stack_top = ORIGIN(RAM) + LENGTH(RAM));
+
+   __bss_start = ADDR(.bss);
+   __bss_length = SIZEOF(.bss);
+
+   /* somewhat of a hack, this is only used at the very start
+      of init to clear down all uninitialised memory, before
+      the stack is used */
+   __free_length = 0x10000 - ADDR(.bss); 
 }
 

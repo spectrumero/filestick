@@ -37,6 +37,12 @@ fake_boot_file:
 .text
 .globl init
 init:
+   la    a0, __bss_start         # start by clearing down the BSS
+   li    a1, 0
+   lui   a2, %hi(__free_length)  # link-time constant: li can't take it
+   addi  a2, a2, %lo(__free_length)
+   call  memset
+
    la    sp, __stack_top         # initialize system stack
 
    call  fd_init                 # initialize file descriptors
@@ -44,13 +50,6 @@ init:
    call  init_dirs               # initialize directory handles
    call  init_fileio             # initialize file io
 
-#ifdef SOFTWARE_FIFO
-   la    a0, __cons_buff         # clear down the console buffer
-   mv    a1, zero
-   li    a2, 256
-   call  memset
-#endif
-   
    la    t0, super_trap          # initialize the supervisor (ecall) trap
    csrw  stvec, t0
 
