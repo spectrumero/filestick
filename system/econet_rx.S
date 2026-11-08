@@ -84,6 +84,8 @@ econet_rx:
    li       s1, ECONET_STATE_WAITDATA  # update state
    sw       s1, 0(a1)
    sw       s2, 4(a1)                  # set econet_pending_port
+   lbu      s1, OFFS_RXFLAG(a0)        # latch the scout's control byte, the
+   sw       s1, 36(a1)                 # data frame overwrites the register
 
 .econet_ack:
    li       s1, BIT_TX_TURNAROUND      # Tell the transmitter it doesn't have to wait 15 bit cycles
@@ -115,6 +117,8 @@ econet_rx:
    lw       s1, OFFS_RXLEN(a0)         # get bytes received length
    addi     s1, s1, -4                 # remove FCS byte length and our addr byte len
    sw       s1, 12(a1)                 # save in econet_buf_len
+   lw       s1, 36(a1)                 # control byte from this frame's scout
+   sw       s1, 40(a1)                 # save in econet_rx_flag
    j        .econet_ack                # send ack frame
 
 # these routines are to handle acknowledgements when we are doing a 4 way handshake
@@ -238,6 +242,10 @@ econet_tx_status:       .word 0
 econet_timeout_state:   .word 0
 .globl econet_monitor_frames        # offset 32
 econet_monitor_frames:  .word 0
+.globl econet_pending_flag          # offset 36
+econet_pending_flag:    .word 0     # control byte of the scout being handled
+.globl econet_rx_flag               # offset 40
+econet_rx_flag:         .word 0     # control byte of the frame in the rx buffer
 
 .globl econet_port_list
 econet_port_list:

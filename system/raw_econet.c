@@ -45,6 +45,7 @@ extern volatile uint32_t econet_tx_end;
 extern volatile uint32_t econet_tx_status;
 extern volatile uint32_t econet_timeout_state;
 extern volatile uint32_t econet_monitor_frames;
+extern volatile uint32_t econet_rx_flag;
 extern volatile uint8_t econet_port_list[256];
 
 // Hardware registers
@@ -117,6 +118,12 @@ int econet_ioctl(int fd, unsigned long request, void *ptr) {
          {
             uint8_t *nsta = (uint8_t *)ptr;
             *nsta = econet_address;
+            return 0;
+         }
+      case ECONET_GET_RXFLAG:
+         {
+            uint8_t *flag = (uint8_t *)ptr;
+            *flag = econet_rx_flag;
             return 0;
          }
       case ECONET_GET_CLKTERM:

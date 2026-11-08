@@ -49,6 +49,12 @@ int SYS_mkdir(const char *pathname, mode_t mode)
    return fatfs_to_errno(res);
 }
 
+int SYS_rename(const char *oldpath, const char *newpath)
+{
+   FRESULT res = f_rename(oldpath, newpath);
+   return fatfs_to_errno(res);
+}
+
 int SYS_chdir(const char *pathname)
 {
    FRESULT res = f_chdir(pathname);

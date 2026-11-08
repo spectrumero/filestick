@@ -47,6 +47,7 @@ int SYS_closedir(int dh);
 int SYS_readdir(int dh, struct dirent *d);
 
 int SYS_unlink(const char *pathname);
+int SYS_rename(const char *oldpath, const char *newpath);
 int SYS_mkdir(const char *pathname, mode_t mode);
 int SYS_stat(const char *pathname, struct stat *statbuf);
 

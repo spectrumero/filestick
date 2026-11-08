@@ -1,0 +1,3 @@
+[submodule "aund"]
+	path = aund
+	url = git@github.com:spectrumero/aund.git

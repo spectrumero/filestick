@@ -96,7 +96,7 @@ syscall_high_table:
 .byte 0           # 1031
 .byte 0           # 1032
 .byte 0           # 1033 SYS_access
-.byte 0           # 1034
+.byte 28          # 1034 SYS_rename
 .byte 0           # 1035
 .byte 0           # 1036
 .byte 0           # 1037
@@ -135,4 +135,5 @@ syscall_address:
 .word tlsf_free   # 25
 .word SYS_chdir   # 26
 .word SYS_poll    # 27
+.word SYS_rename  # 28
 
