@@ -1,6 +1,6 @@
 # FileStick
 
-This is still a very early work in progress.
+This is still a work in progress.
 
 This project implements an Econet fileserver "onna stick". Acorn had
 the FileStore, so this is kind of a play on words on the FileStore.
@@ -9,7 +9,10 @@ The system is built on a Lattice UltraPlus 5K FPGA, which includes
 blockrams, which makes it ideal for a small system project.
 
 The prototype board is based on the UPduino 3.1 board.
-See: https://tinyvision.ai/products/upduino-v3-1
+See: https://tinyvision.ai/products/upduino-v3-1 . This was "stick shaped"
+hence the name, but the eventual PCB no longer is so this is a bit
+of a misnomer. It is my intention to make a 3D printed mini Acorn filestore
+case for the project.
 
 The version 1 board contains the econet front end, the up5k FPGA,
 an SD card slot, flash memory and a USB interface, implemented with
@@ -52,12 +55,19 @@ multitasking operating system, it's an OS in the vein of a classic
 home micro's operating system. It does provide a number of system
 calls using the Linux rv32 syscall numbers. Remember there is no
 virtual memory on this very small system, however, some simple memory
-protection is planned so that user programs can't accidentally
-overwrite kernel memory or device address space.
+protection is included so that user programs can't accidentally
+overwrite kernel memory. (User programs can still access device
+address space).
 
 * lib: The filestick library. This is required for most userspace programs
 as at the very least it provides the sbrk implementation needed to properly
 support libc's malloc.
+
+* aund: (Note: Do a git submodule init to fetch this). A modified version
+of the aund project that has been somewhat stripped down. This provides
+a file server.
+
+* monitor: (Work in progress) An econet monitoring program.
 
 ## Other programs
 
