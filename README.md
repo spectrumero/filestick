@@ -148,6 +148,21 @@ iceprog -d i:0x0403:0x6014 -o 0x040000 256kfs.img
 (256kfs.img is a blank 256k fat12 filesystem, used for storing system settings
 and some basic software).
 
+To use the Adafruit FT232H board to flash the v1 PCB, from left to right on the
+filestick board with the board oriented so the programming pins are nearest to
+you:
+
+* pin 8 (left most pin) to GND
+* pin 7 to 3v3
+* pin 6 to D0 (SCK)
+* pin 5 to D1 (MOSI)
+* pin 4 to D2 (MISO)
+* pin 3 to D4 (CS)
+* pin 2 to D6 (CDONE)
+* pin 1 to D7 (CRESET)
+
+
+
 ## TODO
 
 There's much to do. More to come later, including how to write programs
